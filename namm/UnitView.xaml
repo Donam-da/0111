@@ -1,0 +1,64 @@
+<UserControl x:Class="namm.UnitView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:namm"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             Loaded="UserControl_Loaded">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <DockPanel Grid.Column="0" Margin="10">
+            <StackPanel DockPanel.Dock="Top" Orientation="Vertical">
+                <TextBlock Text="DANH SÁCH ĐƠN VỊ TÍNH" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                <TextBox x:Name="txtSearch" Margin="0,0,0,5" Height="25" TextChanged="TxtSearch_TextChanged" ToolTip="Nhập tên đơn vị tính để tìm kiếm"/>
+            </StackPanel>
+            <DataGrid x:Name="dgUnits" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single"
+                      LoadingRow="DgUnits_LoadingRow" SelectionChanged="DgUnits_SelectionChanged">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="STT" Binding="{Binding STT}" Width="50"/>
+                    <DataGridTextColumn Header="Tên đơn vị tính" Binding="{Binding Name}" Width="*"/>
+                    <DataGridTextColumn Header="Viết tắt" Binding="{Binding Abbreviation}" Width="100"/>
+                    <DataGridTextColumn Header="Ghi chú" Binding="{Binding Description}" Width="*"/>
+                    <DataGridTextColumn Header="Trạng thái" Binding="{Binding StatusText}" Width="100"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
+
+        <StackPanel Grid.Column="1" Margin="10" VerticalAlignment="Center" Width="250">
+            <TextBlock Text="Thông tin chi tiết" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+
+            <TextBlock Text="Tên đơn vị tính:" Margin="0,5,0,2"/>
+            <TextBox x:Name="txtName" Height="25" FontSize="14"/>
+
+            <TextBlock Text="Viết tắt:" Margin="0,5,0,2"/>
+            <TextBox x:Name="txtAbbreviation" Height="25" FontSize="14"/>
+
+            <TextBlock Text="Ghi chú:" Margin="0,5,0,2"/>
+            <TextBox x:Name="txtDescription" Height="50" FontSize="14" TextWrapping="Wrap"/>
+
+            <CheckBox x:Name="chkIsActive" Content="Đang kích hoạt" Margin="0,10,0,0" IsChecked="True"/>
+
+            <Grid Margin="0,20,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+
+                <Button x:Name="BtnAdd" Content="Thêm" Grid.Row="0" Grid.Column="0" Margin="5" Height="30" Click="BtnAdd_Click"/>
+                <Button x:Name="BtnEdit" Content="Sửa" Grid.Row="0" Grid.Column="1" Margin="5" Height="30" Click="BtnEdit_Click"/>
+                <Button x:Name="BtnDelete" Content="Xóa" Grid.Row="1" Grid.Column="0" Margin="5" Height="30" Click="BtnDelete_Click"/>
+                <Button x:Name="BtnReset" Content="Làm mới" Grid.Row="1" Grid.Column="1" Margin="5" Height="30" Click="BtnReset_Click"/>
+            </Grid>
+        </StackPanel>
+    </Grid>
+</UserControl>

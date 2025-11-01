@@ -11,19 +11,19 @@
         <Menu DockPanel.Dock="Top" FontSize="14">
             <MenuItem Header="_Hệ thống" Click="TopLevelMenuItem_Click">
                 <MenuItem x:Name="miManageEmployees" Header="Quản lí nhân viên" Click="ManageEmployees_Click"/>
-                <MenuItem Header="Đổi mật khẩu"/>
+                <MenuItem Header="Đổi mật khẩu" Click="ChangePassword_Click"/>
                 <Separator/>
                 <MenuItem Header="Đăng xuất" Click="Logout_Click"/>
                 <Separator/>
                 <MenuItem x:Name="miDeleteHistory" Header="Xóa lịch sử hóa đơn"/>
             </MenuItem>
             <MenuItem Header="_Quản lí" Click="TopLevelMenuItem_Click">
-                <MenuItem Header="Quản lí bàn"/>
+                <MenuItem Header="Quản lí bàn" Click="ManageTables_Click"/>
                 <MenuItem Header="Quản lí đồ uống"/>
-                <MenuItem Header="Quản lí loại đồ uống"/>
+                <MenuItem Header="Quản lí loại đồ uống" />
                 <MenuItem Header="Quản lí nguyên liệu"/>
                 <MenuItem Header="Quản lí đồ uống nguyên bản"/>
-                <MenuItem Header="Quản lí đơn vị tính"/>
+                <MenuItem Header="Quản lí đơn vị tính" Click="ManageUnits_Click"/>
             </MenuItem>
             <MenuItem x:Name="miStatistics" Header="_Thống kê" Click="TopLevelMenuItem_Click">
                 <MenuItem Header="Doanh thu nhân viên"/>

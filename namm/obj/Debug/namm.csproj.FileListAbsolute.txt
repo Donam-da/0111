@@ -18,3 +18,12 @@ D:\QuanLyCafe\namm\obj\Debug\MainAppWindow.g.cs
 D:\QuanLyCafe\namm\obj\Debug\MainAppWindow.baml
 D:\QuanLyCafe\namm\obj\Debug\EmployeeView.g.cs
 D:\QuanLyCafe\namm\obj\Debug\EmployeeView.baml
+D:\QuanLyCafe\namm\obj\Debug\ChangePasswordView.g.cs
+D:\QuanLyCafe\namm\obj\Debug\ChangePasswordView.baml
+D:\QuanLyCafe\namm\obj\Debug\TableView.g.cs
+D:\QuanLyCafe\namm\obj\Debug\TableView.baml
+D:\QuanLyCafe\namm\obj\Debug\TableListView.baml
+D:\QuanLyCafe\namm\obj\Debug\DashboardView.g.cs
+D:\QuanLyCafe\namm\obj\Debug\DashboardView.baml
+D:\QuanLyCafe\namm\obj\Debug\UnitView.g.cs
+D:\QuanLyCafe\namm\obj\Debug\UnitView.baml

@@ -26,6 +26,9 @@ namespace namm
             InitializeComponent();
             this.loggedInAccount = account;
             Authorize();
+
+            // Hiển thị sơ đồ bàn làm màn hình chính
+            MainContent.Children.Add(new DashboardView());
         }
 
         void Authorize()
@@ -63,6 +66,32 @@ namespace namm
             loginWindow.Show();
             // Đóng cửa sổ chính hiện tại
             this.Close();
+        }
+
+        private void ChangePassword_Click(object sender, RoutedEventArgs e)
+        {
+            // Hiển thị giao diện đổi mật khẩu, truyền thông tin tài khoản đang đăng nhập
+            var changePasswordView = new ChangePasswordView(loggedInAccount);
+
+            // Lắng nghe sự kiện yêu cầu đăng xuất từ ChangePasswordView
+            changePasswordView.LogoutRequested += (s, args) => Logout_Click(s, null);
+
+            MainContent.Children.Clear();
+            MainContent.Children.Add(changePasswordView);
+        }
+
+        private void ManageTables_Click(object sender, RoutedEventArgs e)
+        {
+            // Hiển thị giao diện quản lý bàn
+            MainContent.Children.Clear();
+            MainContent.Children.Add(new TableView());
+        }
+
+        private void ManageUnits_Click(object sender, RoutedEventArgs e)
+        {
+            // Hiển thị giao diện quản lý đơn vị tính
+            MainContent.Children.Clear();
+            MainContent.Children.Add(new UnitView());
         }
     }
 }

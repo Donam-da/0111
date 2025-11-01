@@ -1,0 +1,78 @@
+<UserControl x:Class="namm.DashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:namm"
+             mc:Ignorable="d" 
+             d:DesignHeight="550" d:DesignWidth="1024"
+             Loaded="UserControl_Loaded">
+    <Grid>
+        <Grid.Resources>
+            <Style x:Key="CenterAlignedColumn" TargetType="DataGridColumnHeader">
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            </Style>
+            <Style x:Key="CenterAlignedCell" TargetType="TextBlock">
+                <Setter Property="HorizontalAlignment" Value="Center"/>
+            </Style>
+            <!-- Style để tô màu hàng dựa trên trạng thái bàn -->
+            <Style TargetType="DataGridRow">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Status}" Value="Trống">
+                        <Setter Property="Background" Value="LightGreen"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Status}" Value="Có người">
+                        <Setter Property="Background" Value="LightCoral"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Resources>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <DockPanel Grid.Column="0" Margin="5">
+            <TextBlock DockPanel.Dock="Top" Text="SƠ ĐỒ BÀN" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+            <DataGrid x:Name="dgTables" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single" LoadingRow="DgTables_LoadingRow">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="STT" Binding="{Binding STT}" Width="40" HeaderStyle="{StaticResource CenterAlignedColumn}" ElementStyle="{StaticResource CenterAlignedCell}"/>
+                    <DataGridTextColumn Header="Tên bàn" Binding="{Binding Name}" Width="*" HeaderStyle="{StaticResource CenterAlignedColumn}" ElementStyle="{StaticResource CenterAlignedCell}"/>
+                    <DataGridTextColumn Header="Trạng thái" Binding="{Binding Status}" Width="80" HeaderStyle="{StaticResource CenterAlignedColumn}" ElementStyle="{StaticResource CenterAlignedCell}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
+
+        <!-- Cột 2: Menu đồ uống -->
+        <DockPanel Grid.Column="1" Margin="5">
+            <TextBlock DockPanel.Dock="Top" Text="MENU" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                <ComboBox x:Name="cbCategory" Width="150" Margin="0,0,5,0" DisplayMemberPath="Name"/>
+                <Button Content="Thêm món" Width="80"/>
+            </StackPanel>
+            <ListView x:Name="lvMenu" Margin="0,5,0,0" BorderBrush="LightGray" BorderThickness="1">
+                <!-- Danh sách đồ uống sẽ được hiển thị ở đây -->
+            </ListView>
+        </DockPanel>
+
+        <!-- Cột 3: Hóa đơn -->
+        <DockPanel Grid.Column="2" Margin="5">
+            <TextBlock DockPanel.Dock="Top" Text="HÓA ĐƠN" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+            <StackPanel DockPanel.Dock="Bottom" Margin="0,10,0,0">
+                <TextBlock Text="Tổng cộng: 0 VNĐ" FontSize="16" FontWeight="Bold" HorizontalAlignment="Right"/>
+                <Button Content="Thanh toán" Height="40" FontSize="16" FontWeight="Bold" Margin="0,5,0,0"/>
+            </StackPanel>
+            <ListView x:Name="lvBill" BorderBrush="LightGray" BorderThickness="1">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Tên món" Width="120"/>
+                        <GridViewColumn Header="SL" Width="40"/>
+                        <GridViewColumn Header="Đơn giá" Width="80"/>
+                        <GridViewColumn Header="Thành tiền" Width="80"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </DockPanel>
+    </Grid>
+</UserControl>
