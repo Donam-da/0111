@@ -22,10 +22,13 @@ D:\QuanLyCafe\namm\obj\Debug\ChangePasswordView.g.cs
 D:\QuanLyCafe\namm\obj\Debug\ChangePasswordView.baml
 D:\QuanLyCafe\namm\obj\Debug\TableView.g.cs
 D:\QuanLyCafe\namm\obj\Debug\TableView.baml
-D:\QuanLyCafe\namm\obj\Debug\TableListView.baml
 D:\QuanLyCafe\namm\obj\Debug\DashboardView.g.cs
 D:\QuanLyCafe\namm\obj\Debug\DashboardView.baml
 D:\QuanLyCafe\namm\obj\Debug\UnitView.g.cs
 D:\QuanLyCafe\namm\obj\Debug\UnitView.baml
 D:\QuanLyCafe\namm\obj\Debug\MaterialView.g.cs
 D:\QuanLyCafe\namm\obj\Debug\MaterialView.baml
+D:\QuanLyCafe\namm\obj\Debug\DrinkView.g.cs
+D:\QuanLyCafe\namm\obj\Debug\DrinkView.baml
+D:\QuanLyCafe\namm\obj\Debug\MenuView.g.cs
+D:\QuanLyCafe\namm\obj\Debug\MenuView.baml

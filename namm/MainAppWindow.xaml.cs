@@ -100,5 +100,19 @@ namespace namm
             MainContent.Children.Clear();
             MainContent.Children.Add(new MaterialView());
         }
+
+        private void ManageOriginalDrinks_Click(object sender, RoutedEventArgs e)
+        {
+            // Hiển thị giao diện quản lý đồ uống nguyên bản
+            MainContent.Children.Clear();
+            MainContent.Children.Add(new DrinkView());
+        }
+
+        private void ManageMenu_Click(object sender, RoutedEventArgs e)
+        {
+            // Hiển thị giao diện quản lý menu đồ uống
+            MainContent.Children.Clear();
+            MainContent.Children.Add(new MenuView());
+        }
     }
 }
