@@ -1,0 +1,40 @@
+<Window x:Class="namm.MainAppWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:namm"
+        mc:Ignorable="d"
+        Title="Chương trình Quản lý Cafe" Height="600" Width="1024"
+        WindowStartupLocation="CenterScreen">
+    <DockPanel>
+        <Menu DockPanel.Dock="Top" FontSize="14">
+            <MenuItem Header="_Hệ thống" Click="TopLevelMenuItem_Click">
+                <MenuItem Header="Quản lí nhân viên"/>
+                <MenuItem Header="Đổi mật khẩu"/>
+                <Separator/>
+                <MenuItem Header="Đăng xuất"/>
+                <Separator/>
+                <MenuItem Header="Xóa lịch sử hóa đơn"/>
+            </MenuItem>
+            <MenuItem Header="_Quản lí" Click="TopLevelMenuItem_Click">
+                <MenuItem Header="Quản lí bàn"/>
+                <MenuItem Header="Quản lí đồ uống"/>
+                <MenuItem Header="Quản lí loại đồ uống"/>
+                <MenuItem Header="Quản lí nguyên liệu"/>
+                <MenuItem Header="Quản lí đồ uống nguyên bản"/>
+                <MenuItem Header="Quản lí đơn vị tính"/>
+            </MenuItem>
+            <MenuItem Header="_Thống kê" Click="TopLevelMenuItem_Click">
+                <MenuItem Header="Doanh thu nhân viên"/>
+                <MenuItem Header="Thống kê lợi nhuận"/>
+                <MenuItem Header="Top hàng bán chạy"/>
+                <MenuItem Header="Khách hàng thân thiết"/>
+                <MenuItem Header="Lịch sử hóa đơn"/>
+            </MenuItem>
+        </Menu>
+        <Grid>
+            <!-- Nội dung chính của ứng dụng sẽ được hiển thị ở đây -->
+        </Grid>
+    </DockPanel>
+</Window>
