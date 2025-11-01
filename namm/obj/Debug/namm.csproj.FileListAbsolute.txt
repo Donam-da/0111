@@ -27,3 +27,5 @@ D:\QuanLyCafe\namm\obj\Debug\DashboardView.g.cs
 D:\QuanLyCafe\namm\obj\Debug\DashboardView.baml
 D:\QuanLyCafe\namm\obj\Debug\UnitView.g.cs
 D:\QuanLyCafe\namm\obj\Debug\UnitView.baml
+D:\QuanLyCafe\namm\obj\Debug\MaterialView.g.cs
+D:\QuanLyCafe\namm\obj\Debug\MaterialView.baml

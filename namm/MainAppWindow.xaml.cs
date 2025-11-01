@@ -93,5 +93,12 @@ namespace namm
             MainContent.Children.Clear();
             MainContent.Children.Add(new UnitView());
         }
+
+        private void ManageMaterials_Click(object sender, RoutedEventArgs e)
+        {
+            // Hiển thị giao diện quản lý nguyên liệu
+            MainContent.Children.Clear();
+            MainContent.Children.Add(new MaterialView());
+        }
     }
 }

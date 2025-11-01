@@ -20,8 +20,8 @@
             <MenuItem Header="_Quản lí" Click="TopLevelMenuItem_Click">
                 <MenuItem Header="Quản lí bàn" Click="ManageTables_Click"/>
                 <MenuItem Header="Quản lí đồ uống"/>
-                <MenuItem Header="Quản lí loại đồ uống" />
-                <MenuItem Header="Quản lí nguyên liệu"/>
+                <MenuItem Header="Quản lí loại đồ uống"/>
+                <MenuItem Header="Quản lí nguyên liệu" Click="ManageMaterials_Click"/>
                 <MenuItem Header="Quản lí đồ uống nguyên bản"/>
                 <MenuItem Header="Quản lí đơn vị tính" Click="ManageUnits_Click"/>
             </MenuItem>
