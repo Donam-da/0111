@@ -10,12 +10,12 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top" FontSize="14">
             <MenuItem Header="_Hệ thống" Click="TopLevelMenuItem_Click">
-                <MenuItem Header="Quản lí nhân viên"/>
+                <MenuItem x:Name="miManageEmployees" Header="Quản lí nhân viên" Click="ManageEmployees_Click"/>
                 <MenuItem Header="Đổi mật khẩu"/>
                 <Separator/>
-                <MenuItem Header="Đăng xuất"/>
+                <MenuItem Header="Đăng xuất" Click="Logout_Click"/>
                 <Separator/>
-                <MenuItem Header="Xóa lịch sử hóa đơn"/>
+                <MenuItem x:Name="miDeleteHistory" Header="Xóa lịch sử hóa đơn"/>
             </MenuItem>
             <MenuItem Header="_Quản lí" Click="TopLevelMenuItem_Click">
                 <MenuItem Header="Quản lí bàn"/>
@@ -25,15 +25,15 @@
                 <MenuItem Header="Quản lí đồ uống nguyên bản"/>
                 <MenuItem Header="Quản lí đơn vị tính"/>
             </MenuItem>
-            <MenuItem Header="_Thống kê" Click="TopLevelMenuItem_Click">
+            <MenuItem x:Name="miStatistics" Header="_Thống kê" Click="TopLevelMenuItem_Click">
                 <MenuItem Header="Doanh thu nhân viên"/>
-                <MenuItem Header="Thống kê lợi nhuận"/>
+                <MenuItem x:Name="miProfitStatistics" Header="Thống kê lợi nhuận"/>
                 <MenuItem Header="Top hàng bán chạy"/>
                 <MenuItem Header="Khách hàng thân thiết"/>
                 <MenuItem Header="Lịch sử hóa đơn"/>
             </MenuItem>
         </Menu>
-        <Grid>
+        <Grid x:Name="MainContent">
             <!-- Nội dung chính của ứng dụng sẽ được hiển thị ở đây -->
         </Grid>
     </DockPanel>

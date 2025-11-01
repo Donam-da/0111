@@ -38,10 +38,10 @@ namespace namm
                 return;
             }
 
-            if (CheckLogin(username, password))
+            AccountDTO loginAccount = CheckLogin(username, password);
+            if (loginAccount != null)
             {
-                // Mở cửa sổ chính của ứng dụng
-                MainAppWindow mainApp = new MainAppWindow();
+                MainAppWindow mainApp = new MainAppWindow(loginAccount);
                 mainApp.Show();
                 this.Close(); // Đóng cửa sổ đăng nhập
             }
@@ -51,25 +51,30 @@ namespace namm
             }
         }
 
-        private bool CheckLogin(string username, string password)
+        private AccountDTO CheckLogin(string username, string password)
         {
-            bool isValid = false;
+            AccountDTO account = null;
             string connectionString = ConfigurationManager.ConnectionStrings["CafeDB"].ConnectionString;
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string query = "SELECT COUNT(1) FROM Account WHERE UserName=@UserName AND Password=@Password";
+                string query = "SELECT * FROM Account WHERE UserName=@UserName AND Password=@Password";
                 SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@UserName", username);
                 command.Parameters.AddWithValue("@Password", password); // Nhắc lại: nên hash mật khẩu
 
                 connection.Open();
-                int count = Convert.ToInt32(command.ExecuteScalar());
-                if (count == 1)
+                SqlDataReader reader = command.ExecuteReader();
+                if (reader.Read())
                 {
-                    isValid = true;
+                    account = new AccountDTO
+                    {
+                        UserName = reader["UserName"].ToString(),
+                        DisplayName = reader["DisplayName"].ToString(),
+                        Type = (int)reader["Type"]
+                    };
                 }
             }
-            return isValid;
+            return account;
         }
 
         private void BtnExit_Click(object sender, RoutedEventArgs e)

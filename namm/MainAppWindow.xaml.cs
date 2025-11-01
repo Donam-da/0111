@@ -19,9 +19,24 @@ namespace namm
     /// </summary>
     public partial class MainAppWindow : Window
     {
-        public MainAppWindow()
+        private AccountDTO loggedInAccount;
+
+        public MainAppWindow(AccountDTO account)
         {
             InitializeComponent();
+            this.loggedInAccount = account;
+            Authorize();
+        }
+
+        void Authorize()
+        {
+            // Nếu không phải là admin (Type = 0 là nhân viên)
+            if (loggedInAccount.Type == 0)
+            {
+                miManageEmployees.Visibility = Visibility.Collapsed;
+                miDeleteHistory.Visibility = Visibility.Collapsed;
+                miProfitStatistics.Visibility = Visibility.Collapsed; // Chỉ ẩn mục Thống kê lợi nhuận
+            }
         }
 
         private void TopLevelMenuItem_Click(object sender, RoutedEventArgs e)
@@ -31,6 +46,23 @@ namespace namm
                 // Bật/tắt trạng thái mở của menu con
                 menuItem.IsSubmenuOpen = !menuItem.IsSubmenuOpen;
             }
+        }
+
+        private void ManageEmployees_Click(object sender, RoutedEventArgs e)
+        {
+            // Hiển thị giao diện quản lý nhân viên trong Grid chính
+            MainContent.Children.Clear();
+            MainContent.Children.Add(new EmployeeView());
+        }
+
+        private void Logout_Click(object sender, RoutedEventArgs e)
+        {
+            // Tạo một cửa sổ đăng nhập mới
+            MainWindow loginWindow = new MainWindow();
+            // Hiển thị cửa sổ đăng nhập
+            loginWindow.Show();
+            // Đóng cửa sổ chính hiện tại
+            this.Close();
         }
     }
 }

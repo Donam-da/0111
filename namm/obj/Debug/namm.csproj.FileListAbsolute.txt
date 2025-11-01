@@ -16,3 +16,5 @@ D:\QuanLyCafe\namm\obj\Debug\namm.pdb
 D:\QuanLyCafe\namm\obj\Debug\namm.exe.config
 D:\QuanLyCafe\namm\obj\Debug\MainAppWindow.g.cs
 D:\QuanLyCafe\namm\obj\Debug\MainAppWindow.baml
+D:\QuanLyCafe\namm\obj\Debug\EmployeeView.g.cs
+D:\QuanLyCafe\namm\obj\Debug\EmployeeView.baml
