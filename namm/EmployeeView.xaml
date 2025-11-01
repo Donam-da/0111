@@ -8,6 +8,15 @@
              d:DesignHeight="550" d:DesignWidth="1000"
              Loaded="UserControl_Loaded">
     <Grid Margin="10">
+        <Grid.Resources>
+            <!-- Style để căn giữa nội dung và tiêu đề của các cột trong DataGrid -->
+            <Style x:Key="CenterAlignedColumn" TargetType="DataGridColumnHeader">
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            </Style>
+            <Style x:Key="CenterAlignedCell" TargetType="TextBlock">
+                <Setter Property="HorizontalAlignment" Value="Center"/>
+            </Style>
+        </Grid.Resources>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="350"/>
@@ -16,13 +25,16 @@
         <!-- Cột 1: Danh sách nhân viên -->
         <DockPanel Grid.Column="0" Margin="0,0,10,0">
             <TextBlock DockPanel.Dock="Top" Text="DANH SÁCH NHÂN VIÊN" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
-            <DataGrid x:Name="dgAccounts" AutoGenerateColumns="False" IsReadOnly="True"
-                      SelectionMode="Single" SelectionChanged="DgAccounts_SelectionChanged">
+            <DataGrid x:Name="dgAccounts" AutoGenerateColumns="False" IsReadOnly="True"                      
+                      SelectionMode="Single" SelectionChanged="DgAccounts_SelectionChanged" 
+                      LoadingRow="DgAccounts_LoadingRow">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Tên đăng nhập" Binding="{Binding UserName}" Width="*"/>
-                    <DataGridTextColumn Header="Tên hiển thị" Binding="{Binding DisplayName}" Width="*"/>
-                    <DataGridTextColumn Header="Số điện thoại" Binding="{Binding PhoneNumber}" Width="*"/>
-                    <DataGridTextColumn Header="Địa chỉ" Binding="{Binding Address}" Width="*"/>
+                    <DataGridTextColumn Header="STT" Binding="{Binding STT}" Width="50" HeaderStyle="{StaticResource CenterAlignedColumn}" ElementStyle="{StaticResource CenterAlignedCell}" />
+                    <DataGridTextColumn Header="Tên đăng nhập" Binding="{Binding UserName}" Width="120" HeaderStyle="{StaticResource CenterAlignedColumn}" ElementStyle="{StaticResource CenterAlignedCell}" />
+                    <DataGridTextColumn Header="Tên hiển thị" Binding="{Binding DisplayName}" Width="150" HeaderStyle="{StaticResource CenterAlignedColumn}" ElementStyle="{StaticResource CenterAlignedCell}" />
+                    <DataGridTextColumn Header="Mật khẩu" Binding="{Binding Password}" Width="100" HeaderStyle="{StaticResource CenterAlignedColumn}" ElementStyle="{StaticResource CenterAlignedCell}" />
+                    <DataGridTextColumn Header="Số điện thoại" Binding="{Binding PhoneNumber}" Width="110" HeaderStyle="{StaticResource CenterAlignedColumn}" ElementStyle="{StaticResource CenterAlignedCell}" />
+                    <DataGridTextColumn Header="Địa chỉ" Binding="{Binding Address}" Width="*" HeaderStyle="{StaticResource CenterAlignedColumn}" ElementStyle="{StaticResource CenterAlignedCell}" />
                 </DataGrid.Columns>
             </DataGrid>
         </DockPanel>

@@ -28,7 +28,9 @@ namespace namm
                 string query = "SELECT UserName, DisplayName, Type, PhoneNumber, Address FROM Account";
                 SqlDataAdapter adapter = new SqlDataAdapter(query, connection);
                 DataTable dataTable = new DataTable();
+                dataTable.Columns.Add("STT", typeof(int)); // Thêm cột STT vào DataTable
                 adapter.Fill(dataTable);
+
                 dgAccounts.ItemsSource = dataTable.DefaultView;
             }
         }
@@ -46,6 +48,15 @@ namespace namm
                 // Không hiển thị mật khẩu khi chọn
                 txtPassword.Text = "";
                 txtUserName.IsEnabled = false; // Không cho sửa tên đăng nhập (khóa chính)
+            }
+        }
+
+        private void DgAccounts_LoadingRow(object sender, DataGridRowEventArgs e)
+        {
+            if (e.Row.Item is DataRowView rowView)
+            {
+                // Gán giá trị cho cột STT
+                rowView["STT"] = e.Row.GetIndex() + 1;
             }
         }
 
