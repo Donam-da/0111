@@ -74,7 +74,7 @@ namespace namm
             var changePasswordView = new ChangePasswordView(loggedInAccount);
 
             // Lắng nghe sự kiện yêu cầu đăng xuất từ ChangePasswordView
-            changePasswordView.LogoutRequested += (s, args) => Logout_Click(s, null);
+            changePasswordView.LogoutRequested += (s, args) => Logout_Click(s!, null!);
 
             MainContent.Children.Clear();
             MainContent.Children.Add(changePasswordView);
@@ -113,6 +113,13 @@ namespace namm
             // Hiển thị giao diện quản lý menu đồ uống
             MainContent.Children.Clear();
             MainContent.Children.Add(new MenuView());
+        }
+
+        private void ManageRecipes_Click(object sender, RoutedEventArgs e)
+        {
+            // Hiển thị giao diện quản lý công thức (đồ uống pha chế)
+            MainContent.Children.Clear();
+            MainContent.Children.Add(new RecipeView());
         }
     }
 }

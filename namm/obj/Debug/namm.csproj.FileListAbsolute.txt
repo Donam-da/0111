@@ -32,3 +32,5 @@ D:\QuanLyCafe\namm\obj\Debug\DrinkView.g.cs
 D:\QuanLyCafe\namm\obj\Debug\DrinkView.baml
 D:\QuanLyCafe\namm\obj\Debug\MenuView.g.cs
 D:\QuanLyCafe\namm\obj\Debug\MenuView.baml
+D:\QuanLyCafe\namm\obj\Debug\RecipeView.g.cs
+D:\QuanLyCafe\namm\obj\Debug\RecipeView.baml

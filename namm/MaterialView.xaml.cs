@@ -10,7 +10,7 @@ namespace namm
     public partial class MaterialView : UserControl
     {
         private string connectionString = ConfigurationManager.ConnectionStrings["CafeDB"].ConnectionString;
-        private DataTable materialDataTable;
+        private DataTable materialDataTable = new DataTable();
 
         public MaterialView()
         {

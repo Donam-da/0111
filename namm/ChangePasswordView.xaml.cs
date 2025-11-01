@@ -8,8 +8,8 @@ namespace namm
 {
     public partial class ChangePasswordView : UserControl
     {
-        // Sự kiện để yêu cầu đăng xuất
-        public event EventHandler LogoutRequested;
+        // Sự kiện để yêu cầu đăng xuất (nullable)
+        public event EventHandler? LogoutRequested;
 
         private AccountDTO loggedInAccount;
         private string connectionString = ConfigurationManager.ConnectionStrings["CafeDB"].ConnectionString;

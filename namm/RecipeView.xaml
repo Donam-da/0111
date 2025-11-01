@@ -1,0 +1,71 @@
+<UserControl x:Class="namm.RecipeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:namm"
+             mc:Ignorable="d" 
+             d:DesignHeight="550" d:DesignWidth="1000"
+             Loaded="UserControl_Loaded">
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="350"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Cột 1: Chọn đồ uống và thiết lập công thức -->
+        <DockPanel Grid.Column="0" Margin="0,0,10,0">
+            <TextBlock DockPanel.Dock="Top" Text="THIẾT LẬP CÔNG THỨC" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
+            <StackPanel>
+                <TextBlock Text="Chọn đồ uống pha chế:" Margin="0,5,0,2"/>
+                <ComboBox x:Name="cbDrink" Padding="5" DisplayMemberPath="Name" SelectedValuePath="ID"
+                          SelectionChanged="CbDrink_SelectionChanged"
+                          ToolTip="Chọn đồ uống để xem hoặc sửa công thức"/>
+
+                <TextBlock Text="Mã kiểu đồ uống:" Margin="0,10,0,2"/>
+                <TextBox x:Name="txtDrinkCode" Padding="5" IsReadOnly="True" Background="#EEEEEE" ToolTip="Mã này được tạo tự động"/>
+
+                <Grid Margin="0,20,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Nguyên liệu" FontWeight="Bold"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="Số lượng" FontWeight="Bold" HorizontalAlignment="Center"/>
+
+                    <ComboBox x:Name="cbMaterial" Grid.Row="1" Grid.Column="0" Margin="0,5,5,5" DisplayMemberPath="Name" SelectedValuePath="ID"/>
+                    <TextBox x:Name="txtQuantity" Grid.Row="1" Grid.Column="1" Margin="0,5,5,5" VerticalContentAlignment="Center"/>
+                    <Button x:Name="btnAddIngredient" Grid.Row="1" Grid.Column="2" Content="Thêm" Width="50" Margin="0,5,0,5" Click="BtnAddIngredient_Click"/>
+                </Grid>
+
+                <Button x:Name="btnSaveRecipe" Content="Lưu Công Thức" Margin="0,20,0,0" Height="35" FontWeight="Bold" Click="BtnSaveRecipe_Click"/>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Cột 2: Danh sách nguyên liệu trong công thức -->
+        <DockPanel Grid.Column="1">
+            <TextBlock DockPanel.Dock="Top" Text="CÔNG THỨC HIỆN TẠI" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+            <DataGrid x:Name="dgRecipe" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Nguyên liệu" Binding="{Binding MaterialName}" Width="*" />
+                    <DataGridTextColumn Header="Số lượng" Binding="{Binding Quantity}" Width="100" />
+                    <DataGridTextColumn Header="Đơn vị" Binding="{Binding UnitName}" Width="100" />
+                    <DataGridTemplateColumn Header="Hành động" Width="80">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="Xóa" CommandParameter="{Binding}" Click="DeleteIngredient_Click"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
+    </Grid>
+</UserControl>

@@ -20,6 +20,7 @@
             <MenuItem Header="_Quản lí" Click="TopLevelMenuItem_Click">
                 <MenuItem Header="Quản lí bàn" Click="ManageTables_Click"/>
                 <MenuItem Header="Quản lí đồ uống" Click="ManageMenu_Click"/>
+                <MenuItem Header="Quản lí đồ uống pha chế" Click="ManageRecipes_Click"/>
                 <MenuItem Header="Quản lí loại đồ uống"/>
                 <MenuItem Header="Quản lí nguyên liệu" Click="ManageMaterials_Click"/>
                 <MenuItem Header="Quản lí đồ uống nguyên bản" Click="ManageOriginalDrinks_Click"/>

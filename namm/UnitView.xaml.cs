@@ -10,7 +10,7 @@ namespace namm
     public partial class UnitView : UserControl
     {
         private string connectionString = ConfigurationManager.ConnectionStrings["CafeDB"].ConnectionString;
-        private DataTable unitDataTable;
+        private DataTable unitDataTable = new DataTable();
 
         public UnitView()
         {

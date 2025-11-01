@@ -38,7 +38,7 @@ namespace namm
                 return;
             }
 
-            AccountDTO loginAccount = CheckLogin(username, password);
+            AccountDTO? loginAccount = CheckLogin(username, password);
             if (loginAccount != null)
             {
                 MainAppWindow mainApp = new MainAppWindow(loginAccount);
@@ -51,9 +51,9 @@ namespace namm
             }
         }
 
-        private AccountDTO CheckLogin(string username, string password)
+        private AccountDTO? CheckLogin(string username, string password)
         {
-            AccountDTO account = null;
+            AccountDTO? account = null;
             string connectionString = ConfigurationManager.ConnectionStrings["CafeDB"].ConnectionString;
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -68,9 +68,9 @@ namespace namm
                 {
                     account = new AccountDTO
                     {
-                        UserName = reader["UserName"].ToString(),
-                        DisplayName = reader["DisplayName"].ToString(),
-                        Type = (int)reader["Type"]
+                        UserName = reader["UserName"].ToString() ?? "",
+                        DisplayName = reader["DisplayName"].ToString() ?? "",
+                        Type = (int)reader["Type"],
                     };
                 }
             }
