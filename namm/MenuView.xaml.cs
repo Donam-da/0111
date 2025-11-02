@@ -43,7 +43,7 @@ namespace namm
             {
                 string query = @"
                     SELECT 
-                        d.ID, REPLACE(d.DrinkCode, '_NB', '') AS DrinkCode, d.Name, d.ActualPrice, d.IsActive,
+                        d.ID, REPLACE(REPLACE(d.DrinkCode, '_NB', ''), '_PC', '') AS DrinkCode, d.Name, d.ActualPrice, d.IsActive,
                         c.Name AS CategoryName 
                     FROM Drink d
                     JOIN Category c ON d.CategoryID = c.ID";
@@ -88,10 +88,25 @@ namespace namm
 
         private void CbDrink_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (cbDrink.SelectedItem is DataRowView selectedDrink)
+            // Chỉ thực hiện khi người dùng thực sự chọn một mục, không phải khi code tự động thay đổi
+            if (cbDrink.SelectedItem is DataRowView selectedDrink && cbDrink.IsDropDownOpen)
             {
                 string drinkName = selectedDrink["Name"].ToString();
                 txtDrinkCode.Text = GenerateMenuCode(drinkName);
+
+                // Lấy giá bán hiện tại của đồ uống được chọn và hiển thị
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    SqlCommand command = new SqlCommand("SELECT ActualPrice, IsActive FROM Drink WHERE ID = @ID", connection);
+                    command.Parameters.AddWithValue("@ID", selectedDrink["ID"]);
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        txtActualPrice.Text = Convert.ToDecimal(reader["ActualPrice"]).ToString("G0");
+                        chkIsActive.IsChecked = (bool)reader["IsActive"];
+                    }
+                }
             }
         }
 
@@ -112,10 +127,9 @@ namespace namm
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string query = "UPDATE Drink SET DrinkCode = @DrinkCode, ActualPrice = @ActualPrice, IsActive = @IsActive WHERE ID = @ID";
+                string query = "UPDATE Drink SET ActualPrice = @ActualPrice, IsActive = @IsActive WHERE ID = @ID";
                 SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@ID", drinkId);
-                command.Parameters.AddWithValue("@DrinkCode", txtDrinkCode.Text);
                 command.Parameters.AddWithValue("@ActualPrice", Convert.ToDecimal(txtActualPrice.Text));
                 command.Parameters.AddWithValue("@IsActive", chkIsActive.IsChecked ?? false);
 
@@ -142,6 +156,7 @@ namespace namm
 
         private string GenerateMenuCode(string drinkName)
         {
+            // Logic này giống với DrinkView và RecipeView để tạo mã, nhưng không có hậu tố
             string temp = drinkName.ToLower();
             temp = Regex.Replace(temp, "[áàảãạâấầẩẫậăắằẳẵặ]", "a");
             temp = Regex.Replace(temp, "[éèẻẽẹêếềểễệ]", "e");
@@ -150,7 +165,7 @@ namespace namm
             temp = Regex.Replace(temp, "[úùủũụưứừửữự]", "u");
             temp = Regex.Replace(temp, "[ýỳỷỹỵ]", "y");
             temp = Regex.Replace(temp, "[đ]", "d");
-            // Bỏ các ký tự đặc biệt, khoảng trắng và không thêm hậu tố
+            // Bỏ các ký tự đặc biệt, khoảng trắng và hậu tố _NB hoặc _PC nếu có
             return Regex.Replace(temp.Replace(" ", ""), "[^a-z0-9]", "");
         }
 
