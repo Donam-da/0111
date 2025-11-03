@@ -43,7 +43,7 @@ namespace namm
             {
                 const string query = @"
                     SELECT 
-                        d.ID, d.DrinkCode, d.Name, d.Price, d.ActualPrice, d.IsActive, d.CategoryID,
+                        d.ID, d.DrinkCode, d.Name, d.OriginalPrice, d.RecipeCost, d.ActualPrice, d.IsActive, d.CategoryID,
                         c.Name AS CategoryName 
                     FROM Drink d 
                     LEFT JOIN Category c ON d.CategoryID = c.ID";
@@ -79,7 +79,7 @@ namespace namm
         {
             if (dgMenuItems.SelectedItem is DataRowView row)
             {
-                // Khi chọn một dòng, không cho phép tạo mã mới
+                // Tạm ngắt sự kiện để tránh tạo mã mới khi đang chọn
                 txtName.TextChanged -= TxtName_TextChanged;
 
                 txtName.Text = row["Name"] as string ?? string.Empty;
@@ -87,7 +87,7 @@ namespace namm
                 cbCategory.SelectedValue = row["CategoryID"]; // This should work if CategoryID is not null
                 chkIsActive.IsChecked = Convert.ToBoolean(row["IsActive"]);
 
-                // Bật lại sự kiện sau khi điền dữ liệu
+                // Bật lại sự kiện
                 txtName.TextChanged += TxtName_TextChanged;
             }
             else
@@ -102,7 +102,7 @@ namespace namm
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                const string query = "INSERT INTO Drink (DrinkCode, Name, CategoryID, IsActive, Price, ActualPrice) VALUES (@DrinkCode, @Name, @CategoryID, @IsActive, 0, 0)";
+                const string query = "INSERT INTO Drink (DrinkCode, Name, CategoryID, IsActive, OriginalPrice, RecipeCost, ActualPrice) VALUES (@DrinkCode, @Name, @CategoryID, @IsActive, 0, 0, 0)";
                 SqlCommand command = new SqlCommand(query, connection);
                 AddParameters(command);
 

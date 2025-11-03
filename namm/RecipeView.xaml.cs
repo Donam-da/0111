@@ -61,7 +61,7 @@ namespace namm
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                const string query = "SELECT ID, Name, DrinkCode FROM Drink WHERE IsActive = 1 ORDER BY Name";
+                const string query = "SELECT ID, Name, DrinkCode, IsActive FROM Drink ORDER BY Name";
                 SqlDataAdapter adapter = new SqlDataAdapter(query, connection);
                 DataTable drinkTable = new DataTable();
                 await Task.Run(() => adapter.Fill(drinkTable));
@@ -88,8 +88,8 @@ namespace namm
                 if (cbDrink.SelectedItem is DataRowView selectedDrink)
                 {
                     string drinkName = selectedDrink["Name"] as string ?? "";
-                    txtDrinkCode.Text = GenerateRecipeCode(drinkName);
-                    int drinkId = (int)selectedDrink["ID"];
+                    txtDrinkCode.Text = (selectedDrink["DrinkCode"] as string ?? "") + "_PC";                    int drinkId = (int)selectedDrink["ID"];
+                    chkIsActive.IsChecked = (bool)selectedDrink["IsActive"];
                     await LoadRecipeForDrink(drinkId);
                 }
                 else
@@ -98,6 +98,7 @@ namespace namm
                     currentRecipe.Clear();
                     txtActualPrice.Clear();
                     dgCurrentRecipe.Items.Refresh();
+                    chkIsActive.IsChecked = true;
                     await UpdateCurrentRecipeCost();
                     // Không cần làm gì thêm vì không còn lưới chi tiết
                 }
@@ -118,7 +119,7 @@ namespace namm
                         SELECT 
                             r.DrinkID,
                             m.Name AS MaterialName,
-                            r.Quantity,
+                            r.Quantity, 
                             (r.Quantity * m.Price) AS Cost,
                             CONCAT(m.Name, '(', FORMAT(r.Quantity, 'G29'), ')') AS RecipePart
                         FROM Recipe r
@@ -129,18 +130,19 @@ namespace namm
                         d.Name AS DrinkName,
                         d.ActualPrice,
                         ISNULL(STRING_AGG(rc.RecipePart, ' + '), 'None') AS RecipeSummary,
-                        ISNULL(SUM(rc.Cost), 0) AS TotalCost,
-                        d.DrinkCode
+                        ISNULL(SUM(rc.Cost), 0) AS TotalCost, 
+                        d.DrinkCode,
+                        d.IsActive
                     FROM Drink d
                     LEFT JOIN RecipeCosts rc ON d.ID = rc.DrinkID
-                    WHERE d.IsActive = 1 
-                    GROUP BY d.ID, d.Name, d.ActualPrice, d.DrinkCode
+                    WHERE d.IsActive = 1
+                    GROUP BY d.ID, d.Name, d.ActualPrice, d.DrinkCode, d.IsActive
                     ORDER BY d.Name;
                 ";
 
                 // Chỉ hiển thị các đồ uống đã được gán là pha chế
-                query = query.Replace("WHERE d.IsActive = 1", "WHERE d.IsActive = 1 AND d.DrinkCode LIKE '%_PC'");
-
+                // Thay đổi logic: hiển thị đồ uống nếu nó có công thức (tồn tại trong bảng Recipe)
+                query = query.Replace("WHERE d.IsActive = 1", "WHERE d.IsActive = 1 AND d.ID IN (SELECT DISTINCT DrinkID FROM Recipe)");
 
                 var tempTable = new DataTable();
                 SqlDataAdapter adapter = new SqlDataAdapter(query, connection);
@@ -212,25 +214,39 @@ namespace namm
                 // 2. Kiểm tra nguyên liệu đã tồn tại trong công thức chưa
                 if (currentRecipe.Any(i => i.MaterialID == materialId))
                 {
-                    MessageBox.Show("Nguyên liệu này đã có trong công thức.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
+                    // Nếu đã tồn tại, hỏi người dùng có muốn cập nhật số lượng không
+                    if (MessageBox.Show("Nguyên liệu này đã có trong công thức. Bạn có muốn cộng dồn số lượng mới vào không?", "Xác nhận cộng dồn", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                    {
+                        var existingIngredient = currentRecipe.First(i => i.MaterialID == materialId);
+                        existingIngredient.Quantity += quantity; // Cộng dồn số lượng
+                        ShowNotification($"Đã cập nhật: {existingIngredient.MaterialName} - Tổng số lượng: {existingIngredient.Quantity}");
+                    }
+                    else
+                    {
+                        return; // Người dùng không muốn cập nhật
+                    }
                 }
-
-                // 3. Lấy thông tin còn thiếu (UnitName) từ DB
-                string unitName = "";
-                using (var connection = new SqlConnection(connectionString))
+                else
                 {
-                    var command = new SqlCommand("SELECT u.Name FROM Material m JOIN Unit u ON m.UnitID = u.ID WHERE m.ID = @MaterialID", connection);
-                    command.Parameters.AddWithValue("@MaterialID", materialId);
-                    await connection.OpenAsync();
-                    unitName = (await command.ExecuteScalarAsync())?.ToString() ?? "Không xác định";
+
+                    // 3. Nếu chưa tồn tại, lấy thông tin và thêm mới
+                    string unitName = "";
+                    using (var connection = new SqlConnection(connectionString))
+                    {
+                        var command = new SqlCommand("SELECT u.Name FROM Material m JOIN Unit u ON m.UnitID = u.ID WHERE m.ID = @MaterialID", connection);
+                        command.Parameters.AddWithValue("@MaterialID", materialId);
+                        await connection.OpenAsync();
+                        unitName = (await command.ExecuteScalarAsync())?.ToString() ?? "Không xác định";
+                    }
+
+                    // 4. Thêm vào danh sách
+                    currentRecipe.Add(new RecipeIngredient { MaterialID = materialId, MaterialName = selectedMaterial["Name"].ToString(), Quantity = quantity, UnitName = unitName });
+                    ShowNotification($"Đã thêm: {selectedMaterial["Name"]} - Số lượng: {quantity}");
                 }
 
-                // 4. Thêm vào danh sách và cập nhật UI
-                currentRecipe.Add(new RecipeIngredient { MaterialID = materialId, MaterialName = selectedMaterial["Name"].ToString(), Quantity = quantity, UnitName = unitName });
+                // Cập nhật UI và chi phí
                 dgCurrentRecipe.Items.Refresh();
                 await UpdateCurrentRecipeCost();
-                ShowNotification($"Đã thêm: {selectedMaterial["Name"]} - Số lượng: {quantity}");
 
                 // 5. Reset ô nhập liệu
                 txtQuantity.Clear();
@@ -299,10 +315,10 @@ namespace namm
                         }
 
                         // 3. Cập nhật giá vốn và giá bán mới cho đồ uống
-                        var updateDrinkCmd = new SqlCommand("UPDATE Drink SET Price = @Price, ActualPrice = @ActualPrice, DrinkCode = @DrinkCode WHERE ID = @DrinkID", connection, transaction);
-                        updateDrinkCmd.Parameters.AddWithValue("@Price", newCostPrice);
+                        var updateDrinkCmd = new SqlCommand("UPDATE Drink SET RecipeCost = @RecipeCost, ActualPrice = @ActualPrice, IsActive = @IsActive WHERE ID = @DrinkID", connection, transaction);
+                        updateDrinkCmd.Parameters.AddWithValue("@RecipeCost", newCostPrice);
                         updateDrinkCmd.Parameters.AddWithValue("@ActualPrice", decimal.Parse(txtActualPrice.Text));
-                        updateDrinkCmd.Parameters.AddWithValue("@DrinkCode", txtDrinkCode.Text);
+                        updateDrinkCmd.Parameters.AddWithValue("@IsActive", chkIsActive.IsChecked ?? false);
                         updateDrinkCmd.Parameters.AddWithValue("@DrinkID", drinkId);
                         await updateDrinkCmd.ExecuteNonQueryAsync();
 
@@ -348,7 +364,7 @@ namespace namm
                         await deleteRecipeCmd.ExecuteNonQueryAsync();
 
                         // 2. Cập nhật lại Drink, xóa DrinkCode và đặt giá vốn về 0
-                        var updateDrinkCmd = new SqlCommand("UPDATE Drink SET DrinkCode = NULL, Price = 0 WHERE ID = @DrinkID", connection, transaction);
+                        var updateDrinkCmd = new SqlCommand("UPDATE Drink SET RecipeCost = 0 WHERE ID = @DrinkID", connection, transaction);
                         updateDrinkCmd.Parameters.AddWithValue("@DrinkID", drinkId);
                         await updateDrinkCmd.ExecuteNonQueryAsync();
 
@@ -408,6 +424,7 @@ namespace namm
                 if (dgRecipeSummary.SelectedItem is DataRowView row)
                 {
                     txtActualPrice.Text = Convert.ToDecimal(row["ActualPrice"]).ToString("G0");
+                    chkIsActive.IsChecked = (bool)row["IsActive"];
                     // Lấy ID của đồ uống từ dòng được chọn
                     int drinkId = (int)row["DrinkID"];
 
@@ -440,22 +457,6 @@ namespace namm
                 });
             }
             txtCurrentRecipeCost.Text = $"Tổng chi phí: {totalCost:N0}";
-        }
-
-        private string GenerateRecipeCode(string drinkName)
-        {
-            // Chuyển tên đồ uống thành mã không dấu, không khoảng trắng, không ký tự đặc biệt
-            string temp = drinkName.ToLower();
-            temp = Regex.Replace(temp, "[áàảãạâấầẩẫậăắằẳẵặ]", "a");
-            temp = Regex.Replace(temp, "[éèẻẽẹêếềểễệ]", "e");
-            temp = Regex.Replace(temp, "[íìỉĩị]", "i");
-            temp = Regex.Replace(temp, "[óòỏõọôốồổỗộơớờởỡợ]", "o");
-            temp = Regex.Replace(temp, "[úùủũụưứừửữự]", "u");
-            temp = Regex.Replace(temp, "[ýỳỷỹỵ]", "y");
-            temp = Regex.Replace(temp, "[đ]", "d");
-            // Bỏ các ký tự đặc biệt và khoảng trắng, sau đó thêm hậu tố _PC
-            temp = Regex.Replace(temp.Replace(" ", ""), "[^a-z0-9]", "");
-            return temp + "_PC";
         }
 
         private async void ShowNotification(string message, int displayTimeInMs = 2000)

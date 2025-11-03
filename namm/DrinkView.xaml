@@ -27,7 +27,7 @@
                     <DataGridTextColumn Header="Tên đồ uống" Binding="{Binding Name}" Width="*" />
                     <DataGridTextColumn Header="Mã Kiểu Đồ Uống" Binding="{Binding DrinkCode}" Width="120" />
                     <DataGridTextColumn Header="Loại" Binding="{Binding CategoryName}" Width="120" />
-                    <DataGridTextColumn Header="Giá nhập vào" Binding="{Binding Price, StringFormat={}{0:N0}}" Width="100" />
+                    <DataGridTextColumn Header="Giá nhập vào" Binding="{Binding OriginalPrice, StringFormat={}{0:N0}}" Width="100" />
                     <DataGridTextColumn Header="Giá bán" Binding="{Binding ActualPrice, StringFormat={}{0:N0}}" Width="100" />
                     <DataGridTextColumn Header="Trạng thái" Binding="{Binding StatusText}" Width="80" />
                 </DataGrid.Columns>
@@ -54,7 +54,6 @@
 
                 <WrapPanel HorizontalAlignment="Center" Margin="0,20,0,0">
                     <Button x:Name="btnSave" Content="Lưu" Width="80" Margin="5" Click="BtnSave_Click"/>
-                    <Button x:Name="btnDelete" Content="Gỡ thuộc tính NB" Width="110" Margin="5" Click="BtnDelete_Click" ToolTip="Xóa thông tin của một đồ uống nguyên bản (giá nhập, mã _NB) nhưng không xóa đồ uống khỏi hệ thống."/>
                 </WrapPanel>
                 <Button x:Name="btnReset" Content="Làm mới" Width="80" Margin="5" HorizontalAlignment="Center" Click="BtnReset_Click"/>
             </StackPanel>

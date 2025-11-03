@@ -16,9 +16,26 @@ namespace namm
         public DrinkView()
         {
             InitializeComponent();
+            // Đăng ký sự kiện IsVisibleChanged để tải lại dữ liệu mỗi khi view được hiển thị
+            this.IsVisibleChanged += DrinkView_IsVisibleChanged;
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Tải dữ liệu lần đầu
+            LoadData();
+        }
+
+        private void DrinkView_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            // Nếu UserControl trở nên sichtbar (visible), tải lại dữ liệu
+            if ((bool)e.NewValue)
+            {
+                LoadData();
+            }
+        }
+
+        private void LoadData()
         {
             LoadDrinksToComboBox();
             LoadDrinks();
@@ -26,13 +43,14 @@ namespace namm
 
         private void LoadDrinksToComboBox()
         {
+            // Lấy cả DrinkCode để hiển thị khi chọn
+            const string query = "SELECT ID, Name, DrinkCode FROM Drink WHERE IsActive = 1 ORDER BY Name";
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                const string query = "SELECT ID, Name FROM Drink WHERE IsActive = 1 ORDER BY Name";
                 SqlDataAdapter adapter = new SqlDataAdapter(query, connection);
-                DataTable categoryTable = new DataTable();
-                adapter.Fill(categoryTable);
-                cbDrink.ItemsSource = categoryTable.DefaultView;
+                DataTable drinkListTable = new DataTable();
+                adapter.Fill(drinkListTable);
+                cbDrink.ItemsSource = drinkListTable.DefaultView;
             }
         }
 
@@ -42,11 +60,12 @@ namespace namm
             {
                 string query = @"
                     SELECT 
-                        d.ID, d.DrinkCode, d.Name, d.Price, d.ActualPrice, d.IsActive, d.CategoryID,
+                        d.ID, (d.DrinkCode + '_NB') AS DrinkCode, d.Name, d.OriginalPrice, d.ActualPrice, d.IsActive, d.CategoryID,
                         ISNULL(c.Name, 'N/A') AS CategoryName 
                     FROM Drink d
                     LEFT JOIN Category c ON d.CategoryID = c.ID
-                    WHERE d.DrinkCode LIKE '%_NB'"; // Chỉ hiển thị các đồ uống đã được gán là nguyên bản
+                    -- Thay đổi logic: hiển thị đồ uống nếu nó có giá nhập nguyên bản > 0
+                    WHERE d.OriginalPrice > 0"; 
 
                 SqlDataAdapter adapter = new SqlDataAdapter(query, connection);
                 drinkDataTable = new DataTable(); // Initialize the DataTable
@@ -85,7 +104,7 @@ namespace namm
                 cbDrink.SelectionChanged += CbDrink_SelectionChanged; // Bật lại event
 
                 txtDrinkCode.Text = row["DrinkCode"] as string ?? string.Empty;
-                txtPrice.Text = Convert.ToDecimal(row["Price"]).ToString("G0"); // Bỏ phần thập phân .00
+                txtPrice.Text = Convert.ToDecimal(row["OriginalPrice"]).ToString("G0"); // Bỏ phần thập phân .00
                 txtActualPrice.Text = Convert.ToDecimal(row["ActualPrice"]).ToString("G0"); // Bỏ phần thập phân .00
                 chkIsActive.IsChecked = (bool)row["IsActive"];
                 cbDrink.IsEnabled = false; // Không cho đổi đồ uống khi đang sửa
@@ -107,7 +126,7 @@ namespace namm
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 // Luôn là UPDATE, không có INSERT ở màn hình này
-                const string query = "UPDATE Drink SET DrinkCode = @DrinkCode, Price = @Price, ActualPrice = @ActualPrice, IsActive = @IsActive WHERE ID = @ID";
+                const string query = "UPDATE Drink SET OriginalPrice = @OriginalPrice, ActualPrice = @ActualPrice, IsActive = @IsActive WHERE ID = @ID";
                 SqlCommand command = new SqlCommand(query, connection);
                 AddParameters(command, drinkId); // Truyền ID vào
 
@@ -116,35 +135,6 @@ namespace namm
                 MessageBox.Show("Cập nhật đồ uống thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                 LoadDrinks();
                 ResetFields();
-            }
-        }
-
-        private void BtnDelete_Click(object sender, RoutedEventArgs e)
-        {
-            if (dgDrinks.SelectedItem == null)
-            {
-                MessageBox.Show("Vui lòng chọn một đồ uống từ danh sách để gỡ thuộc tính.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            if (MessageBox.Show("Bạn có chắc chắn muốn gỡ bỏ thuộc tính 'nguyên bản' của đồ uống này không? Hành động này sẽ xóa mã _NB và đặt giá nhập về 0.", "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
-            {
-                DataRowView row = (DataRowView)dgDrinks.SelectedItem;
-                int drinkId = (int)row["ID"];
-
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    // Thay vì xóa, chúng ta cập nhật để loại bỏ thuộc tính "nguyên bản"
-                    // Xóa DrinkCode và đặt giá nhập về 0
-                    string query = "UPDATE Drink SET DrinkCode = NULL, Price = 0 WHERE ID = @ID";
-                    SqlCommand command = new SqlCommand(query, connection);
-                    command.Parameters.AddWithValue("@ID", drinkId);
-                    connection.Open();
-                    command.ExecuteNonQuery();
-                    MessageBox.Show("Đã gỡ thuộc tính 'nguyên bản' thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                    LoadDrinks();
-                    ResetFields();
-                }
             }
         }
 
@@ -165,25 +155,9 @@ namespace namm
         {
             if (cbDrink.SelectedItem is DataRowView selectedDrink)
             {
-                string drinkName = selectedDrink["Name"] as string ?? "";
-                txtDrinkCode.Text = GenerateNBCode(drinkName);
+                // Hiển thị mã đồ uống gốc khi người dùng chọn từ ComboBox
+                txtDrinkCode.Text = (selectedDrink["DrinkCode"] as string ?? "") + "_NB";
             }
-        }
-
-        private string GenerateNBCode(string drinkName)
-        {
-            // Chuyển thành chữ thường, bỏ dấu
-            string temp = drinkName.ToLower();
-            temp = Regex.Replace(temp, "[áàảãạâấầẩẫậăắằẳẵặ]", "a");
-            temp = Regex.Replace(temp, "[éèẻẽẹêếềểễệ]", "e");
-            temp = Regex.Replace(temp, "[íìỉĩị]", "i");
-            temp = Regex.Replace(temp, "[óòỏõọôốồổỗộơớờởỡợ]", "o");
-            temp = Regex.Replace(temp, "[úùủũụưứừửữự]", "u");
-            temp = Regex.Replace(temp, "[ýỳỷỹỵ]", "y");
-            temp = Regex.Replace(temp, "[đ]", "d");
-            // Bỏ các ký tự đặc biệt và khoảng trắng
-            temp = Regex.Replace(temp.Replace(" ", ""), "[^a-z0-9]", "");
-            return temp + "_NB";
         }
 
         private void ResetFields()
@@ -219,8 +193,7 @@ namespace namm
             {
                 command.Parameters.AddWithValue("@ID", id.Value);
             }
-            command.Parameters.AddWithValue("@DrinkCode", txtDrinkCode.Text);
-            command.Parameters.AddWithValue("@Price", Convert.ToDecimal(txtPrice.Text));
+            command.Parameters.AddWithValue("@OriginalPrice", Convert.ToDecimal(txtPrice.Text));
             command.Parameters.AddWithValue("@ActualPrice", Convert.ToDecimal(txtActualPrice.Text));
             command.Parameters.AddWithValue("@IsActive", chkIsActive.IsChecked ?? false);
         }
