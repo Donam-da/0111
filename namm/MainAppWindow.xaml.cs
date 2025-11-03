@@ -126,5 +126,12 @@ namespace namm
             MainContent.Children.Clear();
             MainContent.Children.Add(new RecipeView());
         }
+
+        private void Home_Click(object sender, RoutedEventArgs e)
+        {
+            // Hiển thị sơ đồ bàn làm màn hình chính
+            MainContent.Children.Clear();
+            MainContent.Children.Add(new DashboardView());
+        }
     }
 }

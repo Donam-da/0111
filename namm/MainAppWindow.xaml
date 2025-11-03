@@ -9,6 +9,12 @@
         WindowStartupLocation="CenterScreen">
     <DockPanel>
         <Menu DockPanel.Dock="Top" FontSize="14">
+            <MenuItem Click="Home_Click" ToolTip="Quay về màn hình chính">
+                <MenuItem.Header>
+                    <Path Data="M12 2.09954L21 10.0995V21.0001H15V15.0001H9V21.0001H3V10.0995L12 2.09954Z" 
+                          Stroke="{DynamicResource {x:Static SystemColors.MenuTextBrushKey}}" StrokeThickness="1.5" Width="16" Height="16" Stretch="Uniform"/>
+                </MenuItem.Header>
+            </MenuItem>
             <MenuItem Header="_Hệ thống" Click="TopLevelMenuItem_Click">
                 <MenuItem x:Name="miManageEmployees" Header="Quản lí nhân viên" Click="ManageEmployees_Click"/>
                 <MenuItem Header="Đổi mật khẩu" Click="ChangePassword_Click"/>
