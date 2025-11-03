@@ -46,7 +46,11 @@ namespace namm
         {
             if (dgTables.SelectedItem is DataRowView row)
             {
-                txtName.Text = row["Name"].ToString();
+                // Chỉ hiển thị số của bàn trong ô nhập liệu
+                string fullName = row["Name"].ToString() ?? "";
+                string tableNumber = fullName.Replace("Bàn ", "").Trim();
+                txtName.Text = tableNumber;
+
                 txtCapacity.Text = row["Capacity"].ToString();
                 cbStatus.Text = row["Status"].ToString();
 
@@ -63,11 +67,18 @@ namespace namm
 
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
+            if (!int.TryParse(txtName.Text, out _))
+            {
+                MessageBox.Show("Mã bàn phải là một số.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 string query = "INSERT INTO TableFood (Name, Capacity, Status) VALUES (@Name, @Capacity, @Status)";
                 SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@Name", txtName.Text);
+                // Tự động thêm "Bàn " vào trước số người dùng nhập
+                command.Parameters.AddWithValue("@Name", "Bàn " + txtName.Text);
                 command.Parameters.AddWithValue("@Capacity", Convert.ToInt32(txtCapacity.Text));
                 command.Parameters.AddWithValue("@Status", ((ComboBoxItem)cbStatus.SelectedItem).Content.ToString());
 
@@ -95,6 +106,12 @@ namespace namm
                 return;
             }
 
+            if (!int.TryParse(txtName.Text, out _))
+            {
+                MessageBox.Show("Mã bàn phải là một số.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             DataRowView row = (DataRowView)dgTables.SelectedItem;
             int tableId = (int)row["ID"];
 
@@ -103,7 +120,8 @@ namespace namm
                 string query = "UPDATE TableFood SET Name = @Name, Capacity = @Capacity, Status = @Status WHERE ID = @ID";
                 SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@ID", tableId);
-                command.Parameters.AddWithValue("@Name", txtName.Text);
+                // Tự động thêm "Bàn " vào trước số người dùng nhập
+                command.Parameters.AddWithValue("@Name", "Bàn " + txtName.Text);
                 command.Parameters.AddWithValue("@Capacity", Convert.ToInt32(txtCapacity.Text));
                 command.Parameters.AddWithValue("@Status", ((ComboBoxItem)cbStatus.SelectedItem).Content.ToString());
 
