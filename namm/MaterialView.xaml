@@ -25,7 +25,7 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="STT" Binding="{Binding STT}" Width="50" />
                     <DataGridTextColumn Header="Tên nguyên liệu" Binding="{Binding Name}" Width="*" />
-                    <DataGridTextColumn Header="Số lượng" Binding="{Binding Quantity}" Width="80" />
+                    <DataGridTextColumn Header="Số lượng tồn" Binding="{Binding Quantity, StringFormat=G29}" Width="100" />
                     <DataGridTextColumn Header="Đơn vị" Binding="{Binding UnitName}" Width="80" />
                     <DataGridTextColumn Header="Đơn giá" Binding="{Binding Price, StringFormat={}{0:N0}}" Width="100" />
                     <DataGridTextColumn Header="Trạng thái" Binding="{Binding StatusText}" Width="100" />

@@ -52,7 +52,8 @@
                 <Button Content="Thêm món" Width="80"/>
             </StackPanel>
             <DataGrid x:Name="dgMenu" Margin="0,5,0,0" AutoGenerateColumns="False" IsReadOnly="True"
-                      HeadersVisibility="Column" SelectionMode="Single" LoadingRow="DgMenu_LoadingRow">
+                      HeadersVisibility="Column" SelectionMode="Single" LoadingRow="DgMenu_LoadingRow"
+                      MouseDoubleClick="DgMenu_MouseDoubleClick">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="STT" Binding="{Binding STT}" Width="40" HeaderStyle="{StaticResource CenterAlignedColumn}" ElementStyle="{StaticResource CenterAlignedCell}"/>
                     <DataGridTextColumn Header="Tên đồ uống" Binding="{Binding Name}" Width="*" HeaderStyle="{StaticResource CenterAlignedColumn}" ElementStyle="{StaticResource CenterAlignedCell}"/>

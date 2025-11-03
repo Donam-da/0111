@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
@@ -42,10 +42,10 @@ namespace namm
                 // Dùng JOIN để lấy tên đơn vị tính từ bảng Unit
                 string query = @"
                     SELECT 
-                        m.ID, m.Name, m.Quantity, m.Price, m.Description, m.IsActive,
+                        m.ID, m.Name, m.Quantity, m.Price, m.Description, m.IsActive, m.UnitID,
                         u.Name AS UnitName 
                     FROM Material m
-                    JOIN Unit u ON m.UnitID = u.ID";
+                    LEFT JOIN Unit u ON m.UnitID = u.ID";
 
                 SqlDataAdapter adapter = new SqlDataAdapter(query, connection);
                 materialDataTable = new DataTable();
@@ -85,8 +85,7 @@ namespace namm
                 chkIsActive.IsChecked = (bool)row["IsActive"];
 
                 // Tìm và chọn Unit trong ComboBox
-                // Cần lấy UnitID từ câu query gốc, tôi sẽ thêm nó vào
-                // Tạm thời để trống, sẽ cập nhật ở bước sau
+                cbUnit.SelectedValue = row["UnitID"];
             }
         }
 
@@ -100,11 +99,19 @@ namespace namm
                 SqlCommand command = new SqlCommand(query, connection);
                 AddParameters(command);
 
-                connection.Open();
-                command.ExecuteNonQuery();
-                MessageBox.Show("Thêm nguyên liệu thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                LoadMaterials();
-                ResetFields();
+                try
+                {
+                    connection.Open();
+                    command.ExecuteNonQuery();
+                    MessageBox.Show("Thêm nguyên liệu thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    LoadMaterials();
+                    ResetFields();
+                }
+                catch (SqlException ex)
+                {
+                    // Bắt lỗi nếu tên nguyên liệu đã tồn tại (lỗi khóa UNIQUE)
+                    MessageBox.Show($"Lỗi khi thêm nguyên liệu: {ex.Message}\n\nCó thể tên nguyên liệu này đã tồn tại.", "Lỗi SQL", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 

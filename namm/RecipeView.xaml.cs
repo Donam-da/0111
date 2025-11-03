@@ -119,7 +119,8 @@ namespace namm
                         SELECT 
                             r.DrinkID,
                             m.Name AS MaterialName,
-                            r.Quantity, 
+                            r.Quantity AS RecipeQuantity, 
+                            m.Quantity AS StockQuantity,
                             (r.Quantity * m.Price) AS Cost,
                             CONCAT(m.Name, '(', FORMAT(r.Quantity, 'G29'), ')') AS RecipePart
                         FROM Recipe r
@@ -131,6 +132,9 @@ namespace namm
                         d.ActualPrice,
                         ISNULL(STRING_AGG(rc.RecipePart, ' + '), 'None') AS RecipeSummary,
                         ISNULL(SUM(rc.Cost), 0) AS TotalCost, 
+                        -- Tính số lượng tối đa có thể làm
+                        -- Nếu không có công thức, trả về 0. Nếu có, tính số ly tối thiểu có thể làm từ các nguyên liệu
+                        CASE WHEN MIN(rc.RecipeQuantity) IS NULL THEN 0 ELSE MIN(FLOOR(rc.StockQuantity / rc.RecipeQuantity)) END AS MaxCanMake,
                         d.DrinkCode,
                         d.IsActive
                     FROM Drink d
@@ -149,6 +153,7 @@ namespace namm
 
                 // Thêm cột STT và điền dữ liệu
                 tempTable.Columns.Add("STT", typeof(int));
+
                 for (int i = 0; i < tempTable.Rows.Count; i++)
                 {
                     tempTable.Rows[i]["STT"] = i + 1;

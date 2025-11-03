@@ -95,6 +95,7 @@
                     <DataGridTextColumn Header="Nguyên liệu" Binding="{Binding RecipeSummary}" Width="3*" HeaderStyle="{StaticResource CenterAlignedColumnHeader}" ElementStyle="{StaticResource CenterAlignedCell}"/>
                     <DataGridTextColumn Header="Chi phí" Binding="{Binding TotalCost, StringFormat={}{0:N0}}" Width="1*" HeaderStyle="{StaticResource CenterAlignedColumnHeader}" ElementStyle="{StaticResource CenterAlignedCell}"/>
                     <DataGridTextColumn Header="Giá bán" Binding="{Binding ActualPrice, StringFormat={}{0:N0}}" Width="1*" HeaderStyle="{StaticResource CenterAlignedColumnHeader}" ElementStyle="{StaticResource CenterAlignedCell}"/>
+                    <DataGridTextColumn Header="Có thể làm (ly)" Binding="{Binding MaxCanMake}" Width="1*" HeaderStyle="{StaticResource CenterAlignedColumnHeader}" ElementStyle="{StaticResource CenterAlignedCell}"/>
                 </DataGrid.Columns>
             </DataGrid>
         </DockPanel>

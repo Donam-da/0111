@@ -11,8 +11,8 @@ namespace namm
     public partial class DashboardView : UserControl
     {
         private string connectionString = ConfigurationManager.ConnectionStrings["CafeDB"].ConnectionString;
-        private DataTable menuDataTable;
-        private DataTable tableDataTable;
+        private DataTable? menuDataTable;
+        private DataTable? tableDataTable;
 
         public DashboardView()
         {
@@ -116,6 +116,36 @@ namespace namm
             if (e.Row.Item is DataRowView rowView)
             {
                 rowView["STT"] = e.Row.GetIndex() + 1;
+            }
+        }
+
+        private void DgMenu_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            // 1. Kiểm tra đã chọn bàn chưa
+            if (dgTables.SelectedItem == null)
+            {
+                MessageBox.Show("Vui lòng chọn một bàn trước khi thêm món.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // 2. Lấy thông tin đồ uống được chọn
+            if (dgMenu.SelectedItem is DataRowView selectedDrink)
+            {
+                string drinkName = selectedDrink["Name"].ToString();
+
+                // 3. Mở dialog để nhập số lượng
+                var dialog = new AddDrinkDialog(drinkName);
+                dialog.Owner = Window.GetWindow(this); // Đặt cửa sổ chính làm chủ sở hữu
+
+                if (dialog.ShowDialog() == true)
+                {
+                    int quantity = dialog.Quantity;
+                    // TODO: Thêm logic để thêm đồ uống vào hóa đơn (cột bên phải)
+                    // Ví dụ:
+                    // BillItem newItem = new BillItem { Name = drinkName, Quantity = quantity, ... };
+                    // currentBill.Items.Add(newItem);
+                    MessageBox.Show($"Đã chọn: {quantity} {drinkName}. \n(Chức năng thêm vào hóa đơn sẽ được phát triển ở bước tiếp theo)", "Thông báo");
+                }
             }
         }
     }

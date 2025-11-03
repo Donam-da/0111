@@ -2,6 +2,7 @@
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Text.RegularExpressions;
 using System.Windows.Controls;
@@ -22,26 +23,33 @@ namespace namm
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            // Tải dữ liệu lần đầu
-            LoadData();
+            // Tải dữ liệu lần đầu một cách bất đồng bộ
+            _ = LoadDataAsync();
         }
 
-        private void DrinkView_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private async void DrinkView_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             // Nếu UserControl trở nên sichtbar (visible), tải lại dữ liệu
             if ((bool)e.NewValue)
             {
-                LoadData();
+                await LoadDataAsync();
             }
         }
 
-        private void LoadData()
+        private async Task LoadDataAsync()
         {
-            LoadDrinksToComboBox();
-            LoadDrinks();
+            try
+            {
+                await LoadDrinksToComboBoxAsync();
+                await LoadDrinksAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi tải dữ liệu: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
-        private void LoadDrinksToComboBox()
+        private async Task LoadDrinksToComboBoxAsync()
         {
             // Lấy cả DrinkCode để hiển thị khi chọn
             const string query = "SELECT ID, Name, DrinkCode FROM Drink WHERE IsActive = 1 ORDER BY Name";
@@ -49,18 +57,20 @@ namespace namm
             {
                 SqlDataAdapter adapter = new SqlDataAdapter(query, connection);
                 DataTable drinkListTable = new DataTable();
-                adapter.Fill(drinkListTable);
+                await Task.Run(() => adapter.Fill(drinkListTable));
                 cbDrink.ItemsSource = drinkListTable.DefaultView;
             }
         }
 
-        private void LoadDrinks()
+        private async Task LoadDrinksAsync()
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 string query = @"
                     SELECT 
-                        d.ID, (d.DrinkCode + '_NB') AS DrinkCode, d.Name, d.OriginalPrice, d.ActualPrice, d.IsActive, d.CategoryID,
+                        d.ID, 
+                        CASE WHEN d.DrinkCode IS NOT NULL THEN (d.DrinkCode + '_NB') ELSE '' END AS DrinkCode, 
+                        d.Name, d.OriginalPrice, d.ActualPrice, d.StockQuantity, d.IsActive, d.CategoryID,
                         ISNULL(c.Name, 'N/A') AS CategoryName 
                     FROM Drink d
                     LEFT JOIN Category c ON d.CategoryID = c.ID
@@ -71,7 +81,7 @@ namespace namm
                 drinkDataTable = new DataTable(); // Initialize the DataTable
                 drinkDataTable.Columns.Add("STT", typeof(int));
                 drinkDataTable.Columns.Add("StatusText", typeof(string));
-                adapter.Fill(drinkDataTable);
+                await Task.Run(() => adapter.Fill(drinkDataTable));
 
                 UpdateStatusText();
                 dgDrinks.ItemsSource = drinkDataTable.DefaultView;
@@ -106,6 +116,7 @@ namespace namm
                 txtDrinkCode.Text = row["DrinkCode"] as string ?? string.Empty;
                 txtPrice.Text = Convert.ToDecimal(row["OriginalPrice"]).ToString("G0"); // Bỏ phần thập phân .00
                 txtActualPrice.Text = Convert.ToDecimal(row["ActualPrice"]).ToString("G0"); // Bỏ phần thập phân .00
+                txtStockQuantity.Text = Convert.ToDecimal(row["StockQuantity"]).ToString("G0");
                 chkIsActive.IsChecked = (bool)row["IsActive"];
                 cbDrink.IsEnabled = false; // Không cho đổi đồ uống khi đang sửa
             }
@@ -126,15 +137,21 @@ namespace namm
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 // Luôn là UPDATE, không có INSERT ở màn hình này
-                const string query = "UPDATE Drink SET OriginalPrice = @OriginalPrice, ActualPrice = @ActualPrice, IsActive = @IsActive WHERE ID = @ID";
+                const string query = "UPDATE Drink SET OriginalPrice = @OriginalPrice, ActualPrice = @ActualPrice, StockQuantity = @StockQuantity, IsActive = @IsActive WHERE ID = @ID";
                 SqlCommand command = new SqlCommand(query, connection);
                 AddParameters(command, drinkId); // Truyền ID vào
-
-                connection.Open();
-                command.ExecuteNonQuery();
-                MessageBox.Show("Cập nhật đồ uống thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                LoadDrinks();
-                ResetFields();
+                try
+                {
+                    connection.Open();
+                    command.ExecuteNonQuery();
+                    MessageBox.Show("Cập nhật đồ uống thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    _ = LoadDrinksAsync(); // Tải lại danh sách
+                    ResetFields();
+                }
+                catch (SqlException ex)
+                {
+                    MessageBox.Show($"Lỗi khi cập nhật: {ex.Message}", "Lỗi SQL", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
@@ -166,6 +183,7 @@ namespace namm
             txtDrinkCode.Clear();
             txtPrice.Clear();
             txtActualPrice.Clear();
+            txtStockQuantity.Clear();
             chkIsActive.IsChecked = true;
             dgDrinks.SelectedItem = null;
             cbDrink.IsEnabled = true;
@@ -173,15 +191,15 @@ namespace namm
 
         private bool ValidateInput()
         {
-            if (cbDrink.SelectedItem == null ||
-                string.IsNullOrWhiteSpace(txtPrice.Text) || string.IsNullOrWhiteSpace(txtActualPrice.Text))
+            if (cbDrink.SelectedItem == null || string.IsNullOrWhiteSpace(txtPrice.Text) || 
+                string.IsNullOrWhiteSpace(txtActualPrice.Text) || string.IsNullOrWhiteSpace(txtStockQuantity.Text))
             {
-                MessageBox.Show("Vui lòng chọn đồ uống và nhập đầy đủ giá nhập, giá bán.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Vui lòng chọn đồ uống và nhập đầy đủ giá nhập, giá bán và số lượng tồn kho.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
-            if (!decimal.TryParse(txtPrice.Text, out _) || !decimal.TryParse(txtActualPrice.Text, out _))
+            if (!decimal.TryParse(txtPrice.Text, out _) || !decimal.TryParse(txtActualPrice.Text, out _) || !decimal.TryParse(txtStockQuantity.Text, out _))
             {
-                MessageBox.Show("Giá nhập và giá bán phải là số.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Giá nhập, giá bán và số lượng tồn kho phải là số.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             return true;
@@ -195,6 +213,7 @@ namespace namm
             }
             command.Parameters.AddWithValue("@OriginalPrice", Convert.ToDecimal(txtPrice.Text));
             command.Parameters.AddWithValue("@ActualPrice", Convert.ToDecimal(txtActualPrice.Text));
+            command.Parameters.AddWithValue("@StockQuantity", Convert.ToDecimal(txtStockQuantity.Text));
             command.Parameters.AddWithValue("@IsActive", chkIsActive.IsChecked ?? false);
         }
     }
