@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.Text.RegularExpressions;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -44,9 +45,16 @@ namespace namm
  
         private async void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            await LoadDrinksToComboBox();
-            await LoadMaterialsToComboBox();
-            await LoadRecipeSummary();
+            try
+            {
+                await LoadDrinksToComboBox();
+                await LoadMaterialsToComboBox();
+                await LoadRecipeSummary();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi nghiêm trọng khi tải trang: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private async Task LoadDrinksToComboBox()
@@ -75,20 +83,28 @@ namespace namm
 
         private async void CbDrink_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (cbDrink.SelectedItem is DataRowView selectedDrink)
+            try
             {
-                txtDrinkCode.Text = selectedDrink["DrinkCode"].ToString();
-                int drinkId = (int)selectedDrink["ID"];
-                await LoadRecipeForDrink(drinkId);
+                if (cbDrink.SelectedItem is DataRowView selectedDrink)
+                {
+                    string drinkName = selectedDrink["Name"] as string ?? "";
+                    txtDrinkCode.Text = GenerateRecipeCode(drinkName);
+                    int drinkId = (int)selectedDrink["ID"];
+                    await LoadRecipeForDrink(drinkId);
+                }
+                else
+                {
+                    txtDrinkCode.Clear();
+                    currentRecipe.Clear();
+                    txtActualPrice.Clear();
+                    dgCurrentRecipe.Items.Refresh();
+                    await UpdateCurrentRecipeCost();
+                    // Không cần làm gì thêm vì không còn lưới chi tiết
+                }
             }
-            else
+            catch (Exception ex)
             {
-                txtDrinkCode.Clear();
-                currentRecipe.Clear();
-                txtActualPrice.Clear();
-                dgCurrentRecipe.Items.Refresh();
-                await UpdateCurrentRecipeCost();
-                // Không cần làm gì thêm vì không còn lưới chi tiết
+                MessageBox.Show($"Lỗi khi chọn đồ uống: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -113,19 +129,17 @@ namespace namm
                         d.Name AS DrinkName,
                         d.ActualPrice,
                         ISNULL(STRING_AGG(rc.RecipePart, ' + '), 'None') AS RecipeSummary,
-                       ISNULL(SUM(rc.Cost), 0) AS TotalCost
+                        ISNULL(SUM(rc.Cost), 0) AS TotalCost,
+                        d.DrinkCode
                     FROM Drink d
                     LEFT JOIN RecipeCosts rc ON d.ID = rc.DrinkID
-                    WHERE d.IsActive = 1
-                    GROUP BY d.ID, d.Name, d.ActualPrice
+                    WHERE d.IsActive = 1 
+                    GROUP BY d.ID, d.Name, d.ActualPrice, d.DrinkCode
                     ORDER BY d.Name;
                 ";
 
-                // Thay đổi "Chưa có công thức" thành "None"
-                query = query.Replace("'Chưa có công thức'", "'None'");
-
-
-                // query = query.Replace("'Chưa có công thức'", "'None'");
+                // Chỉ hiển thị các đồ uống đã được gán là pha chế
+                query = query.Replace("WHERE d.IsActive = 1", "WHERE d.IsActive = 1 AND d.DrinkCode LIKE '%_PC'");
 
 
                 var tempTable = new DataTable();
@@ -177,48 +191,55 @@ namespace namm
 
         private async void BtnAddIngredient_Click(object sender, RoutedEventArgs e)
         {
-            // 1. Kiểm tra và lấy dữ liệu đầu vào
-            if (cbMaterial.SelectedItem == null)
+            try
             {
-                MessageBox.Show("Vui lòng chọn một nguyên liệu.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
+                // 1. Kiểm tra và lấy dữ liệu đầu vào
+                if (cbMaterial.SelectedItem == null)
+                {
+                    MessageBox.Show("Vui lòng chọn một nguyên liệu.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
 
-            if (!decimal.TryParse(txtQuantity.Text, out decimal quantity) || quantity <= 0)
+                if (!decimal.TryParse(txtQuantity.Text, out decimal quantity) || quantity <= 0)
+                {
+                    MessageBox.Show("Số lượng phải là một số dương hợp lệ.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                var selectedMaterial = (DataRowView)cbMaterial.SelectedItem;
+                int materialId = (int)selectedMaterial["ID"];
+
+                // 2. Kiểm tra nguyên liệu đã tồn tại trong công thức chưa
+                if (currentRecipe.Any(i => i.MaterialID == materialId))
+                {
+                    MessageBox.Show("Nguyên liệu này đã có trong công thức.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // 3. Lấy thông tin còn thiếu (UnitName) từ DB
+                string unitName = "";
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    var command = new SqlCommand("SELECT u.Name FROM Material m JOIN Unit u ON m.UnitID = u.ID WHERE m.ID = @MaterialID", connection);
+                    command.Parameters.AddWithValue("@MaterialID", materialId);
+                    await connection.OpenAsync();
+                    unitName = (await command.ExecuteScalarAsync())?.ToString() ?? "Không xác định";
+                }
+
+                // 4. Thêm vào danh sách và cập nhật UI
+                currentRecipe.Add(new RecipeIngredient { MaterialID = materialId, MaterialName = selectedMaterial["Name"].ToString(), Quantity = quantity, UnitName = unitName });
+                dgCurrentRecipe.Items.Refresh();
+                await UpdateCurrentRecipeCost();
+                ShowNotification($"Đã thêm: {selectedMaterial["Name"]} - Số lượng: {quantity}");
+
+                // 5. Reset ô nhập liệu
+                txtQuantity.Clear();
+                cbMaterial.SelectedIndex = -1;
+            }
+            catch (Exception ex)
             {
-                MessageBox.Show("Số lượng phải là một số dương hợp lệ.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                MessageBox.Show($"Lỗi khi thêm nguyên liệu: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-
-            var selectedMaterial = (DataRowView)cbMaterial.SelectedItem;
-            int materialId = (int)selectedMaterial["ID"];
-
-            // 2. Kiểm tra nguyên liệu đã tồn tại trong công thức chưa
-            if (currentRecipe.Any(i => i.MaterialID == materialId))
-            {
-                MessageBox.Show("Nguyên liệu này đã có trong công thức.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            // 3. Lấy thông tin còn thiếu (UnitName) từ DB
-            string unitName = "";
-            using (var connection = new SqlConnection(connectionString))
-            {
-                var command = new SqlCommand("SELECT u.Name FROM Material m JOIN Unit u ON m.UnitID = u.ID WHERE m.ID = @MaterialID", connection);
-                command.Parameters.AddWithValue("@MaterialID", materialId);
-                await connection.OpenAsync();
-                unitName = (await command.ExecuteScalarAsync())?.ToString() ?? "Không xác định";
-            }
-
-            // 4. Thêm vào danh sách và cập nhật UI
-            currentRecipe.Add(new RecipeIngredient { MaterialID = materialId, MaterialName = selectedMaterial["Name"].ToString(), Quantity = quantity, UnitName = unitName });
-            dgCurrentRecipe.Items.Refresh();
-            await UpdateCurrentRecipeCost();
-            MessageBox.Show($"Đã thêm: {selectedMaterial["Name"]} - Số lượng: {quantity}", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-
-            // 5. Reset ô nhập liệu
-            txtQuantity.Clear();
-            cbMaterial.SelectedIndex = -1;
         }
 
         private async void BtnSaveRecipe_Click(object sender, RoutedEventArgs e)
@@ -278,14 +299,15 @@ namespace namm
                         }
 
                         // 3. Cập nhật giá vốn và giá bán mới cho đồ uống
-                        var updateDrinkCmd = new SqlCommand("UPDATE Drink SET Price = @Price, ActualPrice = @ActualPrice WHERE ID = @DrinkID", connection, transaction);
+                        var updateDrinkCmd = new SqlCommand("UPDATE Drink SET Price = @Price, ActualPrice = @ActualPrice, DrinkCode = @DrinkCode WHERE ID = @DrinkID", connection, transaction);
                         updateDrinkCmd.Parameters.AddWithValue("@Price", newCostPrice);
                         updateDrinkCmd.Parameters.AddWithValue("@ActualPrice", decimal.Parse(txtActualPrice.Text));
+                        updateDrinkCmd.Parameters.AddWithValue("@DrinkCode", txtDrinkCode.Text);
                         updateDrinkCmd.Parameters.AddWithValue("@DrinkID", drinkId);
                         await updateDrinkCmd.ExecuteNonQueryAsync();
 
                         transaction.Commit();
-                        MessageBox.Show("Lưu công thức thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                        ShowNotification("Lưu công thức thành công!");
                         dgCurrentRecipe.Items.Refresh(); // Làm mới lưới sau khi lưu
                         await LoadRecipeSummary(); // Tải lại bảng tóm tắt
                     }
@@ -293,6 +315,53 @@ namespace namm
                     {
                         transaction.Rollback();
                         MessageBox.Show($"Đã xảy ra lỗi khi lưu công thức: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+        }
+
+        private async void BtnRemoveRecipe_Click(object sender, RoutedEventArgs e)
+        {
+            if (cbDrink.SelectedItem == null)
+            {
+                MessageBox.Show("Vui lòng chọn một đồ uống để gỡ công thức.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (MessageBox.Show("Bạn có chắc chắn muốn gỡ bỏ công thức của đồ uống này không? Tất cả nguyên liệu sẽ bị xóa khỏi công thức.", "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            {
+                return;
+            }
+
+            int drinkId = (int)((DataRowView)cbDrink.SelectedItem)["ID"];
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                await connection.OpenAsync();
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        // 1. Xóa tất cả các mục trong bảng Recipe cho DrinkID này
+                        var deleteRecipeCmd = new SqlCommand("DELETE FROM Recipe WHERE DrinkID = @DrinkID", connection, transaction);
+                        deleteRecipeCmd.Parameters.AddWithValue("@DrinkID", drinkId);
+                        await deleteRecipeCmd.ExecuteNonQueryAsync();
+
+                        // 2. Cập nhật lại Drink, xóa DrinkCode và đặt giá vốn về 0
+                        var updateDrinkCmd = new SqlCommand("UPDATE Drink SET DrinkCode = NULL, Price = 0 WHERE ID = @DrinkID", connection, transaction);
+                        updateDrinkCmd.Parameters.AddWithValue("@DrinkID", drinkId);
+                        await updateDrinkCmd.ExecuteNonQueryAsync();
+
+
+                        transaction.Commit();
+                        ShowNotification("Gỡ công thức thành công!");
+                        await LoadRecipeForDrink(drinkId); // Tải lại công thức (sẽ trống)
+                        await LoadRecipeSummary(); // Tải lại bảng tóm tắt
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        MessageBox.Show($"Đã xảy ra lỗi khi gỡ công thức: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
             }
@@ -334,20 +403,27 @@ namespace namm
 
         private async void DgRecipeSummary_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (dgRecipeSummary.SelectedItem is DataRowView row)
+            try
             {
-                txtActualPrice.Text = Convert.ToDecimal(row["ActualPrice"]).ToString("G0");
-                // Lấy ID của đồ uống từ dòng được chọn
-                int drinkId = (int)row["DrinkID"];
+                if (dgRecipeSummary.SelectedItem is DataRowView row)
+                {
+                    txtActualPrice.Text = Convert.ToDecimal(row["ActualPrice"]).ToString("G0");
+                    // Lấy ID của đồ uống từ dòng được chọn
+                    int drinkId = (int)row["DrinkID"];
 
-                // Tạm thời bỏ đăng ký sự kiện để tránh vòng lặp không cần thiết
-                cbDrink.SelectionChanged -= CbDrink_SelectionChanged;
-                // Đặt ComboBox thành đồ uống tương ứng để đồng bộ giao diện
-                cbDrink.SelectedValue = drinkId;
-                // Đăng ký lại sự kiện
-                cbDrink.SelectionChanged += CbDrink_SelectionChanged;
-                // Trực tiếp tải công thức cho đồ uống đã chọn
-                await LoadRecipeForDrink(drinkId);
+                    // Tạm thời bỏ đăng ký sự kiện để tránh vòng lặp không cần thiết
+                    cbDrink.SelectionChanged -= CbDrink_SelectionChanged;
+                    // Đặt ComboBox thành đồ uống tương ứng để đồng bộ giao diện
+                    cbDrink.SelectedValue = drinkId;
+                    // Đăng ký lại sự kiện
+                    cbDrink.SelectionChanged += CbDrink_SelectionChanged;
+                    // Trực tiếp tải công thức cho đồ uống đã chọn
+                    await LoadRecipeForDrink(drinkId);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi chọn từ bảng tóm tắt: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -364,6 +440,32 @@ namespace namm
                 });
             }
             txtCurrentRecipeCost.Text = $"Tổng chi phí: {totalCost:N0}";
+        }
+
+        private string GenerateRecipeCode(string drinkName)
+        {
+            // Chuyển tên đồ uống thành mã không dấu, không khoảng trắng, không ký tự đặc biệt
+            string temp = drinkName.ToLower();
+            temp = Regex.Replace(temp, "[áàảãạâấầẩẫậăắằẳẵặ]", "a");
+            temp = Regex.Replace(temp, "[éèẻẽẹêếềểễệ]", "e");
+            temp = Regex.Replace(temp, "[íìỉĩị]", "i");
+            temp = Regex.Replace(temp, "[óòỏõọôốồổỗộơớờởỡợ]", "o");
+            temp = Regex.Replace(temp, "[úùủũụưứừửữự]", "u");
+            temp = Regex.Replace(temp, "[ýỳỷỹỵ]", "y");
+            temp = Regex.Replace(temp, "[đ]", "d");
+            // Bỏ các ký tự đặc biệt và khoảng trắng, sau đó thêm hậu tố _PC
+            temp = Regex.Replace(temp.Replace(" ", ""), "[^a-z0-9]", "");
+            return temp + "_PC";
+        }
+
+        private async void ShowNotification(string message, int displayTimeInMs = 2000)
+        {
+            notificationText.Text = message;
+            notificationPopup.IsOpen = true;
+
+            await Task.Delay(displayTimeInMs);
+
+            notificationPopup.IsOpen = false;
         }
     }
 }

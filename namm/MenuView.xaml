@@ -8,6 +8,14 @@
              d:DesignHeight="550" d:DesignWidth="1000"
              Loaded="UserControl_Loaded">
     <Grid Margin="10">
+        <Grid.Resources>
+            <Style x:Key="CenterAlignedColumnHeader" TargetType="DataGridColumnHeader">
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            </Style>
+            <Style x:Key="CenterAlignedCell" TargetType="TextBlock">
+                <Setter Property="HorizontalAlignment" Value="Center"/>
+            </Style>
+        </Grid.Resources>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="350"/>
@@ -23,12 +31,11 @@
                       SelectionMode="Single" SelectionChanged="DgMenuItems_SelectionChanged" 
                       LoadingRow="DgMenuItems_LoadingRow">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="STT" Binding="{Binding STT}" Width="50" />
-                    <DataGridTextColumn Header="Tên đồ uống" Binding="{Binding Name}" Width="*" />
-                    <DataGridTextColumn Header="Mã Đồ Uống" Binding="{Binding DrinkCode}" Width="120" />
-                    <DataGridTextColumn Header="Loại" Binding="{Binding CategoryName}" Width="120" />
-                    <DataGridTextColumn Header="Giá bán" Binding="{Binding ActualPrice, StringFormat={}{0:N0}}" Width="100" />
-                    <DataGridTextColumn Header="Trạng thái" Binding="{Binding StatusText}" Width="80" />
+                    <DataGridTextColumn Header="STT" Binding="{Binding STT}" Width="0.5*" HeaderStyle="{StaticResource CenterAlignedColumnHeader}" ElementStyle="{StaticResource CenterAlignedCell}"/>
+                    <DataGridTextColumn Header="Tên đồ uống" Binding="{Binding Name}" Width="2*" HeaderStyle="{StaticResource CenterAlignedColumnHeader}" ElementStyle="{StaticResource CenterAlignedCell}"/>
+                    <DataGridTextColumn Header="Mã Đồ Uống" Binding="{Binding DrinkCode}" Width="1.5*" HeaderStyle="{StaticResource CenterAlignedColumnHeader}" ElementStyle="{StaticResource CenterAlignedCell}"/>
+                    <DataGridTextColumn Header="Loại" Binding="{Binding CategoryName}" Width="1.5*" HeaderStyle="{StaticResource CenterAlignedColumnHeader}" ElementStyle="{StaticResource CenterAlignedCell}"/>
+                    <DataGridTextColumn Header="Trạng thái" Binding="{Binding StatusText}" Width="1*" HeaderStyle="{StaticResource CenterAlignedColumnHeader}" ElementStyle="{StaticResource CenterAlignedCell}"/>
                 </DataGrid.Columns>
             </DataGrid>
         </DockPanel>
@@ -46,19 +53,14 @@
                 <TextBlock Text="Loại đồ uống:" Margin="0,10,0,2"/>
                 <ComboBox x:Name="cbCategory" Padding="5" DisplayMemberPath="Name" SelectedValuePath="ID"/>
 
-                <TextBlock Text="Giá vốn:" Margin="0,10,0,2"/>
-                <TextBox x:Name="txtPrice" Padding="5" ToolTip="Giá nhập hoặc chi phí sản xuất"/>
-
-                <TextBlock Text="Giá bán:" Margin="0,10,0,2"/>
-                <TextBox x:Name="txtActualPrice" Padding="5"/>
-
                 <CheckBox x:Name="chkIsActive" Content="Hiển thị trên menu" Margin="0,15,0,0" IsChecked="True"/>
 
                 <WrapPanel HorizontalAlignment="Center" Margin="0,20,0,0">
                     <Button x:Name="btnAdd" Content="Thêm mới" Width="100" Margin="5" Click="BtnAdd_Click"/>
-                    <Button x:Name="btnUpdate" Content="Cập nhật" Width="100" Margin="5" Click="BtnUpdate_Click"/>
-                    <Button x:Name="btnReset" Content="Làm mới" Width="100" Margin="5" Click="BtnReset_Click"/>
+                    <Button x:Name="btnUpdate" Content="Cập nhật" Width="90" Margin="5" Click="BtnUpdate_Click"/>
+                    <Button x:Name="btnDelete" Content="Xóa" Width="90" Margin="5" Click="BtnDelete_Click" Background="LightCoral"/>
                 </WrapPanel>
+                <Button x:Name="btnReset" Content="Làm mới" Width="100" Margin="5,10,5,5" HorizontalAlignment="Center" Click="BtnReset_Click"/>
             </StackPanel>
         </DockPanel>
     </Grid>

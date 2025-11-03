@@ -110,9 +110,14 @@ namespace namm
 
         private void ManageMenu_Click(object sender, RoutedEventArgs e)
         {
-            // Hiển thị giao diện quản lý menu đồ uống
-            MainContent.Children.Clear();
-            MainContent.Children.Add(new MenuView());
+            // Chỉ thực hiện hành động khi người dùng click trực tiếp vào menu cha,
+            // không phải khi click vào một menu con bên trong nó.
+            if (e.OriginalSource == sender)
+            {
+                // Hiển thị giao diện quản lý menu đồ uống
+                MainContent.Children.Clear();
+                MainContent.Children.Add(new MenuView());
+            }
         }
 
         private void ManageRecipes_Click(object sender, RoutedEventArgs e)

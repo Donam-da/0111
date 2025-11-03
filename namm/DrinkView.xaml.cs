@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
@@ -20,19 +20,19 @@ namespace namm
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            LoadCategoriesToComboBox();
+            LoadDrinksToComboBox();
             LoadDrinks();
         }
 
-        private void LoadCategoriesToComboBox()
+        private void LoadDrinksToComboBox()
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string query = "SELECT ID, Name FROM Category WHERE IsActive = 1 ORDER BY Name";
+                const string query = "SELECT ID, Name FROM Drink WHERE IsActive = 1 ORDER BY Name";
                 SqlDataAdapter adapter = new SqlDataAdapter(query, connection);
                 DataTable categoryTable = new DataTable();
                 adapter.Fill(categoryTable);
-                cbCategory.ItemsSource = categoryTable.DefaultView;
+                cbDrink.ItemsSource = categoryTable.DefaultView;
             }
         }
 
@@ -43,9 +43,10 @@ namespace namm
                 string query = @"
                     SELECT 
                         d.ID, d.DrinkCode, d.Name, d.Price, d.ActualPrice, d.IsActive, d.CategoryID,
-                        c.Name AS CategoryName 
+                        ISNULL(c.Name, 'N/A') AS CategoryName 
                     FROM Drink d
-                    JOIN Category c ON d.CategoryID = c.ID";
+                    LEFT JOIN Category c ON d.CategoryID = c.ID
+                    WHERE d.DrinkCode LIKE '%_NB'"; // Chỉ hiển thị các đồ uống đã được gán là nguyên bản
 
                 SqlDataAdapter adapter = new SqlDataAdapter(query, connection);
                 drinkDataTable = new DataTable(); // Initialize the DataTable
@@ -76,53 +77,39 @@ namespace namm
 
         private void DgDrinks_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            // Khi chọn từ Grid, đồng bộ lên ComboBox và các trường
             if (dgDrinks.SelectedItem is DataRowView row)
             {
-                txtName.Text = row["Name"].ToString();
-                txtDrinkCode.Text = row["DrinkCode"].ToString();
-                txtPrice.Text = Convert.ToDecimal(row["Price"]).ToString("G0");
-                txtActualPrice.Text = Convert.ToDecimal(row["ActualPrice"]).ToString("G0");
+                cbDrink.SelectionChanged -= CbDrink_SelectionChanged; // Tạm ngắt event
+                cbDrink.SelectedValue = row["ID"];
+                cbDrink.SelectionChanged += CbDrink_SelectionChanged; // Bật lại event
+
+                txtDrinkCode.Text = row["DrinkCode"] as string ?? string.Empty;
+                txtPrice.Text = Convert.ToDecimal(row["Price"]).ToString("G0"); // Bỏ phần thập phân .00
+                txtActualPrice.Text = Convert.ToDecimal(row["ActualPrice"]).ToString("G0"); // Bỏ phần thập phân .00
                 chkIsActive.IsChecked = (bool)row["IsActive"];
-                cbCategory.SelectedValue = row["CategoryID"];
+                cbDrink.IsEnabled = false; // Không cho đổi đồ uống khi đang sửa
             }
         }
 
-        private void BtnAdd_Click(object sender, RoutedEventArgs e)
+        // Đổi tên BtnAdd và BtnEdit thành một nút BtnSave duy nhất
+        private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
-            if (!ValidateInput()) return;
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            if (cbDrink.SelectedItem == null)
             {
-                string query = "INSERT INTO Drink (DrinkCode, Name, CategoryID, Price, ActualPrice, IsActive) VALUES (@DrinkCode, @Name, @CategoryID, @Price, @ActualPrice, @IsActive)";
-                SqlCommand command = new SqlCommand(query, connection);
-                AddParameters(command);
-
-                connection.Open();
-                command.ExecuteNonQuery();
-                MessageBox.Show("Thêm đồ uống thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                LoadDrinks();
-                ResetFields();
-            }
-        }
-
-        private void BtnEdit_Click(object sender, RoutedEventArgs e)
-        {
-            if (dgDrinks.SelectedItem == null)
-            {
-                MessageBox.Show("Vui lòng chọn một đồ uống để sửa.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Vui lòng chọn một đồ uống để gán thuộc tính.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
             if (!ValidateInput()) return;
 
-            DataRowView row = (DataRowView)dgDrinks.SelectedItem;
-            int drinkId = (int)row["ID"];
+            int drinkId = (int)cbDrink.SelectedValue;
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string query = "UPDATE Drink SET DrinkCode = @DrinkCode, Name = @Name, CategoryID = @CategoryID, Price = @Price, ActualPrice = @ActualPrice, IsActive = @IsActive WHERE ID = @ID";
+                // Luôn là UPDATE, không có INSERT ở màn hình này
+                const string query = "UPDATE Drink SET DrinkCode = @DrinkCode, Price = @Price, ActualPrice = @ActualPrice, IsActive = @IsActive WHERE ID = @ID";
                 SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@ID", drinkId);
-                AddParameters(command);
+                AddParameters(command, drinkId); // Truyền ID vào
 
                 connection.Open();
                 command.ExecuteNonQuery();
@@ -136,23 +123,25 @@ namespace namm
         {
             if (dgDrinks.SelectedItem == null)
             {
-                MessageBox.Show("Vui lòng chọn một đồ uống để xóa.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Vui lòng chọn một đồ uống từ danh sách để gỡ thuộc tính.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (MessageBox.Show("Bạn có chắc chắn muốn xóa đồ uống này?", "Xác nhận xóa", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            if (MessageBox.Show("Bạn có chắc chắn muốn gỡ bỏ thuộc tính 'nguyên bản' của đồ uống này không? Hành động này sẽ xóa mã _NB và đặt giá nhập về 0.", "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
                 DataRowView row = (DataRowView)dgDrinks.SelectedItem;
                 int drinkId = (int)row["ID"];
 
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
-                    string query = "DELETE FROM Drink WHERE ID = @ID";
+                    // Thay vì xóa, chúng ta cập nhật để loại bỏ thuộc tính "nguyên bản"
+                    // Xóa DrinkCode và đặt giá nhập về 0
+                    string query = "UPDATE Drink SET DrinkCode = NULL, Price = 0 WHERE ID = @ID";
                     SqlCommand command = new SqlCommand(query, connection);
                     command.Parameters.AddWithValue("@ID", drinkId);
                     connection.Open();
                     command.ExecuteNonQuery();
-                    MessageBox.Show("Xóa đồ uống thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show("Đã gỡ thuộc tính 'nguyên bản' thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                     LoadDrinks();
                     ResetFields();
                 }
@@ -172,12 +161,16 @@ namespace namm
             }
         }
 
-        private void TxtName_TextChanged(object sender, TextChangedEventArgs e)
+        private void CbDrink_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            txtDrinkCode.Text = GenerateDrinkCode(txtName.Text);
+            if (cbDrink.SelectedItem is DataRowView selectedDrink)
+            {
+                string drinkName = selectedDrink["Name"] as string ?? "";
+                txtDrinkCode.Text = GenerateNBCode(drinkName);
+            }
         }
 
-        private string GenerateDrinkCode(string drinkName)
+        private string GenerateNBCode(string drinkName)
         {
             // Chuyển thành chữ thường, bỏ dấu
             string temp = drinkName.ToLower();
@@ -195,41 +188,38 @@ namespace namm
 
         private void ResetFields()
         {
-            txtName.Clear();
+            cbDrink.SelectedIndex = -1;
             txtDrinkCode.Clear();
             txtPrice.Clear();
             txtActualPrice.Clear();
-            cbCategory.SelectedIndex = -1;
             chkIsActive.IsChecked = true;
             dgDrinks.SelectedItem = null;
+            cbDrink.IsEnabled = true;
         }
 
         private bool ValidateInput()
         {
-            if (string.IsNullOrWhiteSpace(txtName.Text) || cbCategory.SelectedItem == null || 
-                string.IsNullOrWhiteSpace(txtPrice.Text) || string.IsNullOrWhiteSpace(txtActualPrice.Text) || string.IsNullOrWhiteSpace(txtDrinkCode.Text))
+            if (cbDrink.SelectedItem == null ||
+                string.IsNullOrWhiteSpace(txtPrice.Text) || string.IsNullOrWhiteSpace(txtActualPrice.Text))
             {
-                MessageBox.Show("Vui lòng nhập đầy đủ thông tin: Tên, loại, giá nhập và giá bán. Mã đồ uống sẽ được tạo tự động.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Vui lòng chọn đồ uống và nhập đầy đủ giá nhập, giá bán.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
-            if (!decimal.TryParse(txtPrice.Text, out _))
+            if (!decimal.TryParse(txtPrice.Text, out _) || !decimal.TryParse(txtActualPrice.Text, out _))
             {
-                MessageBox.Show("Giá nhập vào phải là một số hợp lệ.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
-            }
-            if (!decimal.TryParse(txtActualPrice.Text, out _))
-            {
-                MessageBox.Show("Giá bán phải là một số hợp lệ.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Giá nhập và giá bán phải là số.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             return true;
         }
 
-        private void AddParameters(SqlCommand command)
+        private void AddParameters(SqlCommand command, int? id = null)
         {
+            if (id.HasValue)
+            {
+                command.Parameters.AddWithValue("@ID", id.Value);
+            }
             command.Parameters.AddWithValue("@DrinkCode", txtDrinkCode.Text);
-            command.Parameters.AddWithValue("@Name", txtName.Text);
-            command.Parameters.AddWithValue("@CategoryID", cbCategory.SelectedValue);
             command.Parameters.AddWithValue("@Price", Convert.ToDecimal(txtPrice.Text));
             command.Parameters.AddWithValue("@ActualPrice", Convert.ToDecimal(txtActualPrice.Text));
             command.Parameters.AddWithValue("@IsActive", chkIsActive.IsChecked ?? false);

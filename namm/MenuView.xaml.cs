@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
@@ -37,18 +37,6 @@ namespace namm
             }
         }
 
-        private void TxtName_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            // Chỉ tạo mã khi người dùng đang thêm mới (chưa chọn item nào từ grid)
-            // Hoặc khi đang ở chế độ thêm mới (chưa có ID)
-            if (dgMenuItems.SelectedItem == null || 
-                !(((DataRowView)dgMenuItems.SelectedItem)["ID"] is int))
-            {
-                // Tạo mã không có hậu tố
-                txtDrinkCode.Text = GenerateMenuCode(txtName.Text);
-            }
-        }
-
         private async Task LoadMenuItems()
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
@@ -57,8 +45,8 @@ namespace namm
                     SELECT 
                         d.ID, d.DrinkCode, d.Name, d.Price, d.ActualPrice, d.IsActive, d.CategoryID,
                         c.Name AS CategoryName 
-                    FROM Drink d
-                    JOIN Category c ON d.CategoryID = c.ID";
+                    FROM Drink d 
+                    LEFT JOIN Category c ON d.CategoryID = c.ID";
 
                 SqlDataAdapter adapter = new SqlDataAdapter(query, connection);
                 menuDataTable = new DataTable();
@@ -91,12 +79,20 @@ namespace namm
         {
             if (dgMenuItems.SelectedItem is DataRowView row)
             {
-                txtName.Text = row["Name"].ToString();
-                txtDrinkCode.Text = row["DrinkCode"].ToString();
-                cbCategory.SelectedValue = row["CategoryID"];
-                txtPrice.Text = Convert.ToDecimal(row["Price"]).ToString("G0");
-                txtActualPrice.Text = Convert.ToDecimal(row["ActualPrice"]).ToString("G0");
-                chkIsActive.IsChecked = (bool)row["IsActive"];
+                // Khi chọn một dòng, không cho phép tạo mã mới
+                txtName.TextChanged -= TxtName_TextChanged;
+
+                txtName.Text = row["Name"] as string ?? string.Empty;
+                txtDrinkCode.Text = row["DrinkCode"] as string ?? string.Empty;
+                cbCategory.SelectedValue = row["CategoryID"]; // This should work if CategoryID is not null
+                chkIsActive.IsChecked = Convert.ToBoolean(row["IsActive"]);
+
+                // Bật lại sự kiện sau khi điền dữ liệu
+                txtName.TextChanged += TxtName_TextChanged;
+            }
+            else
+            {
+                ResetFields();
             }
         }
 
@@ -106,7 +102,7 @@ namespace namm
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                const string query = "INSERT INTO Drink (DrinkCode, Name, CategoryID, Price, ActualPrice, IsActive) VALUES (@DrinkCode, @Name, @CategoryID, @Price, @ActualPrice, @IsActive)";
+                const string query = "INSERT INTO Drink (DrinkCode, Name, CategoryID, IsActive, Price, ActualPrice) VALUES (@DrinkCode, @Name, @CategoryID, @IsActive, 0, 0)";
                 SqlCommand command = new SqlCommand(query, connection);
                 AddParameters(command);
 
@@ -140,7 +136,7 @@ namespace namm
 
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
-                    const string query = "UPDATE Drink SET DrinkCode = @DrinkCode, Name = @Name, CategoryID = @CategoryID, Price = @Price, ActualPrice = @ActualPrice, IsActive = @IsActive WHERE ID = @ID";
+                    const string query = "UPDATE Drink SET Name = @Name, CategoryID = @CategoryID, IsActive = @IsActive WHERE ID = @ID";
                     SqlCommand command = new SqlCommand(query, connection);
                     AddParameters(command, drinkId);
 
@@ -160,6 +156,38 @@ namespace namm
             }
         }
 
+        private async void BtnDelete_Click(object sender, RoutedEventArgs e)
+        {
+            if (dgMenuItems.SelectedItem == null)
+            {
+                MessageBox.Show("Vui lòng chọn một đồ uống để xóa.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (MessageBox.Show("Bạn có chắc chắn muốn xóa vĩnh viễn đồ uống này? Hành động này không thể hoàn tác.", "Xác nhận xóa", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            {
+                if (dgMenuItems.SelectedItem is DataRowView row)
+                {
+                    int drinkId = (int)row["ID"];
+
+                    using (SqlConnection connection = new SqlConnection(connectionString))
+                    {
+                        // This query will permanently delete the drink.
+                        // Ensure cascading deletes are set up in the DB for related tables (like Recipe) or handle them here.
+                        const string query = "DELETE FROM Drink WHERE ID = @ID";
+                        SqlCommand command = new SqlCommand(query, connection);
+                        command.Parameters.AddWithValue("@ID", drinkId);
+
+                        await connection.OpenAsync();
+                        await command.ExecuteNonQueryAsync();
+                        MessageBox.Show("Xóa đồ uống thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                        await LoadMenuItems();
+                        ResetFields();
+                    }
+                }
+            }
+        }
+
         private void BtnReset_Click(object sender, RoutedEventArgs e)
         {
             ResetFields();
@@ -173,9 +201,18 @@ namespace namm
             }
         }
 
+        private void TxtName_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // Chỉ tạo mã khi người dùng đang thêm mới (chưa chọn item nào từ grid)
+            if (dgMenuItems.SelectedItem == null)
+            {
+                txtDrinkCode.Text = GenerateMenuCode(txtName.Text);
+            }
+        }
+
         private string GenerateMenuCode(string drinkName)
         {
-            // Logic này giống với DrinkView và RecipeView để tạo mã, nhưng không có hậu tố
+            // Chuyển tên đồ uống thành mã không dấu, không khoảng trắng, không ký tự đặc biệt
             string temp = drinkName.ToLower();
             temp = Regex.Replace(temp, "[áàảãạâấầẩẫậăắằẳẵặ]", "a");
             temp = Regex.Replace(temp, "[éèẻẽẹêếềểễệ]", "e");
@@ -186,26 +223,14 @@ namespace namm
             temp = Regex.Replace(temp, "[đ]", "d");
             // Bỏ các ký tự đặc biệt và khoảng trắng
             temp = Regex.Replace(temp.Replace(" ", ""), "[^a-z0-9]", "");
-            // Thêm hậu tố _NB cho đồ uống mới tạo từ đây
-            return temp + "_NB";
+            return temp;
         }
 
         private bool ValidateInput()
         {
-            if (string.IsNullOrWhiteSpace(txtName.Text) || cbCategory.SelectedItem == null ||
-                string.IsNullOrWhiteSpace(txtPrice.Text) || string.IsNullOrWhiteSpace(txtActualPrice.Text) || string.IsNullOrWhiteSpace(txtDrinkCode.Text))
+            if (string.IsNullOrWhiteSpace(txtName.Text) || cbCategory.SelectedItem == null || string.IsNullOrWhiteSpace(txtDrinkCode.Text))
             {
-                MessageBox.Show("Vui lòng nhập đầy đủ thông tin: Tên, loại, giá vốn và giá bán.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
-            }
-            if (!decimal.TryParse(txtPrice.Text, out _))
-            {
-                MessageBox.Show("Giá vốn phải là một số hợp lệ.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
-            }
-            if (!decimal.TryParse(txtActualPrice.Text, out _))
-            {
-                MessageBox.Show("Giá bán phải là một số hợp lệ.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Vui lòng nhập đầy đủ thông tin: Tên và loại đồ uống.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             return true;
@@ -220,8 +245,6 @@ namespace namm
             command.Parameters.AddWithValue("@DrinkCode", txtDrinkCode.Text);
             command.Parameters.AddWithValue("@Name", txtName.Text);
             command.Parameters.AddWithValue("@CategoryID", cbCategory.SelectedValue);
-            command.Parameters.AddWithValue("@Price", decimal.Parse(txtPrice.Text));
-            command.Parameters.AddWithValue("@ActualPrice", decimal.Parse(txtActualPrice.Text));
             command.Parameters.AddWithValue("@IsActive", chkIsActive.IsChecked ?? false);
         }
 
@@ -230,8 +253,6 @@ namespace namm
             txtName.Clear();
             txtDrinkCode.Clear();
             cbCategory.SelectedIndex = -1;
-            txtPrice.Clear();
-            txtActualPrice.Clear();
             chkIsActive.IsChecked = true;
             dgMenuItems.SelectedItem = null;
         }

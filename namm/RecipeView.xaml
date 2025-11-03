@@ -7,6 +7,14 @@
              d:DesignHeight="550" d:DesignWidth="1000"
              Loaded="UserControl_Loaded">
     <Grid Margin="10">
+        <Grid.Resources>
+            <Style x:Key="CenterAlignedColumnHeader" TargetType="DataGridColumnHeader">
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            </Style>
+            <Style x:Key="CenterAlignedCell" TargetType="TextBlock">
+                <Setter Property="HorizontalAlignment" Value="Center"/>
+            </Style>
+        </Grid.Resources>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="350"/>
             <ColumnDefinition Width="*"/>
@@ -48,10 +56,10 @@
                 <DataGrid x:Name="dgCurrentRecipe" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="150"
                           HeadersVisibility="Column">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Nguyên liệu" Binding="{Binding MaterialName}" Width="120" />
-                        <DataGridTextColumn Header="Số lượng" Binding="{Binding Quantity, StringFormat=G29}" Width="70" />
-                        <DataGridTextColumn Header="Đơn vị" Binding="{Binding UnitName}" Width="50" />
-                        <DataGridTemplateColumn Header="Xóa" Width="60">
+                        <DataGridTextColumn Header="Nguyên liệu" Binding="{Binding MaterialName}" Width="2.5*" HeaderStyle="{StaticResource CenterAlignedColumnHeader}" ElementStyle="{StaticResource CenterAlignedCell}"/>
+                        <DataGridTextColumn Header="Số lượng" Binding="{Binding Quantity, StringFormat=G29}" Width="1.5*" HeaderStyle="{StaticResource CenterAlignedColumnHeader}" ElementStyle="{StaticResource CenterAlignedCell}"/>
+                        <DataGridTextColumn Header="Đơn vị" Binding="{Binding UnitName}" Width="1*" HeaderStyle="{StaticResource CenterAlignedColumnHeader}" ElementStyle="{StaticResource CenterAlignedCell}"/>
+                        <DataGridTemplateColumn Header="Xóa" Width="Auto" HeaderStyle="{StaticResource CenterAlignedColumnHeader}">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Button Content="Xóa" Click="DeleteIngredient_Click" CommandParameter="{Binding}" Padding="5,2"/>
@@ -66,7 +74,10 @@
                 <TextBlock Text="Giá bán cho khách:" Margin="0,10,0,2"/>
                 <TextBox x:Name="txtActualPrice" Padding="5"/>
 
-                <Button x:Name="btnSaveRecipe" Content="Lưu Công Thức" Margin="0,15,0,0" Height="35" FontWeight="Bold" Click="BtnSaveRecipe_Click"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,0">
+                    <Button x:Name="btnSaveRecipe" Content="Lưu Công Thức" Width="150" Height="35" FontWeight="Bold" Click="BtnSaveRecipe_Click"/>
+                    <Button x:Name="btnRemoveRecipe" Content="Gỡ Công Thức" Width="120" Height="35" Margin="10,0,0,0" Click="BtnRemoveRecipe_Click" ToolTip="Xóa công thức và các nguyên liệu liên quan khỏi đồ uống này."/>
+                </StackPanel>
             </StackPanel>
         </DockPanel>
 
@@ -77,13 +88,23 @@
                       HeadersVisibility="Column" SelectionMode="Single"
                       SelectionChanged="DgRecipeSummary_SelectionChanged">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="STT" Binding="{Binding STT}" Width="50" />
-                    <DataGridTextColumn Header="Đồ uống pha chế" Binding="{Binding DrinkName}" Width="120" />
-                    <DataGridTextColumn Header="Nguyên liệu" Binding="{Binding RecipeSummary}" Width="*" MaxWidth="260" />
-                    <DataGridTextColumn Header="Chi phí" Binding="{Binding TotalCost, StringFormat={}{0:N0}}" Width="90" />
-                    <DataGridTextColumn Header="Giá bán" Binding="{Binding ActualPrice, StringFormat={}{0:N0}}" Width="90" />
+                    <DataGridTextColumn Header="STT" Binding="{Binding STT}" Width="0.5*" HeaderStyle="{StaticResource CenterAlignedColumnHeader}" ElementStyle="{StaticResource CenterAlignedCell}"/>
+                    <DataGridTextColumn Header="Đồ uống pha chế" Binding="{Binding DrinkName}" Width="1.5*" HeaderStyle="{StaticResource CenterAlignedColumnHeader}" ElementStyle="{StaticResource CenterAlignedCell}"/>
+                    <DataGridTextColumn Header="Nguyên liệu" Binding="{Binding RecipeSummary}" Width="3*" HeaderStyle="{StaticResource CenterAlignedColumnHeader}" ElementStyle="{StaticResource CenterAlignedCell}"/>
+                    <DataGridTextColumn Header="Chi phí" Binding="{Binding TotalCost, StringFormat={}{0:N0}}" Width="1*" HeaderStyle="{StaticResource CenterAlignedColumnHeader}" ElementStyle="{StaticResource CenterAlignedCell}"/>
+                    <DataGridTextColumn Header="Giá bán" Binding="{Binding ActualPrice, StringFormat={}{0:N0}}" Width="1*" HeaderStyle="{StaticResource CenterAlignedColumnHeader}" ElementStyle="{StaticResource CenterAlignedCell}"/>
                 </DataGrid.Columns>
             </DataGrid>
         </DockPanel>
+
+        <!-- Popup for notifications -->
+        <Popup x:Name="notificationPopup"
+               Placement="Center"
+               AllowsTransparency="True"
+               PopupAnimation="Fade">
+            <Border Background="#333333" CornerRadius="5" Padding="15,10">
+                <TextBlock x:Name="notificationText" Foreground="White" FontSize="14"/>
+            </Border>
+        </Popup>
     </Grid>
 </UserControl>
