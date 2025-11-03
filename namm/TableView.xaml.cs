@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
@@ -49,6 +49,15 @@ namespace namm
                 txtName.Text = row["Name"].ToString();
                 txtCapacity.Text = row["Capacity"].ToString();
                 cbStatus.Text = row["Status"].ToString();
+
+                // Khi chọn một bàn, bật chế độ Sửa/Xóa và tắt chế độ Thêm
+                btnAdd.IsEnabled = false;
+                btnEdit.IsEnabled = true;
+                btnDelete.IsEnabled = true;
+            }
+            else
+            {
+                ResetFields();
             }
         }
 
@@ -62,11 +71,19 @@ namespace namm
                 command.Parameters.AddWithValue("@Capacity", Convert.ToInt32(txtCapacity.Text));
                 command.Parameters.AddWithValue("@Status", ((ComboBoxItem)cbStatus.SelectedItem).Content.ToString());
 
-                connection.Open();
-                command.ExecuteNonQuery();
-                MessageBox.Show("Thêm bàn thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                LoadTables();
-                ResetFields();
+                try
+                {
+                    connection.Open();
+                    command.ExecuteNonQuery();
+                    MessageBox.Show("Thêm bàn thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    LoadTables();
+                    ResetFields();
+                }
+                catch (SqlException ex)
+                {
+                    // Bắt lỗi nếu tên bàn đã tồn tại (lỗi khóa UNIQUE)
+                    MessageBox.Show($"Lỗi khi thêm bàn: {ex.Message}\n\nCó thể tên bàn này đã tồn tại.", "Lỗi SQL", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
@@ -136,6 +153,11 @@ namespace namm
             txtCapacity.Clear();
             cbStatus.SelectedIndex = 0;
             dgTables.SelectedItem = null;
+
+            // Khi làm mới, bật chế độ Thêm và tắt chế độ Sửa/Xóa
+            btnAdd.IsEnabled = true;
+            btnEdit.IsEnabled = false;
+            btnDelete.IsEnabled = false;
         }
     }
 }

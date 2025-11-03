@@ -1,8 +1,10 @@
 ﻿﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -119,7 +121,7 @@ namespace namm
             }
         }
 
-        private void DgMenu_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private async void DgMenu_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             // 1. Kiểm tra đã chọn bàn chưa
             if (dgTables.SelectedItem == null)
@@ -129,24 +131,67 @@ namespace namm
             }
 
             // 2. Lấy thông tin đồ uống được chọn
-            if (dgMenu.SelectedItem is DataRowView selectedDrink)
+            if (dgMenu.SelectedItem is DataRowView selectedDrinkRow)
             {
-                string drinkName = selectedDrink["Name"].ToString();
+                int drinkId = (int)selectedDrinkRow["ID"];
+                string drinkName = selectedDrinkRow["Name"].ToString();
 
-                // 3. Mở dialog để nhập số lượng
-                var dialog = new AddDrinkDialog(drinkName);
+                // 3. Kiểm tra các kiểu có sẵn của đồ uống từ DB
+                var availableStock = await GetDrinkStockAsync(drinkId);
+
+                if (!availableStock.Any())
+                {
+                    MessageBox.Show("Đồ uống này chưa được cấu hình để bán (chưa có giá hoặc công thức).", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // 4. Mở dialog để nhập số lượng cho các kiểu có sẵn
+                var dialog = new SelectDrinkTypeDialog(drinkName, availableStock);
                 dialog.Owner = Window.GetWindow(this); // Đặt cửa sổ chính làm chủ sở hữu
 
                 if (dialog.ShowDialog() == true)
                 {
-                    int quantity = dialog.Quantity;
-                    // TODO: Thêm logic để thêm đồ uống vào hóa đơn (cột bên phải)
-                    // Ví dụ:
-                    // BillItem newItem = new BillItem { Name = drinkName, Quantity = quantity, ... };
-                    // currentBill.Items.Add(newItem);
-                    MessageBox.Show($"Đã chọn: {quantity} {drinkName}. \n(Chức năng thêm vào hóa đơn sẽ được phát triển ở bước tiếp theo)", "Thông báo");
+                    foreach (var item in dialog.SelectedQuantities)
+                    {
+                        // TODO: Thêm logic để thêm đồ uống vào hóa đơn và trừ tồn kho
+                        MessageBox.Show($"Đã thêm: {item.Value} x {drinkName} (Kiểu: {item.Key})", "Thông báo");
+                    }
                 }
             }
+        }
+
+        private async Task<Dictionary<string, int>> GetDrinkStockAsync(int drinkId)
+        {
+            var stock = new Dictionary<string, int>();
+            using (var connection = new SqlConnection(connectionString))
+            {
+                // 1. Lấy số lượng tồn kho của đồ uống nguyên bản
+                var cmdOriginal = new SqlCommand("SELECT StockQuantity FROM Drink WHERE ID = @ID AND OriginalPrice > 0", connection);
+                cmdOriginal.Parameters.AddWithValue("@ID", drinkId);
+
+                // 2. Tính số lượng có thể làm của đồ uống pha chế
+                var cmdRecipe = new SqlCommand(@"
+                    SELECT MIN(ISNULL(FLOOR(m.Quantity / r.Quantity), 0))
+                    FROM Recipe r
+                    JOIN Material m ON r.MaterialID = m.ID
+                    WHERE r.DrinkID = @ID", connection);
+                cmdRecipe.Parameters.AddWithValue("@ID", drinkId);
+
+                await connection.OpenAsync();
+
+                var originalStockResult = await cmdOriginal.ExecuteScalarAsync();
+                if (originalStockResult != null && originalStockResult != DBNull.Value)
+                {
+                    stock["Nguyên bản"] = Convert.ToInt32(originalStockResult);
+                }
+
+                var recipeStockResult = await cmdRecipe.ExecuteScalarAsync();
+                if (recipeStockResult != null && recipeStockResult != DBNull.Value)
+                {
+                    stock["Pha chế"] = Convert.ToInt32(recipeStockResult);
+                }
+            }
+            return stock;
         }
     }
 }

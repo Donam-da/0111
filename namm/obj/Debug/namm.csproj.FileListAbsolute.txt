@@ -36,3 +36,5 @@ D:\QuanLyCafe\namm\obj\Debug\RecipeView.g.cs
 D:\QuanLyCafe\namm\obj\Debug\RecipeView.baml
 D:\QuanLyCafe\namm\obj\Debug\AddDrinkDialog.baml
 D:\QuanLyCafe\namm\obj\Debug\AddDrinkDialog.g.cs
+D:\QuanLyCafe\namm\obj\Debug\SelectDrinkTypeDialog.baml
+D:\QuanLyCafe\namm\obj\Debug\SelectDrinkTypeDialog.g.cs

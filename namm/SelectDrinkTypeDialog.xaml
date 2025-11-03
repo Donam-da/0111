@@ -1,0 +1,33 @@
+<Window x:Class="namm.SelectDrinkTypeDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Chọn kiểu và số lượng" SizeToContent="Height" Width="350"
+        WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow"
+        Loaded="Window_Loaded">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Name="tbDrinkName" Grid.Row="0" Text="Tên đồ uống" FontWeight="Bold" FontSize="16" Margin="0,0,0,15"/>
+
+        <Grid x:Name="gridDrinkTypes" Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <!-- Cột cho nhãn (Nguyên bản, Pha chế) -->
+                <ColumnDefinition Width="Auto"/>
+                <!-- Cột cho ô nhập liệu -->
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+        </Grid>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,20,0,0">
+            <Button x:Name="btnOk" Content="Đồng ý" Width="80" Margin="0,0,10,0" IsDefault="True" Click="BtnOk_Click"/>
+            <Button x:Name="btnCancel" Content="Hủy" Width="80" IsCancel="True"/>
+        </StackPanel>
+    </Grid>
+</Window>
