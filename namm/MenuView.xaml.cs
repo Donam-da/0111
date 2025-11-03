@@ -2,6 +2,7 @@
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,20 +19,20 @@ namespace namm
             InitializeComponent();
         }
 
-        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        private async void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            LoadCategoriesToComboBox();
-            LoadMenuItems();
+            await LoadCategoriesToComboBox();
+            await LoadMenuItems();
         }
 
-        private void LoadCategoriesToComboBox()
+        private async Task LoadCategoriesToComboBox()
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string query = "SELECT ID, Name FROM Category WHERE IsActive = 1 ORDER BY Name";
+                const string query = "SELECT ID, Name FROM Category WHERE IsActive = 1 ORDER BY Name";
                 SqlDataAdapter adapter = new SqlDataAdapter(query, connection);
                 DataTable categoryTable = new DataTable();
-                adapter.Fill(categoryTable);
+                await Task.Run(() => adapter.Fill(categoryTable));
                 cbCategory.ItemsSource = categoryTable.DefaultView;
             }
         }
@@ -39,18 +40,20 @@ namespace namm
         private void TxtName_TextChanged(object sender, TextChangedEventArgs e)
         {
             // Chỉ tạo mã khi người dùng đang thêm mới (chưa chọn item nào từ grid)
-            if (dgMenuItems.SelectedItem == null)
+            // Hoặc khi đang ở chế độ thêm mới (chưa có ID)
+            if (dgMenuItems.SelectedItem == null || 
+                !(((DataRowView)dgMenuItems.SelectedItem)["ID"] is int))
             {
                 // Tạo mã không có hậu tố
                 txtDrinkCode.Text = GenerateMenuCode(txtName.Text);
             }
         }
 
-        private void LoadMenuItems()
+        private async Task LoadMenuItems()
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string query = @"
+                const string query = @"
                     SELECT 
                         d.ID, d.DrinkCode, d.Name, d.Price, d.ActualPrice, d.IsActive, d.CategoryID,
                         c.Name AS CategoryName 
@@ -61,7 +64,7 @@ namespace namm
                 menuDataTable = new DataTable();
                 menuDataTable.Columns.Add("STT", typeof(int));
                 menuDataTable.Columns.Add("StatusText", typeof(string));
-                adapter.Fill(menuDataTable);
+                await Task.Run(() => adapter.Fill(menuDataTable));
 
                 UpdateStatusText();
                 dgMenuItems.ItemsSource = menuDataTable.DefaultView;
@@ -97,25 +100,32 @@ namespace namm
             }
         }
 
-        private void BtnAdd_Click(object sender, RoutedEventArgs e)
+        private async void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
             if (!ValidateInput()) return;
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string query = "INSERT INTO Drink (DrinkCode, Name, CategoryID, Price, ActualPrice, IsActive) VALUES (@DrinkCode, @Name, @CategoryID, @Price, @ActualPrice, @IsActive)";
+                const string query = "INSERT INTO Drink (DrinkCode, Name, CategoryID, Price, ActualPrice, IsActive) VALUES (@DrinkCode, @Name, @CategoryID, @Price, @ActualPrice, @IsActive)";
                 SqlCommand command = new SqlCommand(query, connection);
                 AddParameters(command);
 
-                connection.Open();
-                command.ExecuteNonQuery();
-                MessageBox.Show("Thêm đồ uống thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                LoadMenuItems();
-                ResetFields();
+                try
+                {
+                    await connection.OpenAsync();
+                    await command.ExecuteNonQueryAsync();
+                    MessageBox.Show("Thêm đồ uống thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                    await LoadMenuItems();
+                    ResetFields();
+                }
+                catch (SqlException ex)
+                {
+                    MessageBox.Show($"Lỗi khi thêm đồ uống: {ex.Message}", "Lỗi SQL", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
-        private void BtnUpdate_Click(object sender, RoutedEventArgs e)
+        private async void BtnUpdate_Click(object sender, RoutedEventArgs e)
         {
             if (dgMenuItems.SelectedItem == null)
             {
@@ -124,21 +134,29 @@ namespace namm
             }
             if (!ValidateInput()) return;
 
-            DataRowView row = (DataRowView)dgMenuItems.SelectedItem;
-            int drinkId = (int)row["ID"];
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            if (dgMenuItems.SelectedItem is DataRowView row)
             {
-                string query = "UPDATE Drink SET DrinkCode = @DrinkCode, Name = @Name, CategoryID = @CategoryID, Price = @Price, ActualPrice = @ActualPrice, IsActive = @IsActive WHERE ID = @ID";
-                SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@ID", drinkId);
-                AddParameters(command);
+                int drinkId = (int)row["ID"];
 
-                connection.Open();
-                command.ExecuteNonQuery();
-                MessageBox.Show("Cập nhật đồ uống thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                LoadMenuItems();
-                ResetFields();
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    const string query = "UPDATE Drink SET DrinkCode = @DrinkCode, Name = @Name, CategoryID = @CategoryID, Price = @Price, ActualPrice = @ActualPrice, IsActive = @IsActive WHERE ID = @ID";
+                    SqlCommand command = new SqlCommand(query, connection);
+                    AddParameters(command, drinkId);
+
+                    try
+                    {
+                        await connection.OpenAsync();
+                        await command.ExecuteNonQueryAsync();
+                        MessageBox.Show("Cập nhật đồ uống thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                        await LoadMenuItems();
+                        ResetFields();
+                    }
+                    catch (SqlException ex)
+                    {
+                        MessageBox.Show($"Lỗi khi cập nhật đồ uống: {ex.Message}", "Lỗi SQL", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
             }
         }
 
@@ -193,13 +211,17 @@ namespace namm
             return true;
         }
 
-        private void AddParameters(SqlCommand command)
+        private void AddParameters(SqlCommand command, int? id = null)
         {
+            if (id.HasValue)
+            {
+                command.Parameters.AddWithValue("@ID", id.Value);
+            }
             command.Parameters.AddWithValue("@DrinkCode", txtDrinkCode.Text);
             command.Parameters.AddWithValue("@Name", txtName.Text);
             command.Parameters.AddWithValue("@CategoryID", cbCategory.SelectedValue);
-            command.Parameters.AddWithValue("@Price", Convert.ToDecimal(txtPrice.Text));
-            command.Parameters.AddWithValue("@ActualPrice", Convert.ToDecimal(txtActualPrice.Text));
+            command.Parameters.AddWithValue("@Price", decimal.Parse(txtPrice.Text));
+            command.Parameters.AddWithValue("@ActualPrice", decimal.Parse(txtActualPrice.Text));
             command.Parameters.AddWithValue("@IsActive", chkIsActive.IsChecked ?? false);
         }
 
