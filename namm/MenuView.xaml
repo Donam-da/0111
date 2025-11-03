@@ -35,6 +35,7 @@
                     <DataGridTextColumn Header="Tên đồ uống" Binding="{Binding Name}" Width="2*" HeaderStyle="{StaticResource CenterAlignedColumnHeader}" ElementStyle="{StaticResource CenterAlignedCell}"/>
                     <DataGridTextColumn Header="Mã Đồ Uống" Binding="{Binding DrinkCode}" Width="1.5*" HeaderStyle="{StaticResource CenterAlignedColumnHeader}" ElementStyle="{StaticResource CenterAlignedCell}"/>
                     <DataGridTextColumn Header="Loại" Binding="{Binding CategoryName}" Width="1.5*" HeaderStyle="{StaticResource CenterAlignedColumnHeader}" ElementStyle="{StaticResource CenterAlignedCell}"/>
+                    <DataGridTextColumn Header="Kiểu đồ uống" Binding="{Binding DrinkType}" Width="1.5*" HeaderStyle="{StaticResource CenterAlignedColumnHeader}" ElementStyle="{StaticResource CenterAlignedCell}"/>
                     <DataGridTextColumn Header="Trạng thái" Binding="{Binding StatusText}" Width="1*" HeaderStyle="{StaticResource CenterAlignedColumnHeader}" ElementStyle="{StaticResource CenterAlignedCell}"/>
                 </DataGrid.Columns>
             </DataGrid>

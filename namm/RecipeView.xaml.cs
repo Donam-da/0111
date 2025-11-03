@@ -140,9 +140,8 @@ namespace namm
                     ORDER BY d.Name;
                 ";
 
-                // Chỉ hiển thị các đồ uống đã được gán là pha chế
                 // Thay đổi logic: hiển thị đồ uống nếu nó có công thức (tồn tại trong bảng Recipe)
-                query = query.Replace("WHERE d.IsActive = 1", "WHERE d.IsActive = 1 AND d.ID IN (SELECT DISTINCT DrinkID FROM Recipe)");
+                query = query.Replace("WHERE d.IsActive = 1", "WHERE d.ID IN (SELECT DISTINCT DrinkID FROM Recipe)");
 
                 var tempTable = new DataTable();
                 SqlDataAdapter adapter = new SqlDataAdapter(query, connection);

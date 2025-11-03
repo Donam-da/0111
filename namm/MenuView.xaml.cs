@@ -43,8 +43,18 @@ namespace namm
             {
                 const string query = @"
                     SELECT 
-                        d.ID, d.DrinkCode, d.Name, d.OriginalPrice, d.RecipeCost, d.ActualPrice, d.IsActive, d.CategoryID,
-                        c.Name AS CategoryName 
+                        d.ID, 
+                        d.DrinkCode, 
+                        d.Name, 
+                        d.IsActive, 
+                        d.CategoryID,
+                        c.Name AS CategoryName,
+                        CASE 
+                            WHEN d.OriginalPrice > 0 AND EXISTS (SELECT 1 FROM Recipe r WHERE r.DrinkID = d.ID) AND d.IsActive = 1 THEN N'Nguyên bản/Pha chế'
+                            WHEN d.OriginalPrice > 0 THEN N'Nguyên bản'
+                            WHEN EXISTS (SELECT 1 FROM Recipe r WHERE r.DrinkID = d.ID) AND d.IsActive = 1 THEN N'Pha chế'
+                            ELSE N'Chưa gán' 
+                        END AS DrinkType
                     FROM Drink d 
                     LEFT JOIN Category c ON d.CategoryID = c.ID";
 
