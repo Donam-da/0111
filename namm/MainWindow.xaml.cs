@@ -1,11 +1,13 @@
 ﻿﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using namm.Properties;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
@@ -25,6 +27,19 @@ namespace namm
         public MainWindow()
         {
             InitializeComponent();
+            this.Loaded += MainWindow_Loaded;
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Tải lại cài đặt đã lưu
+            if (Settings.Default.RememberMe)
+            {
+                txtUsername.Text = Settings.Default.Username;
+                pwbPassword.Password = Settings.Default.Password;
+                chkRememberMe.IsChecked = true;
+            }
+            txtUsername.Focus();
         }
 
         private void BtnLogin_Click(object sender, RoutedEventArgs e)
@@ -41,6 +56,21 @@ namespace namm
             AccountDTO? loginAccount = CheckLogin(username, password);
             if (loginAccount != null)
             {
+                // Lưu hoặc xóa cài đặt tùy thuộc vào checkbox
+                if (chkRememberMe.IsChecked == true)
+                {
+                    Settings.Default.Username = username;
+                    Settings.Default.Password = password; // Cảnh báo: Lưu mật khẩu dạng plain text không an toàn
+                    Settings.Default.RememberMe = true;
+                }
+                else
+                {
+                    Settings.Default.Username = "";
+                    Settings.Default.Password = "";
+                    Settings.Default.RememberMe = false;
+                }
+                Settings.Default.Save();
+
                 MainAppWindow mainApp = new MainAppWindow(loginAccount);
                 mainApp.Show();
                 this.Close(); // Đóng cửa sổ đăng nhập

@@ -28,6 +28,8 @@
                 <PasswordBox x:Name="pwbPassword" Width="200" FontSize="14" Padding="5"/>
             </StackPanel>
 
+            <CheckBox x:Name="chkRememberMe" Content="Lưu mật khẩu" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10,20,10,10">
                 <Button x:Name="btnLogin" Content="Đăng nhập" Width="100" Margin="0,0,10,0" 
                         Click="BtnLogin_Click" IsDefault="True"/>
