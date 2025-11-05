@@ -1,5 +1,6 @@
 ﻿﻿using System;
 using System.Configuration;
+using System.Linq;
 using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
@@ -23,8 +24,7 @@ namespace namm
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            // Tải dữ liệu lần đầu một cách bất đồng bộ
-            _ = LoadDataAsync();
+            // Không cần tải dữ liệu ở đây nữa vì đã có IsVisibleChanged xử lý
         }
 
         private async void DrinkView_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -170,10 +170,32 @@ namespace namm
 
         private void CbDrink_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (cbDrink.SelectedItem is DataRowView selectedDrink)
+            if (cbDrink.SelectedItem is DataRowView selectedDrink && drinkDataTable != null)
             {
-                // Hiển thị mã đồ uống gốc khi người dùng chọn từ ComboBox
-                txtDrinkCode.Text = (selectedDrink["DrinkCode"] as string ?? "") + "_NB";
+                int selectedId = (int)selectedDrink["ID"];
+
+                // Tìm kiếm đồ uống trong bảng dữ liệu đã tải
+                DataRow? existingDrinkRow = drinkDataTable.AsEnumerable()
+                    .FirstOrDefault(row => (int)row["ID"] == selectedId);
+
+                if (existingDrinkRow != null)
+                {
+                    // Nếu đồ uống đã tồn tại trong danh sách, hiển thị thông tin của nó
+                    txtDrinkCode.Text = existingDrinkRow["DrinkCode"] as string ?? string.Empty;
+                    txtPrice.Text = Convert.ToDecimal(existingDrinkRow["OriginalPrice"]).ToString("G0");
+                    txtActualPrice.Text = Convert.ToDecimal(existingDrinkRow["ActualPrice"]).ToString("G0");
+                    txtStockQuantity.Text = Convert.ToDecimal(existingDrinkRow["StockQuantity"]).ToString("G0");
+                    chkIsActive.IsChecked = (bool)existingDrinkRow["IsActive"];
+                }
+                else
+                {
+                    // Nếu là đồ uống mới, tạo mã và xóa các trường khác
+                    txtDrinkCode.Text = (selectedDrink["DrinkCode"] as string ?? "") + "_NB";
+                    txtPrice.Clear();
+                    txtActualPrice.Clear();
+                    txtStockQuantity.Text = "0"; // Mặc định tồn kho là 0
+                    chkIsActive.IsChecked = true;
+                }
             }
         }
 
