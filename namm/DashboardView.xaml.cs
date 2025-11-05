@@ -1,5 +1,6 @@
-﻿﻿using System;
+﻿﻿﻿﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
@@ -15,6 +16,8 @@ namespace namm
         private string connectionString = ConfigurationManager.ConnectionStrings["CafeDB"].ConnectionString;
         private DataTable? menuDataTable;
         private DataTable? tableDataTable;
+        // Sử dụng ObservableCollection để UI tự động cập nhật khi có thay đổi
+        private ObservableCollection<BillItem> currentBillItems = new ObservableCollection<BillItem>();
 
         public DashboardView()
         {
@@ -23,6 +26,7 @@ namespace namm
 
         private async void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
+            dgBill.ItemsSource = currentBillItems;
             try
             {
                 await LoadTables();
@@ -151,12 +155,67 @@ namespace namm
 
                 if (dialog.ShowDialog() == true)
                 {
-                    foreach (var item in dialog.SelectedQuantities)
+                    foreach (var selectedItem in dialog.SelectedQuantities)
                     {
-                        // TODO: Thêm logic để thêm đồ uống vào hóa đơn và trừ tồn kho
-                        MessageBox.Show($"Đã thêm: {item.Value} x {drinkName} (Kiểu: {item.Key})", "Thông báo");
+                        string drinkType = selectedItem.Key;
+                        int quantity = selectedItem.Value;
+
+                        // Lấy giá của đồ uống
+                        decimal price = await GetDrinkPriceAsync(drinkId, drinkType);
+
+                        // Kiểm tra xem món đã có trong hóa đơn chưa
+                        var existingItem = currentBillItems.FirstOrDefault(item => item.DrinkId == drinkId && item.DrinkType == drinkType);
+
+                        if (existingItem != null)
+                        {
+                            // Nếu đã có, chỉ cập nhật số lượng
+                            existingItem.Quantity += quantity;
+                            // Phải gọi refresh để DataGrid cập nhật lại TotalPrice
+                            dgBill.Items.Refresh();
+                        }
+                        else
+                        {
+                            // Nếu chưa có, thêm mới
+                            currentBillItems.Add(new BillItem
+                            {
+                                DrinkId = drinkId,
+                                DrinkName = drinkName,
+                                DrinkType = drinkType,
+                                Quantity = quantity,
+                                Price = price
+                            });
+                        }
                     }
+                    UpdateTotalAmount();
                 }
+            }
+        }
+
+        private async Task<decimal> GetDrinkPriceAsync(int drinkId, string drinkType)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                // Nếu là "Nguyên bản", lấy giá bán thực tế. Nếu là "Pha chế", cũng lấy giá bán thực tế (đã được tính toán từ giá vốn).
+                var cmd = new SqlCommand("SELECT ActualPrice FROM Drink WHERE ID = @ID", connection);
+                cmd.Parameters.AddWithValue("@ID", drinkId);
+                await connection.OpenAsync();
+                var result = await cmd.ExecuteScalarAsync();
+                return result != null ? Convert.ToDecimal(result) : 0;
+            }
+        }
+
+        private void UpdateTotalAmount()
+        {
+            decimal total = currentBillItems.Sum(item => item.TotalPrice);
+            tbTotalAmount.Text = $"{total:N0} VNĐ";
+        }
+
+        private void DeleteBillItem_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as Button)?.CommandParameter is BillItem itemToRemove)
+            {
+                currentBillItems.Remove(itemToRemove);
+                UpdateTotalAmount();
             }
         }
 
@@ -192,6 +251,20 @@ namespace namm
                 }
             }
             return stock;
+        }
+    }
+}
+
+namespace namm
+{
+    // Style cho nút xóa trong DataGrid, làm cho nó trông giống một liên kết
+    public partial class DashboardView
+    {
+        public static ResourceDictionary GetLinkButtonStyle()
+        {
+            var rd = new ResourceDictionary();
+            rd.Source = new Uri("/namm;component/LinkButtonStyle.xaml", UriKind.RelativeOrAbsolute);
+            return rd;
         }
     }
 }
