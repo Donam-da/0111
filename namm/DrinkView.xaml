@@ -8,6 +8,23 @@
              d:DesignHeight="550" d:DesignWidth="1000"
              Loaded="UserControl_Loaded">
     <Grid Margin="10">
+        <Grid.Resources>
+            <Style x:Key="CenterHeader" TargetType="DataGridColumnHeader">
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            </Style>
+            <Style x:Key="LeftCell" TargetType="TextBlock">
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="Margin" Value="5,0,0,0"/>
+            </Style>
+            <Style x:Key="RightCell" TargetType="TextBlock">
+                <Setter Property="HorizontalAlignment" Value="Right"/>
+                <Setter Property="Margin" Value="0,0,5,0"/>
+            </Style>
+            <Style x:Key="CenterCell" TargetType="TextBlock">
+                <Setter Property="HorizontalAlignment" Value="Center"/>
+                <Setter Property="Margin" Value="2,0,2,0"/>
+            </Style>
+        </Grid.Resources>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="350"/>
@@ -23,14 +40,14 @@
                       SelectionMode="Single" SelectionChanged="DgDrinks_SelectionChanged" 
                       LoadingRow="DgDrinks_LoadingRow">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="STT" Binding="{Binding STT}" Width="50" />
-                    <DataGridTextColumn Header="Tên đồ uống" Binding="{Binding Name}" Width="*" />
-                    <DataGridTextColumn Header="Mã Kiểu Đồ Uống" Binding="{Binding DrinkCode}" Width="120" />
-                    <DataGridTextColumn Header="Loại" Binding="{Binding CategoryName}" Width="120" />
-                    <DataGridTextColumn Header="Giá nhập vào" Binding="{Binding OriginalPrice, StringFormat={}{0:N0}}" Width="100" />
-                    <DataGridTextColumn Header="Giá bán" Binding="{Binding ActualPrice, StringFormat={}{0:N0}}" Width="100" />
-                    <DataGridTextColumn Header="Tồn kho" Binding="{Binding StockQuantity, StringFormat={}{0:G29}}" Width="80" />
-                    <DataGridTextColumn Header="Trạng thái" Binding="{Binding StatusText}" Width="80" />
+                    <DataGridTextColumn Header="STT" Binding="{Binding STT}" Width="0.5*" HeaderStyle="{StaticResource CenterHeader}" ElementStyle="{StaticResource CenterCell}"/>
+                    <DataGridTextColumn Header="Tên đồ uống" Binding="{Binding Name}" Width="2.2*" HeaderStyle="{StaticResource CenterHeader}" ElementStyle="{StaticResource CenterCell}"/>
+                    <DataGridTextColumn Header="Mã Kiểu Đồ Uống" Binding="{Binding DrinkCode}" Width="1.8*" HeaderStyle="{StaticResource CenterHeader}" ElementStyle="{StaticResource CenterCell}"/>
+                    <DataGridTextColumn Header="Loại" Binding="{Binding CategoryName}" Width="1.2*" HeaderStyle="{StaticResource CenterHeader}" ElementStyle="{StaticResource CenterCell}"/>
+                    <DataGridTextColumn Header="Giá nhập vào" Binding="{Binding OriginalPrice, StringFormat={}{0:N0}}" Width="1.4*" HeaderStyle="{StaticResource CenterHeader}" ElementStyle="{StaticResource CenterCell}"/>
+                    <DataGridTextColumn Header="Giá bán" Binding="{Binding ActualPrice, StringFormat={}{0:N0}}" Width="1.3*" HeaderStyle="{StaticResource CenterHeader}" ElementStyle="{StaticResource CenterCell}"/>
+                    <DataGridTextColumn Header="Tồn kho" Binding="{Binding StockQuantity, StringFormat={}{0:G29}}" Width="1*" HeaderStyle="{StaticResource CenterHeader}" ElementStyle="{StaticResource CenterCell}"/>
+                    <DataGridTextColumn Header="Trạng thái" Binding="{Binding StatusText}" Width="1*" HeaderStyle="{StaticResource CenterHeader}" ElementStyle="{StaticResource CenterCell}"/>
                 </DataGrid.Columns>
             </DataGrid>
         </DockPanel>
