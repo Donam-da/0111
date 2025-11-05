@@ -7,6 +7,14 @@
              mc:Ignorable="d" 
              d:DesignHeight="550" d:DesignWidth="1024"
              Loaded="UserControl_Loaded">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Nạp tệp style cho nút xóa -->
+                <ResourceDictionary Source="LinkButtonStyle.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <Grid>
         <Grid.Resources>
             <Style x:Key="CenterAlignedColumn" TargetType="DataGridColumnHeader">

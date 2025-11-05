@@ -1,13 +1,20 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\Admin\\source\\repos\\namm\\",
+  "WorkspaceRootPath": "D:\\QuanLyCafe\\namm\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{EF8A09BB-D1C6-4309-BBD7-DE5C9050EDA3}|namm.csproj|c:\\users\\admin\\source\\repos\\namm\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "AbsoluteMoniker": "D:0:0:{EF8A09BB-D1C6-4309-BBD7-DE5C9050EDA3}|namm.csproj|d:\\quanlycafe\\namm\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{EF8A09BB-D1C6-4309-BBD7-DE5C9050EDA3}|namm.csproj|solutionrelative:app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\AppData\\Local\\Temp\\.vsdbgsrc\\1afc73f2d9c879658d6cca69a32be5198a3ce72bdc37694ad52c6c8fcbc90be0\\FrameworkTemplate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EF8A09BB-D1C6-4309-BBD7-DE5C9050EDA3}|namm.csproj|D:\\QuanLyCafe\\namm\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{EF8A09BB-D1C6-4309-BBD7-DE5C9050EDA3}|namm.csproj|solutionrelative:mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EF8A09BB-D1C6-4309-BBD7-DE5C9050EDA3}|namm.csproj|c:\\users\\admin\\source\\repos\\namm\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{EF8A09BB-D1C6-4309-BBD7-DE5C9050EDA3}|namm.csproj|D:\\QuanLyCafe\\namm\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{EF8A09BB-D1C6-4309-BBD7-DE5C9050EDA3}|namm.csproj|solutionrelative:mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -23,27 +30,48 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "MainWindow.xaml",
-              "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\namm\\MainWindow.xaml",
-              "RelativeDocumentMoniker": "MainWindow.xaml",
-              "ToolTip": "C:\\Users\\Admin\\source\\repos\\namm\\MainWindow.xaml",
-              "RelativeToolTip": "MainWindow.xaml",
+              "Title": "App.xaml",
+              "DocumentMoniker": "D:\\QuanLyCafe\\namm\\App.xaml",
+              "RelativeDocumentMoniker": "App.xaml",
+              "ToolTip": "D:\\QuanLyCafe\\namm\\App.xaml",
+              "RelativeToolTip": "App.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-11-01T11:51:24.472Z",
+              "WhenOpened": "2025-11-05T22:16:07.098Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "FrameworkTemplate.cs",
+              "DocumentMoniker": "C:\\Users\\Admin\\AppData\\Local\\Temp\\.vsdbgsrc\\1afc73f2d9c879658d6cca69a32be5198a3ce72bdc37694ad52c6c8fcbc90be0\\FrameworkTemplate.cs",
+              "ToolTip": "C:\\Users\\Admin\\AppData\\Local\\Temp\\.vsdbgsrc\\1afc73f2d9c879658d6cca69a32be5198a3ce72bdc37694ad52c6c8fcbc90be0\\FrameworkTemplate.cs",
+              "ViewState": "AgIAAJcCAAAAAAAAAAAIwA4DAAAGAAAAAQAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-05T22:03:00Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "MainWindow.xaml",
+              "DocumentMoniker": "D:\\QuanLyCafe\\namm\\MainWindow.xaml",
+              "RelativeDocumentMoniker": "MainWindow.xaml",
+              "ToolTip": "D:\\QuanLyCafe\\namm\\MainWindow.xaml",
+              "RelativeToolTip": "MainWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-11-01T11:51:24.472Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "MainWindow.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\namm\\MainWindow.xaml.cs",
+              "DocumentMoniker": "D:\\QuanLyCafe\\namm\\MainWindow.xaml.cs",
               "RelativeDocumentMoniker": "MainWindow.xaml.cs",
-              "ToolTip": "C:\\Users\\Admin\\source\\repos\\namm\\MainWindow.xaml.cs",
+              "ToolTip": "D:\\QuanLyCafe\\namm\\MainWindow.xaml.cs",
               "RelativeToolTip": "MainWindow.xaml.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-01T11:51:21.542Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-01T11:51:21.542Z"
             }
           ]
         }

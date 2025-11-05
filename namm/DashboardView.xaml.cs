@@ -1,4 +1,4 @@
-﻿﻿﻿﻿using System;
+﻿﻿﻿﻿﻿﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Configuration;
@@ -29,9 +29,13 @@ namespace namm
             dgBill.ItemsSource = currentBillItems;
             try
             {
-                await LoadTables();
-                await LoadCategories();
-                await LoadMenu();
+                // Tải dữ liệu song song để tăng tốc độ khởi động và giữ cho UI luôn phản hồi.
+                var loadTablesTask = LoadTables();
+                var loadCategoriesTask = LoadCategories();
+                var loadMenuTask = LoadMenu();
+
+                await Task.WhenAll(loadTablesTask, loadCategoriesTask, loadMenuTask);
+
                 // Gắn sự kiện sau khi đã tải xong dữ liệu ban đầu
                 cbCategory.SelectionChanged += CbCategory_SelectionChanged;
             }
@@ -48,8 +52,11 @@ namespace namm
                 // Thêm mục "Tất cả" vào danh sách
                 const string query = "SELECT 0 AS ID, N'Tất cả' AS Name UNION ALL SELECT ID, Name FROM Category WHERE IsActive = 1 ORDER BY Name";
                 SqlDataAdapter adapter = new SqlDataAdapter(query, connection);
-                DataTable categoryTable = new DataTable();
+                var categoryTable = new DataTable();
+                // Sử dụng Task.Run để chạy tác vụ Fill trên một luồng nền.
                 await Task.Run(() => adapter.Fill(categoryTable));
+
+                // Sau khi await, chúng ta đã quay lại luồng UI, có thể cập nhật trực tiếp.
                 cbCategory.ItemsSource = categoryTable.DefaultView;
                 cbCategory.SelectedValuePath = "ID";
                 cbCategory.DisplayMemberPath = "Name";
@@ -67,6 +74,8 @@ namespace namm
                 menuDataTable = new DataTable();
                 menuDataTable.Columns.Add("STT", typeof(int));
                 await Task.Run(() => adapter.Fill(menuDataTable));
+
+                // Sau khi await, chúng ta đã quay lại luồng UI, có thể cập nhật trực tiếp.
                 dgMenu.ItemsSource = menuDataTable.DefaultView;
             }
         }
@@ -80,6 +89,8 @@ namespace namm
                 tableDataTable = new DataTable();
                 tableDataTable.Columns.Add("STT", typeof(int));
                 await Task.Run(() => adapter.Fill(tableDataTable));
+
+                // Sau khi await, chúng ta đã quay lại luồng UI, có thể cập nhật trực tiếp.
                 dgTables.ItemsSource = tableDataTable.DefaultView;
             }
         }
@@ -125,82 +136,59 @@ namespace namm
             }
         }
 
-        private async void DgMenu_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void DgMenu_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            // 1. Kiểm tra đã chọn bàn chưa
             if (dgTables.SelectedItem == null)
             {
                 MessageBox.Show("Vui lòng chọn một bàn trước khi thêm món.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // 2. Lấy thông tin đồ uống được chọn
             if (dgMenu.SelectedItem is DataRowView selectedDrinkRow)
             {
-                int drinkId = (int)selectedDrinkRow["ID"];
-                string drinkName = selectedDrinkRow["Name"].ToString();
-
-                // 3. Kiểm tra các kiểu có sẵn của đồ uống từ DB
-                var availableStock = await GetDrinkStockAsync(drinkId);
-
-                if (!availableStock.Any())
+                try
                 {
-                    MessageBox.Show("Đồ uống này chưa được cấu hình để bán (chưa có giá hoặc công thức).", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                    return;
-                }
+                    int drinkId = (int)selectedDrinkRow["ID"];
+                    string drinkName = selectedDrinkRow["Name"].ToString() ?? "Không tên";
 
-                // 4. Mở dialog để nhập số lượng cho các kiểu có sẵn
-                var dialog = new SelectDrinkTypeDialog(drinkName, availableStock);
-                dialog.Owner = Window.GetWindow(this); // Đặt cửa sổ chính làm chủ sở hữu
+                    // Lấy dữ liệu tồn kho một cách đồng bộ
+                    var availableStock = GetDrinkStock(drinkId);
 
-                if (dialog.ShowDialog() == true)
-                {
-                    foreach (var selectedItem in dialog.SelectedQuantities)
+                    if (!availableStock.Any())
                     {
-                        string drinkType = selectedItem.Key;
-                        int quantity = selectedItem.Value;
-
-                        // Lấy giá của đồ uống
-                        decimal price = await GetDrinkPriceAsync(drinkId, drinkType);
-
-                        // Kiểm tra xem món đã có trong hóa đơn chưa
-                        var existingItem = currentBillItems.FirstOrDefault(item => item.DrinkId == drinkId && item.DrinkType == drinkType);
-
-                        if (existingItem != null)
-                        {
-                            // Nếu đã có, chỉ cập nhật số lượng
-                            existingItem.Quantity += quantity;
-                            // Phải gọi refresh để DataGrid cập nhật lại TotalPrice
-                            dgBill.Items.Refresh();
-                        }
-                        else
-                        {
-                            // Nếu chưa có, thêm mới
-                            currentBillItems.Add(new BillItem
-                            {
-                                DrinkId = drinkId,
-                                DrinkName = drinkName,
-                                DrinkType = drinkType,
-                                Quantity = quantity,
-                                Price = price
-                            });
-                        }
+                        MessageBox.Show("Đồ uống này chưa được cấu hình để bán (chưa có giá hoặc công thức).", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                        return;
                     }
-                    UpdateTotalAmount();
-                }
-            }
-        }
 
-        private async Task<decimal> GetDrinkPriceAsync(int drinkId, string drinkType)
-        {
-            using (var connection = new SqlConnection(connectionString))
-            {
-                // Nếu là "Nguyên bản", lấy giá bán thực tế. Nếu là "Pha chế", cũng lấy giá bán thực tế (đã được tính toán từ giá vốn).
-                var cmd = new SqlCommand("SELECT ActualPrice FROM Drink WHERE ID = @ID", connection);
-                cmd.Parameters.AddWithValue("@ID", drinkId);
-                await connection.OpenAsync();
-                var result = await cmd.ExecuteScalarAsync();
-                return result != null ? Convert.ToDecimal(result) : 0;
+                    var dialog = new SelectDrinkTypeDialog(drinkName, availableStock);
+                    dialog.Owner = Window.GetWindow(this);
+
+                    if (dialog.ShowDialog() == true)
+                    {
+                        foreach (var selectedItem in dialog.SelectedQuantities)
+                        {
+                            string drinkType = selectedItem.Key;
+                            int quantity = selectedItem.Value;
+                            decimal price = Convert.ToDecimal(selectedDrinkRow["ActualPrice"]);
+
+                            var existingItem = currentBillItems.FirstOrDefault(item => item.DrinkId == drinkId && item.DrinkType == drinkType);
+
+                            if (existingItem != null)
+                            {
+                                existingItem.Quantity += quantity;
+                            }
+                            else
+                            {
+                                currentBillItems.Add(new BillItem { DrinkId = drinkId, DrinkName = drinkName, DrinkType = drinkType, Quantity = quantity, Price = price });
+                            }
+                        }
+                        UpdateTotalAmount();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Đã xảy ra lỗi không mong muốn: {ex.Message}", "Lỗi nghiêm trọng", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
@@ -219,7 +207,7 @@ namespace namm
             }
         }
 
-        private async Task<Dictionary<string, int>> GetDrinkStockAsync(int drinkId)
+        private Dictionary<string, int> GetDrinkStock(int drinkId)
         {
             var stock = new Dictionary<string, int>();
             using (var connection = new SqlConnection(connectionString))
@@ -230,41 +218,29 @@ namespace namm
 
                 // 2. Tính số lượng có thể làm của đồ uống pha chế
                 var cmdRecipe = new SqlCommand(@"
-                    SELECT MIN(ISNULL(FLOOR(m.Quantity / r.Quantity), 0))
+                    SELECT MIN(FLOOR(m.Quantity / r.Quantity))
                     FROM Recipe r
                     JOIN Material m ON r.MaterialID = m.ID
-                    WHERE r.DrinkID = @ID", connection);
+                    WHERE r.DrinkID = @ID 
+                    -- Chỉ tính khi có công thức tồn tại
+                    HAVING COUNT(r.DrinkID) > 0", connection);
                 cmdRecipe.Parameters.AddWithValue("@ID", drinkId);
 
-                await connection.OpenAsync();
+                connection.Open();
 
-                var originalStockResult = await cmdOriginal.ExecuteScalarAsync();
+                var originalStockResult = cmdOriginal.ExecuteScalar();
                 if (originalStockResult != null && originalStockResult != DBNull.Value)
                 {
                     stock["Nguyên bản"] = Convert.ToInt32(originalStockResult);
                 }
 
-                var recipeStockResult = await cmdRecipe.ExecuteScalarAsync();
+                var recipeStockResult = cmdRecipe.ExecuteScalar();
                 if (recipeStockResult != null && recipeStockResult != DBNull.Value)
                 {
                     stock["Pha chế"] = Convert.ToInt32(recipeStockResult);
                 }
             }
             return stock;
-        }
-    }
-}
-
-namespace namm
-{
-    // Style cho nút xóa trong DataGrid, làm cho nó trông giống một liên kết
-    public partial class DashboardView
-    {
-        public static ResourceDictionary GetLinkButtonStyle()
-        {
-            var rd = new ResourceDictionary();
-            rd.Source = new Uri("/namm;component/LinkButtonStyle.xaml", UriKind.RelativeOrAbsolute);
-            return rd;
         }
     }
 }

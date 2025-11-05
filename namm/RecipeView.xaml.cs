@@ -1,4 +1,4 @@
-﻿﻿﻿﻿using System;
+﻿﻿﻿﻿﻿﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -421,7 +421,7 @@ namespace namm
             return prices;
         }
 
-        private async void DgRecipeSummary_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void DgRecipeSummary_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             try
             {
