@@ -17,22 +17,11 @@
     </UserControl.Resources>
     <Grid>
         <Grid.Resources>
-            <Style x:Key="CenterAlignedColumn" TargetType="DataGridColumnHeader">
-                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Style x:Key="CenterAlignedColumn" TargetType="DataGridColumnHeader" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
             </Style>
-            <Style x:Key="CenterAlignedCell" TargetType="TextBlock">
-                <Setter Property="HorizontalAlignment" Value="Center"/>
-            </Style>
-            <!-- Style để tô màu hàng dựa trên trạng thái bàn -->
-            <Style TargetType="DataGridRow">
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding Status}" Value="Trống">
-                        <Setter Property="Background" Value="LightGreen"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding Status}" Value="Có người">
-                        <Setter Property="Background" Value="LightCoral"/>
-                    </DataTrigger>
-                </Style.Triggers>
+            <Style x:Key="CenterAlignedCell" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                <Setter Property="HorizontalAlignment" Value="Center" />
             </Style>
         </Grid.Resources>
         <Grid.ColumnDefinitions>
@@ -44,6 +33,36 @@
         <DockPanel Grid.Column="0" Margin="5">
             <TextBlock DockPanel.Dock="Top" Text="SƠ ĐỒ BÀN" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,5"/>
             <DataGrid x:Name="dgTables" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single" LoadingRow="DgTables_LoadingRow" SelectionChanged="DgTables_SelectionChanged">
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Status}" Value="Trống">
+                                <Setter Property="Background" Value="LightGreen"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Status}" Value="Có người">
+                                <Setter Property="Background" Value="LightCoral"/>
+                            </DataTrigger>
+                            <!-- Chỉ tô màu vàng khi bàn được chọn VÀ trạng thái là 'Trống' -->
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsSelected, RelativeSource={RelativeSource Self}}" Value="True"/>
+                                    <Condition Binding="{Binding Status}" Value="Trống"/>
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Background" Value="Gold" />
+                                <Setter Property="Foreground" Value="Black" />
+                            </MultiDataTrigger>
+                            <!-- Thêm Trigger để tùy chỉnh màu khi chọn bàn 'Có người' -->
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsSelected, RelativeSource={RelativeSource Self}}" Value="True"/>
+                                    <Condition Binding="{Binding Status}" Value="Có người"/>
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Background" Value="Crimson" /> <!-- Màu đỏ đậm hơn khi được chọn -->
+                                <Setter Property="Foreground" Value="White" />
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="STT" Binding="{Binding STT}" Width="40" HeaderStyle="{StaticResource CenterAlignedColumn}" ElementStyle="{StaticResource CenterAlignedCell}"/>
                     <DataGridTextColumn Header="Tên bàn" Binding="{Binding Name}" Width="*" HeaderStyle="{StaticResource CenterAlignedColumn}" ElementStyle="{StaticResource CenterAlignedCell}"/>
