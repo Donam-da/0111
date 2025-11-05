@@ -43,7 +43,7 @@
 
         <DockPanel Grid.Column="0" Margin="5">
             <TextBlock DockPanel.Dock="Top" Text="SƠ ĐỒ BÀN" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,5"/>
-            <DataGrid x:Name="dgTables" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single" LoadingRow="DgTables_LoadingRow">
+            <DataGrid x:Name="dgTables" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single" LoadingRow="DgTables_LoadingRow" SelectionChanged="DgTables_SelectionChanged">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="STT" Binding="{Binding STT}" Width="40" HeaderStyle="{StaticResource CenterAlignedColumn}" ElementStyle="{StaticResource CenterAlignedCell}"/>
                     <DataGridTextColumn Header="Tên bàn" Binding="{Binding Name}" Width="*" HeaderStyle="{StaticResource CenterAlignedColumn}" ElementStyle="{StaticResource CenterAlignedCell}"/>
@@ -72,7 +72,10 @@
 
         <!-- Cột 3: Hóa đơn -->
         <DockPanel Grid.Column="2" Margin="10,0,0,0">
-            <TextBlock Text="HÓA ĐƠN" FontSize="18" FontWeight="Bold" DockPanel.Dock="Top" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+            <StackPanel DockPanel.Dock="Top" HorizontalAlignment="Center" Margin="0,0,0,10">
+                <TextBlock Text="HÓA ĐƠN" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="tbSelectedTable" Text="(Chưa chọn bàn)" FontSize="14" FontStyle="Italic" Foreground="Gray" HorizontalAlignment="Center"/>
+            </StackPanel>
             <StackPanel DockPanel.Dock="Bottom" Margin="0,10,0,0">
                 <Separator/>
                 <Grid Margin="0,10,0,0">

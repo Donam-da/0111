@@ -9,6 +9,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
+
 namespace namm
 {
     public partial class DashboardView : UserControl
@@ -133,6 +134,27 @@ namespace namm
             if (e.Row.Item is DataRowView rowView)
             {
                 rowView["STT"] = e.Row.GetIndex() + 1;
+            }
+        }
+
+        private void DgTables_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (dgTables.SelectedItem is DataRowView selectedTable)
+            {
+                string tableName = selectedTable["Name"].ToString() ?? "Không xác định";
+                tbSelectedTable.Text = $"Chọn: {tableName}";
+                tbSelectedTable.FontStyle = FontStyles.Normal;
+                tbSelectedTable.Foreground = System.Windows.Media.Brushes.Black;
+
+                // Thêm logic xóa hóa đơn cũ khi chuyển bàn (tùy chọn)
+                // currentBillItems.Clear();
+                // UpdateTotalAmount();
+            }
+            else
+            {
+                tbSelectedTable.Text = "(Chưa chọn bàn)";
+                tbSelectedTable.FontStyle = FontStyles.Italic;
+                tbSelectedTable.Foreground = System.Windows.Media.Brushes.Gray;
             }
         }
 
