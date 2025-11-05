@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿﻿﻿﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -432,14 +432,16 @@ namespace namm
                     // Lấy ID của đồ uống từ dòng được chọn
                     int drinkId = (int)row["DrinkID"];
 
-                    // Tạm thời bỏ đăng ký sự kiện để tránh vòng lặp không cần thiết
-                    cbDrink.SelectionChanged -= CbDrink_SelectionChanged;
-                    // Đặt ComboBox thành đồ uống tương ứng để đồng bộ giao diện
-                    cbDrink.SelectedValue = drinkId;
-                    // Đăng ký lại sự kiện
-                    cbDrink.SelectionChanged += CbDrink_SelectionChanged;
-                    // Trực tiếp tải công thức cho đồ uống đã chọn
-                    await LoadRecipeForDrink(drinkId);
+                    // Chỉ thực hiện nếu lựa chọn trong ComboBox chưa đúng
+                    if ((int?)cbDrink.SelectedValue != drinkId)
+                    {
+                        // Tạm thời bỏ đăng ký sự kiện để tránh vòng lặp không cần thiết
+                        cbDrink.SelectionChanged -= CbDrink_SelectionChanged;
+                        // Đặt ComboBox thành đồ uống tương ứng để đồng bộ giao diện
+                        cbDrink.SelectedValue = drinkId;
+                        // Đăng ký lại sự kiện
+                        cbDrink.SelectionChanged += CbDrink_SelectionChanged;
+                    }
                 }
             }
             catch (Exception ex)

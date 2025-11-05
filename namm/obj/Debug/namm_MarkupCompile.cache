@@ -10,11 +10,11 @@ none
 false
 DEBUG;TRACE
 D:\QuanLyCafe\namm\App.xaml
-13473171709
+141989351051
 
-181312196742
+19-283493266
 141066371409
-MainWindow.xaml;MainAppWindow.xaml;EmployeeView.xaml;ChangePasswordView.xaml;TableView.xaml;DashboardView.xaml;UnitView.xaml;MaterialView.xaml;DrinkView.xaml;MenuView.xaml;RecipeView.xaml;AddDrinkDialog.xaml;SelectDrinkTypeDialog.xaml;
+MainWindow.xaml;MainAppWindow.xaml;EmployeeView.xaml;ChangePasswordView.xaml;TableView.xaml;DashboardView.xaml;UnitView.xaml;MaterialView.xaml;DrinkView.xaml;MenuView.xaml;RecipeView.xaml;AddDrinkDialog.xaml;CategoryView.xaml;SelectDrinkTypeDialog.xaml;
 
 False
 

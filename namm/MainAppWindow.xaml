@@ -28,7 +28,7 @@
                 <MenuItem Header="Quản lí Đồ uống (Tổng)" Click="ManageMenu_Click" ToolTip="Quản lý danh sách đồ uống chính của quán."/>
                 <MenuItem Header="Quản lí đồ uống pha chế" Click="ManageRecipes_Click" ToolTip="Thiết lập công thức cho đồ uống pha chế."/>
                 <MenuItem Header="Quản lí đồ uống nguyên bản" Click="ManageOriginalDrinks_Click" ToolTip="Thiết lập giá nhập/bán cho đồ uống nguyên bản."/>
-                <MenuItem Header="Quản lí loại đồ uống"/>
+                <MenuItem Header="Quản lí loại đồ uống" Click="ManageCategories_Click"/>
                 <MenuItem Header="Quản lí nguyên liệu" Click="ManageMaterials_Click"/>
                 <MenuItem Header="Quản lí đơn vị tính" Click="ManageUnits_Click"/>
             </MenuItem>

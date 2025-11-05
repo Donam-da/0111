@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -132,6 +132,13 @@ namespace namm
             // Hiển thị sơ đồ bàn làm màn hình chính
             MainContent.Children.Clear();
             MainContent.Children.Add(new DashboardView());
+        }
+
+        private void ManageCategories_Click(object sender, RoutedEventArgs e)
+        {
+            // Hiển thị giao diện quản lý loại đồ uống
+            MainContent.Children.Clear();
+            MainContent.Children.Add(new CategoryView());
         }
     }
 }
