@@ -285,6 +285,12 @@ namespace namm
                 string customerName = _selectedCustomer["Name"].ToString();
                 string customerCode = _selectedCustomer["CustomerCode"].ToString();
 
+                // Lấy thông tin chi tiêu và tính toán giảm giá
+                var customerStats = await GetCustomerStatsAsync(customerId.Value);
+                var discountRules = await GetDiscountRulesAsync();
+                decimal discountPercent = CalculateDiscount(customerStats, discountRules);
+                decimal finalAmount = _totalAmount * (1 - (discountPercent / 100m)); // Sử dụng 100m để đảm bảo phép chia là số thập phân
+
                 // Lấy ID hóa đơn chưa thanh toán của bàn
                 int billId = await GetUnpaidBillIdForTableAsync(_tableId);
                 if (billId == -1)
@@ -294,13 +300,14 @@ namespace namm
                 }
 
                 // Tạo và hiển thị cửa sổ hóa đơn
-                var invoiceWindow = new InvoiceWindow(_tableId, _tableName, customerName, customerCode, _totalAmount, _currentBill, billId);
+                var invoiceWindow = new InvoiceWindow(_tableId, _tableName, customerName, customerCode, _totalAmount, discountPercent, finalAmount, _currentBill, billId);
                 invoiceWindow.Owner = Window.GetWindow(this);
 
                 // Chỉ xử lý thanh toán khi người dùng nhấn "Xác nhận" trên hóa đơn
                 if (invoiceWindow.ShowDialog() == true)
                 {
-                    await ProcessPaymentAsync(customerId, null); // Khách hàng có đăng ký, không có mã khách vãng lai
+                    // Lưu hóa đơn với tổng tiền đã giảm giá
+                    await ProcessPaymentAsync(customerId, null, finalAmount);
                 }
             }
             else
@@ -322,13 +329,14 @@ namespace namm
                 return;
             }
 
-            var invoiceWindow = new InvoiceWindow(_tableId, _tableName, customerName, customerCode, _totalAmount, _currentBill, billId);
+            // Khách vãng lai không có giảm giá (0%) và tổng tiền cuối cùng bằng tổng tiền hàng
+            var invoiceWindow = new InvoiceWindow(_tableId, _tableName, customerName, customerCode, _totalAmount, 0, _totalAmount, _currentBill, billId);
             invoiceWindow.Owner = Window.GetWindow(this);
 
             if (invoiceWindow.ShowDialog() == true)
             {
-                // Thanh toán với customerId là null và truyền mã khách vãng lai
-                await ProcessPaymentAsync(null, customerCode);
+                // Khách vãng lai không có giảm giá, thanh toán với số tiền gốc
+                await ProcessPaymentAsync(null, customerCode, _totalAmount);
             }
         }
 
@@ -344,25 +352,28 @@ namespace namm
             }
         }
 
-        private async Task ProcessPaymentAsync(int? customerId, string? guestCustomerCode)
+        private async Task ProcessPaymentAsync(int? customerId, string? guestCustomerCode, decimal finalAmount)
         {
             using (var connection = new SqlConnection(connectionString))
             {
                 await connection.OpenAsync();
                 // Tìm hóa đơn chưa thanh toán của bàn (status = 0) và cập nhật nó
                 const string updateBillQuery = @"
-                    UPDATE Bill
-                    SET Status = 1, -- Đã thanh toán
+                    UPDATE Bill SET 
+                        Status = 1, -- Đã thanh toán
                         DateCheckOut = GETDATE(),
                         IdCustomer = @CustomerID,
                         GuestCustomerCode = @GuestCustomerCode,
-                        TotalAmount = @TotalAmount
+                        -- Lưu cả tổng tiền gốc và tổng tiền sau giảm giá
+                        SubTotal = @SubTotal,
+                        TotalAmount = @FinalAmount
                     WHERE TableID = @TableID AND Status = 0";
 
                 var updateBillCmd = new SqlCommand(updateBillQuery, connection);
                 updateBillCmd.Parameters.AddWithValue("@CustomerID", customerId ?? (object)DBNull.Value);
                 updateBillCmd.Parameters.AddWithValue("@GuestCustomerCode", string.IsNullOrEmpty(guestCustomerCode) ? (object)DBNull.Value : guestCustomerCode);
-                updateBillCmd.Parameters.AddWithValue("@TotalAmount", _totalAmount);
+                updateBillCmd.Parameters.AddWithValue("@FinalAmount", finalAmount);
+                updateBillCmd.Parameters.AddWithValue("@SubTotal", _totalAmount); // _totalAmount là tổng tiền gốc
                 updateBillCmd.Parameters.AddWithValue("@TableID", _tableId);
 
                 // Cập nhật trạng thái bàn về 'Trống'
@@ -376,6 +387,70 @@ namespace namm
 
             MessageBox.Show("Thanh toán thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
             NavigateBackToDashboard();
+        }
+
+        private async Task<(int PurchaseCount, decimal TotalSpent)> GetCustomerStatsAsync(int customerId)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                const string query = @"
+                    SELECT
+                        COUNT(b.ID) AS PurchaseCount,
+                        ISNULL(SUM(b.TotalAmount), 0) AS TotalSpent
+                    FROM Bill b
+                    WHERE b.IdCustomer = @CustomerId AND b.Status = 1"; // Chỉ tính các hóa đơn đã thanh toán
+                var command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@CustomerId", customerId);
+                await connection.OpenAsync();
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    if (await reader.ReadAsync())
+                    {
+                        return (reader.GetInt32(0), reader.GetDecimal(1));
+                    }
+                }
+            }
+            return (0, 0); // Trả về mặc định nếu không có dữ liệu
+        }
+
+        private async Task<List<DiscountRule>> GetDiscountRulesAsync()
+        {
+            var rules = new List<DiscountRule>();
+            using (var connection = new SqlConnection(connectionString))
+            {
+                const string query = "SELECT CriteriaType, Threshold, DiscountPercent FROM DiscountRule";
+                var command = new SqlCommand(query, connection);
+                await connection.OpenAsync();
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        rules.Add(new DiscountRule
+                        {
+                            CriteriaType = reader.GetString(0),
+                            Threshold = reader.GetDecimal(1),
+                            DiscountPercent = reader.GetDecimal(2)
+                        });
+                    }
+                }
+            }
+            return rules;
+        }
+
+        private decimal CalculateDiscount((int PurchaseCount, decimal TotalSpent) stats, List<DiscountRule> rules)
+        {
+            decimal maxDiscount = 0;
+            foreach (var rule in rules)
+            {
+                bool ruleApplies = (rule.CriteriaType == "Số lần mua" && stats.PurchaseCount >= rule.Threshold) ||
+                                   (rule.CriteriaType == "Tổng chi tiêu" && stats.TotalSpent >= rule.Threshold);
+
+                if (ruleApplies && rule.DiscountPercent > maxDiscount)
+                {
+                    maxDiscount = rule.DiscountPercent;
+                }
+            }
+            return maxDiscount;
         }
 
         private void BtnBack_Click(object sender, RoutedEventArgs e)

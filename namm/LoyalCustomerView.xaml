@@ -17,6 +17,49 @@
                        HorizontalAlignment="Center"/>
         </Border>
 
+        <!-- Khu vực thiết lập giảm giá -->
+        <GroupBox DockPanel.Dock="Top" Header="Thiết lập các mức giảm giá" FontWeight="SemiBold" Margin="0,0,0,10">
+            <Grid Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Form thêm quy tắc mới -->
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                    <TextBlock Text="Tiêu chí:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <ComboBox x:Name="cbCriteriaType" Width="120" VerticalContentAlignment="Center">
+                        <ComboBoxItem Content="Số lần mua"/>
+                        <ComboBoxItem Content="Tổng chi tiêu"/>
+                    </ComboBox>
+                    <TextBlock Text="Ngưỡng >=" VerticalAlignment="Center" Margin="15,0,5,0"/>
+                    <TextBox x:Name="txtThreshold" Width="120" VerticalContentAlignment="Center"/>
+                    <TextBlock Text="Giảm giá (%):" VerticalAlignment="Center" Margin="15,0,5,0"/>
+                    <TextBox x:Name="txtDiscountPercent" Width="80" VerticalContentAlignment="Center"/>
+                    <Button x:Name="btnAddRule" Content="Thêm mức" Width="100" Margin="15,0,0,0" Click="BtnAddRule_Click"/>
+                </StackPanel>
+
+                <!-- Danh sách các quy tắc đã thêm -->
+                <ListView Grid.Row="1" x:Name="lvDiscountRules" MaxHeight="150" HorizontalAlignment="Left">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Tiêu chí" DisplayMemberBinding="{Binding CriteriaType}" Width="150"/>
+                            <GridViewColumn Header="Ngưỡng" DisplayMemberBinding="{Binding Threshold, StringFormat={}{0:N0}}" Width="150"/>
+                            <GridViewColumn Header="Giảm giá (%)" DisplayMemberBinding="{Binding DiscountPercent}" Width="100"/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+
+                <!-- Nút điều khiển -->
+                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                    <Button x:Name="btnRemoveRule" Content="Xóa mức đã chọn" Margin="0,0,10,0" Click="BtnRemoveRule_Click"/>
+                    <!-- <Button x:Name="btnApplyDiscount" Content="Áp dụng cho toàn bộ khách hàng" FontWeight="Bold" Click="BtnApplyDiscount_Click"/> -->
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+
         <!-- Bảng dữ liệu -->
         <DataGrid x:Name="dgLoyalCustomers" 
                   AutoGenerateColumns="False" 
@@ -36,13 +79,14 @@
                 </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="STT" Binding="{Binding STT}" Width="50" ElementStyle="{StaticResource CenterCellStyle}"/>
-                <DataGridTextColumn Header="Tên khách hàng" Binding="{Binding CustomerName}" Width="*" ElementStyle="{StaticResource CenterCellStyle}"/>
-                <DataGridTextColumn Header="Mã Khách hàng" Binding="{Binding CustomerCode}" Width="150" ElementStyle="{StaticResource CenterCellStyle}"/>
-                <DataGridTextColumn Header="Số ĐT" Binding="{Binding PhoneNumber}" Width="120" ElementStyle="{StaticResource CenterCellStyle}"/>
-                <DataGridTextColumn Header="Địa chỉ" Binding="{Binding Address}" Width="2*" ElementStyle="{StaticResource CenterCellStyle}"/>
-                <DataGridTextColumn Header="Số lần mua" Binding="{Binding PurchaseCount}" Width="100" ElementStyle="{StaticResource CenterCellStyle}"/>
-                <DataGridTextColumn Header="Tổng chi tiêu" Binding="{Binding TotalSpent, StringFormat={}{0:N0} VNĐ}" Width="150" SortDirection="Descending" ElementStyle="{StaticResource CenterCellStyle}"/>
+                <DataGridTextColumn Header="STT" Binding="{Binding STT}" Width="0.5*" ElementStyle="{StaticResource CenterCellStyle}"/>
+                <DataGridTextColumn Header="Tên khách hàng" Binding="{Binding CustomerName}" Width="2*" ElementStyle="{StaticResource CenterCellStyle}"/>
+                <DataGridTextColumn Header="Mã Khách hàng" Binding="{Binding CustomerCode}" Width="1.5*" ElementStyle="{StaticResource CenterCellStyle}"/>
+                <DataGridTextColumn Header="Số ĐT" Binding="{Binding PhoneNumber}" Width="1.2*" ElementStyle="{StaticResource CenterCellStyle}"/>
+                <DataGridTextColumn Header="Địa chỉ" Binding="{Binding Address}" Width="2.5*" ElementStyle="{StaticResource CenterCellStyle}"/>
+                <DataGridTextColumn Header="Số lần mua" Binding="{Binding PurchaseCount}" Width="1*" ElementStyle="{StaticResource CenterCellStyle}"/>
+                <DataGridTextColumn Header="Tổng chi tiêu" Binding="{Binding TotalSpent, StringFormat={}{0:N0} VNĐ}" Width="1.5*" SortDirection="Descending" ElementStyle="{StaticResource CenterCellStyle}"/>
+                <DataGridTextColumn Header="Tiền được giảm" Binding="{Binding Discount, StringFormat={}{0:N0} VNĐ}" Width="1*" ElementStyle="{StaticResource CenterCellStyle}"/>
             </DataGrid.Columns>
         </DataGrid>
     </DockPanel>

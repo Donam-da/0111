@@ -7,7 +7,7 @@ namespace namm
 {
     public partial class InvoiceWindow : Window
     {
-        public InvoiceWindow(int tableId, string tableName, string customerName, string customerCode, decimal totalAmount, ObservableCollection<BillItem> billItems, int billId)
+        public InvoiceWindow(int tableId, string tableName, string customerName, string customerCode, decimal subTotal, decimal discountPercent, decimal finalTotal, ObservableCollection<BillItem> billItems, int billId)
         {
             InitializeComponent();
 
@@ -17,7 +17,16 @@ namespace namm
             tbCustomerCode.Text = customerCode;
             tbCustomerName.Text = customerName;
             tbDateTime.Text = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
-            tbTotalAmount.Text = $"{totalAmount:N0} VNĐ";
+
+            tbSubTotal.Text = $"{subTotal:N0}";
+            tbTotalAmount.Text = $"{finalTotal:N0} VNĐ";
+
+            if (discountPercent > 0)
+            {
+                decimal discountAmount = subTotal - finalTotal;
+                tbDiscountAmount.Text = $"-{discountAmount:N0} ({discountPercent:G29}%)";
+                gridDiscount.Visibility = Visibility.Visible;
+            }
 
             // Hiển thị danh sách món
             dgBillItems.ItemsSource = billItems;

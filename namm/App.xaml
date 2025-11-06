@@ -1,15 +1,19 @@
 ﻿<Application x:Class="namm.App"
- xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
- xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
- xmlns:local="clr-namespace:namm"
- StartupUri="MainWindow.xaml">
- <Application.Resources>
- <ResourceDictionary>
- <ResourceDictionary.MergedDictionaries>
- <ResourceDictionary Source="/namm;component/LinkButtonStyle.xaml" />
- </ResourceDictionary.MergedDictionaries>
- <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
- <local:NullToFalseConverter x:Key="NullToFalseConverter"/>
- </ResourceDictionary>
- </Application.Resources>
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:namm"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <local:NullToFalseConverter x:Key="NullToFalseConverter"/>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary>
+                    <ResourceDictionary.MergedDictionaries>
+                        <ResourceDictionary Source="LinkButtonStyle.xaml"/>
+                    </ResourceDictionary.MergedDictionaries>
+                </ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
 </Application>
