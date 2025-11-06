@@ -47,3 +47,5 @@ D:\QuanLyCafe\namm\obj\Debug\SelectCustomerView.g.cs
 D:\QuanLyCafe\namm\obj\Debug\LinkButtonStyle.baml
 D:\QuanLyCafe\namm\obj\Debug\InvoiceWindow.g.cs
 D:\QuanLyCafe\namm\obj\Debug\InvoiceWindow.baml
+D:\QuanLyCafe\namm\obj\Debug\InvoiceHistoryView.g.cs
+D:\QuanLyCafe\namm\obj\Debug\InvoiceHistoryView.baml

@@ -1,0 +1,98 @@
+<UserControl x:Class="namm.InvoiceHistoryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:namm"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1000"
+             FontFamily="Segoe UI" Loaded="UserControl_Loaded">
+    <DockPanel Margin="10">
+        <!-- Thanh công cụ lọc -->
+        <Border DockPanel.Dock="Top" Padding="5" Margin="0,0,0,10" BorderBrush="LightGray" BorderThickness="0,0,0,1">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="Từ ngày:" VerticalAlignment="Center" Margin="5"/>
+                <DatePicker x:Name="dpStartDate" Width="120" VerticalContentAlignment="Center"/>
+                <TextBlock Text="Đến ngày:" VerticalAlignment="Center" Margin="15,5,5,5"/>
+                <DatePicker x:Name="dpEndDate" Width="120" VerticalContentAlignment="Center"/>
+                <Button x:Name="btnFilter" Content="Lọc" Width="80" Height="30" Margin="15,0" Click="BtnFilter_Click"/>
+                <TextBlock Text="Tổng doanh thu:" VerticalAlignment="Center" Margin="20,0,5,0" FontWeight="SemiBold"/>
+                <TextBlock x:Name="tbTotalRevenue" Text="0 VNĐ" VerticalAlignment="Center" FontWeight="Bold" FontSize="16" Foreground="DarkRed"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Nội dung chính -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Danh sách hóa đơn -->
+            <DataGrid Grid.Column="0" x:Name="dgInvoices" AutoGenerateColumns="False" IsReadOnly="True"
+                      SelectionMode="Single" SelectionChanged="DgInvoices_SelectionChanged" LoadingRow="DgInvoices_LoadingRow">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="STT" Binding="{Binding STT}" Width="40"/>
+                    <DataGridTextColumn Header="Mã HĐ" Binding="{Binding ID, StringFormat=D6}" Width="80"/>
+                    <DataGridTextColumn Header="Ngày TT" Binding="{Binding DateCheckOut, StringFormat='dd/MM/yyyy HH:mm'}" Width="140"/>
+                    <DataGridTextColumn Header="Khách hàng" Binding="{Binding CustomerName}" Width="*"/>
+                    <DataGridTextColumn Header="Bàn" Binding="{Binding TableName}" Width="80"/>
+                    <DataGridTextColumn Header="Tổng tiền" Binding="{Binding TotalAmount, StringFormat={}{0:N0} VNĐ}" Width="120">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="TextAlignment" Value="Right"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
+
+            <!-- Chi tiết hóa đơn -->
+            <GroupBox Grid.Column="2" Header="Chi tiết hóa đơn" FontWeight="SemiBold">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Margin="5">
+                        <TextBlock x:Name="tbDetailInvoiceId" Text="Mã HĐ: "/>
+                        <TextBlock x:Name="tbDetailCustomer" Text="Khách hàng: "/>
+                        <TextBlock x:Name="tbDetailDate" Text="Ngày: "/>
+                    </StackPanel>
+                    
+                    <DataGrid x:Name="dgInvoiceDetails" AutoGenerateColumns="False" IsReadOnly="True"
+                              HeadersVisibility="Column" GridLinesVisibility="Horizontal" Background="Transparent">
+                        <DataGrid.Resources>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            </Style>
+                            <Style TargetType="DataGridCell">
+                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            </Style>
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Tên món" Binding="{Binding DrinkName}" Width="*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextAlignment" Value="Left"/>
+                                        <Setter Property="Padding" Value="5,0"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="SL" Binding="{Binding Quantity}" Width="40"/>
+                            <DataGridTextColumn Header="Đơn giá" Binding="{Binding Price, StringFormat={}{0:N0}}" Width="80"/>
+                            <DataGridTextColumn Header="Thành tiền" Binding="{Binding TotalPrice, StringFormat={}{0:N0}}" Width="90">
+                                <DataGridTextColumn.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                        <Setter Property="HorizontalContentAlignment" Value="Right"/>
+                                        <Setter Property="Padding" Value="0,0,5,0"/>
+                                    </Style>
+                                </DataGridTextColumn.CellStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </GroupBox>
+        </Grid>
+    </DockPanel>
+</UserControl>
