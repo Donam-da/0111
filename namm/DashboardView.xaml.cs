@@ -207,6 +207,7 @@ namespace namm
                             string drinkType = selectedItem.Key;
                             int quantity = selectedItem.Value;
                             decimal price = Convert.ToDecimal(selectedDrinkRow["ActualPrice"]);
+                            string baseDrinkCode = selectedDrinkRow["DrinkCode"].ToString() ?? "";
 
                             var existingItem = currentBillItems.FirstOrDefault(item => item.DrinkId == drinkId && item.DrinkType == drinkType);
 
@@ -216,7 +217,14 @@ namespace namm
                             }
                             else
                             {
-                                currentBillItems.Add(new BillItem { DrinkId = drinkId, DrinkName = drinkName, DrinkType = drinkType, Quantity = quantity, Price = price });
+                                currentBillItems.Add(new BillItem { 
+                                    DrinkId = drinkId, 
+                                    DrinkName = drinkName, 
+                                    DrinkTypeCode = $"{baseDrinkCode}_{(drinkType == "Nguyên bản" ? "NB" : "PC")}",
+                                    DrinkType = drinkType, 
+                                    Quantity = quantity, 
+                                    Price = price 
+                                });
                             }
                             // Cập nhật kho cho món vừa được thêm/cập nhật
                             await UpdateStockForDrinkAsync(drinkId, drinkType, quantity);
@@ -378,8 +386,7 @@ namespace namm
             using (var connection = new SqlConnection(connectionString))
             {
                 // Tìm hóa đơn chưa thanh toán (Status = 0) của bàn
-                const string query = @"
-                    SELECT bi.DrinkID, d.Name, bi.DrinkType, bi.Quantity, bi.Price
+                const string query = @"                    SELECT bi.DrinkID, d.Name, bi.DrinkType, bi.Quantity, bi.Price, d.DrinkCode
                     FROM BillInfo bi
                     JOIN Bill b ON bi.BillID = b.ID
                     JOIN Drink d ON bi.DrinkID = d.ID
@@ -393,8 +400,13 @@ namespace namm
                 {
                     while (await reader.ReadAsync())
                     {
+                        string drinkType = reader.GetString(2);
+                        string baseDrinkCode = reader.GetString(5);
+
                         billItems.Add(new BillItem
                         {
+                            // Xây dựng lại DrinkTypeCode khi tải từ DB
+                            DrinkTypeCode = $"{baseDrinkCode}_{(drinkType == "Nguyên bản" ? "NB" : "PC")}",
                             DrinkId = reader.GetInt32(0),
                             DrinkName = reader.GetString(1),
                             DrinkType = reader.GetString(2),
@@ -443,6 +455,7 @@ namespace namm
                         {
                             var cmdInsertInfo = new SqlCommand("INSERT INTO BillInfo (BillID, DrinkID, DrinkType, Quantity, Price) VALUES (@BillID, @DrinkID, @DrinkType, @Quantity, @Price)", connection, transaction);
                             cmdInsertInfo.Parameters.AddWithValue("@BillID", billId);
+                            // Lưu ý: DrinkTypeCode không được lưu vào DB, nó chỉ dùng để hiển thị
                             cmdInsertInfo.Parameters.AddWithValue("@DrinkID", item.DrinkId);
                             cmdInsertInfo.Parameters.AddWithValue("@DrinkType", item.DrinkType);
                             cmdInsertInfo.Parameters.AddWithValue("@Quantity", item.Quantity);

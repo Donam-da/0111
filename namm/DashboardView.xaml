@@ -106,7 +106,7 @@
 
             <DataGrid x:Name="dgBill" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Tên món" Binding="{Binding DrinkName}" Width="*"/>
+                    <DataGridTextColumn Header="Mã kiểu đồ uống" Binding="{Binding DrinkTypeCode}" Width="*"/>
                     <DataGridTextColumn Header="SL" Binding="{Binding Quantity}" Width="Auto"/>
                     <DataGridTextColumn Header="Đơn giá" Binding="{Binding Price, StringFormat={}{0:N0}}" Width="Auto"/>
                     <DataGridTextColumn Header="Thành tiền" Binding="{Binding TotalPrice, StringFormat={}{0:N0}}" Width="Auto"/>

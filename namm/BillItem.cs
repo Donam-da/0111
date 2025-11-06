@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+﻿﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace namm
@@ -7,6 +7,7 @@ namespace namm
     {
         public int DrinkId { get; set; }
         public string DrinkName { get; set; } = string.Empty;
+        public string DrinkTypeCode { get; set; } = string.Empty; // Mã kiểu đồ uống (ví dụ: caphesua_NB)
         public string DrinkType { get; set; } = string.Empty; // "Nguyên bản" hoặc "Pha chế"
 
         private int _quantity;
