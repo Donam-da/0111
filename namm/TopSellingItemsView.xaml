@@ -1,0 +1,85 @@
+<UserControl x:Class="namm.TopSellingItemsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:namm"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1000"
+             FontFamily="Segoe UI" Loaded="UserControl_Loaded">
+    <DockPanel Margin="10">
+        <!-- Tiêu đề và bộ lọc -->
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock Text="THỐNG KÊ TOP HÀNG BÁN CHẠY" 
+                       FontSize="20" 
+                       FontWeight="Bold" 
+                       Foreground="#2E4053" 
+                       HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,10"/>
+
+            <Border Padding="5" Margin="0,0,0,10" BorderBrush="LightGray" BorderThickness="0,0,0,1">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <TextBlock Text="Từ ngày:" VerticalAlignment="Center" Margin="5"/>
+                        <DatePicker x:Name="dpStartDate" Width="120" VerticalContentAlignment="Center" SelectedDateChanged="DpStartDate_SelectedDateChanged"/>
+                        <TextBlock Text="Đến ngày:" VerticalAlignment="Center" Margin="15,5,5,5"/>
+                        <DatePicker x:Name="dpEndDate" Width="120" VerticalContentAlignment="Center"/>
+                        <Button x:Name="btnFilter" Content="Lọc" Width="80" Height="30" Margin="15,0" Click="BtnFilter_Click"/>
+                    </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <!-- Bộ lọc cột -->
+        <Border DockPanel.Dock="Top" Padding="5" Margin="0,0,0,5">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="Tên đồ uống:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBox Grid.Column="1" x:Name="txtFilterDrinkName" TextChanged="Filter_TextChanged"/>
+
+                <TextBlock Grid.Column="2" Text="Mã đồ uống:" VerticalAlignment="Center" Margin="10,0,5,0"/>
+                <TextBox Grid.Column="3" x:Name="txtFilterDrinkCode" TextChanged="Filter_TextChanged"/>
+
+                <TextBlock Grid.Column="4" Text="Kiểu:" VerticalAlignment="Center" Margin="10,0,5,0"/>
+                <ComboBox Grid.Column="5" x:Name="cbFilterDrinkType" SelectionChanged="Filter_TextChanged"/>
+            </Grid>
+        </Border>
+
+        <!-- Bảng dữ liệu -->
+        <DataGrid x:Name="dgTopSelling" 
+                  AutoGenerateColumns="False" 
+                  IsReadOnly="True"
+                  CanUserSortColumns="True"
+                  GridLinesVisibility="Horizontal"
+                  AlternatingRowBackground="#F5F5F5">
+            <DataGrid.Resources>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                </Style>
+                <Style x:Key="CenterCellStyle" TargetType="TextBlock">
+                    <Setter Property="HorizontalAlignment" Value="Center" />
+                </Style>
+                <Style x:Key="RightCellStyle" TargetType="TextBlock">
+                    <Setter Property="HorizontalAlignment" Value="Right" />
+                    <Setter Property="Margin" Value="0,0,5,0"/>
+                </Style>
+            </DataGrid.Resources>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="STT" Binding="{Binding STT}" Width="0.5*" ElementStyle="{StaticResource CenterCellStyle}"/>
+                <DataGridTextColumn Header="Tên đồ uống" Binding="{Binding DrinkName}" Width="2.5*" ElementStyle="{StaticResource CenterCellStyle}"/>
+                <DataGridTextColumn Header="Mã đồ uống" Binding="{Binding DrinkCode}" Width="1.5*" ElementStyle="{StaticResource CenterCellStyle}"/>
+                <DataGridTextColumn Header="Kiểu" Binding="{Binding DrinkType}" Width="1*" ElementStyle="{StaticResource CenterCellStyle}"/>
+                <DataGridTextColumn Header="Số lượng bán" Binding="{Binding TotalQuantitySold}" Width="1.2*" SortDirection="Descending" ElementStyle="{StaticResource CenterCellStyle}">
+                    <DataGridTextColumn.CellStyle><Style TargetType="DataGridCell"><Setter Property="FontWeight" Value="Bold"/></Style></DataGridTextColumn.CellStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Tổng doanh thu" Binding="{Binding TotalRevenue, StringFormat={}{0:N0} VNĐ}" Width="1.5*" ElementStyle="{StaticResource CenterCellStyle}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</UserControl>

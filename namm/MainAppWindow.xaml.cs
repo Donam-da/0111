@@ -154,5 +154,12 @@ namespace namm
             MainContent.Children.Clear();
             MainContent.Children.Add(new LoyalCustomerView());
         }
+
+        private void TopSelling_Click(object sender, RoutedEventArgs e)
+        {
+            // Hiển thị giao diện thống kê top hàng bán chạy
+            MainContent.Children.Clear();
+            MainContent.Children.Add(new TopSellingItemsView());
+        }
     }
 }

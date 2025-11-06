@@ -35,7 +35,7 @@
             <MenuItem x:Name="miStatistics" Header="_Thống kê" Click="TopLevelMenuItem_Click">
                 <MenuItem Header="Doanh thu nhân viên"/>
                 <MenuItem x:Name="miProfitStatistics" Header="Thống kê lợi nhuận"/>
-                <MenuItem Header="Top hàng bán chạy"/>
+                <MenuItem Header="Top hàng bán chạy" Click="TopSelling_Click"/>
                 <MenuItem Header="Khách hàng thân thiết" Click="LoyalCustomers_Click"/>
                 <MenuItem x:Name="miInvoiceHistory" Header="Lịch sử hóa đơn" Click="InvoiceHistory_Click"/>
             </MenuItem>

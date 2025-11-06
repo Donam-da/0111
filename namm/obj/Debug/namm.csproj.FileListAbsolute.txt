@@ -53,3 +53,5 @@ D:\QuanLyCafe\namm\obj\Debug\InvoicePreviewControl.g.cs
 D:\QuanLyCafe\namm\obj\Debug\InvoicePreviewControl.baml
 D:\QuanLyCafe\namm\obj\Debug\LoyalCustomerView.g.cs
 D:\QuanLyCafe\namm\obj\Debug\LoyalCustomerView.baml
+D:\QuanLyCafe\namm\obj\Debug\TopSellingItemsView.g.cs
+D:\QuanLyCafe\namm\obj\Debug\TopSellingItemsView.baml

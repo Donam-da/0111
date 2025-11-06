@@ -134,6 +134,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="TopSellingItemsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="LinkButtonStyle.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -219,6 +223,10 @@
     </Compile>
     <Compile Include="LoyalCustomerView.xaml.cs">
       <DependentUpon>LoyalCustomerView.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TopSellingItemsView.xaml.cs">
+      <DependentUpon>TopSellingItemsView.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="BillItem.cs">
