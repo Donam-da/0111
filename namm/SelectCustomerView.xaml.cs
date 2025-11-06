@@ -50,7 +50,7 @@ namespace namm
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                const string query = "SELECT ID, Name, PhoneNumber, Address FROM Customer ORDER BY Name";
+                const string query = "SELECT ID, Name, PhoneNumber, Address, CustomerCode FROM Customer ORDER BY Name";
                 var adapter = new SqlDataAdapter(query, connection);
                 customerDataTable = new DataTable();
                 customerDataTable.Columns.Add("STT", typeof(int));
@@ -74,12 +74,13 @@ namespace namm
             if (dgCustomers.SelectedItem is DataRowView selected)
             {
                 _selectedCustomer = selected;
-                tbSelectedCustomer.Text = $"Đã chọn: {selected["Name"]} - SĐT: {selected["PhoneNumber"]}";
+                tbSelectedCustomer.Text = $"Đã chọn: {selected["Name"]} (Mã: {selected["CustomerCode"]}) - SĐT: {selected["PhoneNumber"]}";
                 btnPay.IsEnabled = true;
 
                 // Điền thông tin vào form để sửa
                 txtNewCustomerName.Text = selected["Name"].ToString();
                 txtNewCustomerPhone.Text = selected["PhoneNumber"].ToString();
+                txtNewCustomerCode.Text = selected["CustomerCode"].ToString();
                 txtNewCustomerAddress.Text = selected["Address"].ToString();
 
                 // Cập nhật trạng thái các nút
@@ -102,7 +103,7 @@ namespace namm
             if (customerDataTable.DefaultView != null)
             {
                 customerDataTable.DefaultView.RowFilter =
-                    $"Name LIKE '%{filter}%' OR PhoneNumber LIKE '%{filter}%'";
+                    $"Name LIKE '%{filter}%' OR PhoneNumber LIKE '%{filter}%' OR CustomerCode LIKE '%{filter}%'";
             }
         }
 
@@ -116,6 +117,73 @@ namespace namm
             }
         }
 
+        private async void TxtNewCustomerName_LostFocus(object sender, RoutedEventArgs e)
+        {
+            // Chỉ tạo mã mới khi đang ở chế độ "Thêm mới"
+            if (btnAddNewCustomer.IsEnabled)
+            {
+                string baseCode = GenerateCustomerCode(txtNewCustomerName.Text);
+                if (string.IsNullOrEmpty(baseCode))
+                {
+                    txtNewCustomerCode.Text = string.Empty;
+                    return;
+                }
+
+                string uniqueCode = await GetNextAvailableCustomerCodeAsync(baseCode);
+                txtNewCustomerCode.Text = uniqueCode;
+            }
+        }
+
+        private string GenerateCustomerCode(string customerName)
+        {
+            if (string.IsNullOrWhiteSpace(customerName))
+                return string.Empty;
+
+            string temp = customerName.ToLower().Trim();
+
+            // Bỏ dấu tiếng Việt
+            temp = Regex.Replace(temp, "[áàảãạâấầẩẫậăắằẳẵặ]", "a");
+            temp = Regex.Replace(temp, "[éèẻẽẹêếềểễệ]", "e");
+            temp = Regex.Replace(temp, "[íìỉĩị]", "i");
+            temp = Regex.Replace(temp, "[óòỏõọôốồổỗộơớờởỡợ]", "o");
+            temp = Regex.Replace(temp, "[úùủũụưứừửữự]", "u");
+            temp = Regex.Replace(temp, "[ýỳỷỹỵ]", "y");
+            temp = Regex.Replace(temp, "[đ]", "d");
+
+            // Thay thế nhiều khoảng trắng bằng một dấu gạch dưới
+            temp = Regex.Replace(temp, @"\s+", "_");
+
+            // Loại bỏ các ký tự không hợp lệ khác
+            temp = Regex.Replace(temp, "[^a-z0-9_]", "");
+
+            return temp;
+        }
+
+        private async Task<string> GetNextAvailableCustomerCodeAsync(string baseCode)
+        {
+            var existingCodes = new HashSet<string>();
+            using (var connection = new SqlConnection(connectionString))
+            {
+                var command = new SqlCommand("SELECT CustomerCode FROM Customer WHERE CustomerCode LIKE @Pattern", connection);
+                command.Parameters.AddWithValue("@Pattern", baseCode + "%");
+
+                await connection.OpenAsync();
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        existingCodes.Add(reader.GetString(0));
+                    }
+                }
+            }
+
+            if (!existingCodes.Contains(baseCode)) return baseCode;
+
+            int suffix = 1;
+            while (existingCodes.Contains($"{baseCode}_{suffix}")) { suffix++; }
+            return $"{baseCode}_{suffix}";
+        }
+
         private async void BtnAddNewCustomer_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtNewCustomerName.Text))
@@ -124,11 +192,18 @@ namespace namm
                 return;
             }
 
+            if (string.IsNullOrWhiteSpace(txtNewCustomerCode.Text))
+            {
+                MessageBox.Show("Mã khách hàng không được để trống. Vui lòng nhập tên và rời khỏi ô để tạo mã.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             using (var connection = new SqlConnection(connectionString)) // Đổi tên nút từ "Thêm & Chọn" thành "Thêm mới"
             {
-                const string query = "INSERT INTO Customer (Name, PhoneNumber, Address) OUTPUT INSERTED.ID VALUES (@Name, @PhoneNumber, @Address)";
+                const string query = "INSERT INTO Customer (Name, CustomerCode, PhoneNumber, Address) OUTPUT INSERTED.ID VALUES (@Name, @CustomerCode, @PhoneNumber, @Address)";
                 var command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@Name", txtNewCustomerName.Text);
+                command.Parameters.AddWithValue("@CustomerCode", txtNewCustomerCode.Text);
                 command.Parameters.AddWithValue("@PhoneNumber", string.IsNullOrWhiteSpace(txtNewCustomerPhone.Text) ? DBNull.Value : (object)txtNewCustomerPhone.Text);
                 command.Parameters.AddWithValue("@Address", string.IsNullOrWhiteSpace(txtNewCustomerAddress.Text) ? DBNull.Value : (object)txtNewCustomerAddress.Text);
 
@@ -165,11 +240,21 @@ namespace namm
                 return;
             }
 
+            // Khi sửa, mã khách hàng không thay đổi, chỉ cập nhật các thông tin khác
+            // Nếu muốn cho phép sửa cả tên và tạo lại mã, logic sẽ phức tạp hơn
+            if (txtNewCustomerName.Text != _selectedCustomer["Name"].ToString())
+            {
+                if (MessageBox.Show("Bạn đã thay đổi tên khách hàng. Điều này sẽ không thay đổi mã khách hàng hiện tại. Bạn có muốn tiếp tục?", "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
+                {
+                    return;
+                }
+            }
+
             int customerId = (int)_selectedCustomer["ID"];
 
             using (var connection = new SqlConnection(connectionString))
             {
-                const string query = "UPDATE Customer SET Name = @Name, PhoneNumber = @PhoneNumber, Address = @Address WHERE ID = @ID";
+                const string query = "UPDATE Customer SET Name = @Name, PhoneNumber = @PhoneNumber, Address = @Address WHERE ID = @ID"; // Không cập nhật CustomerCode
                 var command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@ID", customerId);
                 command.Parameters.AddWithValue("@Name", txtNewCustomerName.Text);
@@ -261,6 +346,7 @@ namespace namm
         {
             txtNewCustomerName.Clear();
             txtNewCustomerPhone.Clear();
+            txtNewCustomerCode.Clear();
             txtNewCustomerAddress.Clear();
             dgCustomers.SelectedItem = null;
 
