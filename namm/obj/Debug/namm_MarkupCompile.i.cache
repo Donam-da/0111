@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-C:\Users\Admin\source\repos\namm\obj\Debug\
+D:\QuanLyCafe\namm\obj\Debug\
 namm
 none
 false
 DEBUG;TRACE
-C:\Users\Admin\source\repos\namm\App.xaml
-1219584333
+D:\QuanLyCafe\namm\App.xaml
+16-530293049
 
-6-502434485
-13-1310406943
-MainWindow.xaml;
+23-1987016971
+14-207034072
+MainWindow.xaml;MainAppWindow.xaml;EmployeeView.xaml;ChangePasswordView.xaml;TableView.xaml;DashboardView.xaml;UnitView.xaml;MaterialView.xaml;DrinkView.xaml;MenuView.xaml;RecipeView.xaml;AddDrinkDialog.xaml;CategoryView.xaml;SelectDrinkTypeDialog.xaml;SelectCustomerView.xaml;LinkButtonStyle.xaml;
 
-True
+False
 

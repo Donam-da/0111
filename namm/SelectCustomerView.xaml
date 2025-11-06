@@ -4,19 +4,64 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
+             d:DesignHeight="600" d:DesignWidth="1000">
+
+    <UserControl.Resources>
+        <Style x:Key="TextBoxWithPlaceholder" TargetType="TextBox">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Grid>
+                            <Border Background="{TemplateBinding Background}" 
+                                    BorderBrush="{TemplateBinding BorderBrush}" 
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="2"/>
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="5,0"/>
+                            <TextBlock Text="{TemplateBinding Tag}" 
+                                       Foreground="Gray" 
+                                       Margin="5,2"
+                                       VerticalAlignment="Center"
+                                       IsHitTestVisible="False">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="#FAFAFA">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
+        <!-- Tiêu đề -->
         <StackPanel Grid.Row="0" Margin="10">
-            <TextBlock Text="THANH TOÁN &amp; CHỌN KHÁCH HÀNG" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center"/>
-            <TextBlock x:Name="tbBillInfo" HorizontalAlignment="Center" FontSize="16" Margin="0,5,0,0" Foreground="DarkSlateGray"/>
+            <TextBlock Text="THANH TOÁN &amp; CHỌN KHÁCH HÀNG" 
+                       FontSize="22" 
+                       FontWeight="Bold" 
+                       Foreground="#2E4053" 
+                       HorizontalAlignment="Center"/>
+            <TextBlock x:Name="tbBillInfo" 
+                       HorizontalAlignment="Center" 
+                       FontSize="16" 
+                       Margin="0,5,0,0" 
+                       Foreground="DarkSlateGray"/>
             <Separator Margin="0,10,0,10"/>
         </StackPanel>
 
+        <!-- Nội dung chính -->
         <Grid Grid.Row="1" Margin="10,0,10,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
@@ -27,11 +72,30 @@
             <DockPanel Grid.Column="0" Margin="0,0,10,0">
                 <StackPanel DockPanel.Dock="Top">
                     <TextBlock Text="Tìm khách hàng (theo Tên hoặc SĐT):" Margin="0,0,0,5"/>
-                    <TextBox x:Name="txtSearchCustomer" TextChanged="TxtSearchCustomer_TextChanged"/>
+                    <TextBox x:Name="txtSearchCustomer" 
+                             KeyDown="TxtSearchCustomer_KeyDown" 
+                             Tag="Nhập từ khóa tìm kiếm..." Style="{StaticResource TextBoxWithPlaceholder}"
+                             Margin="0,0,0,5"/>
                 </StackPanel>
-                <TextBlock x:Name="tbSelectedCustomer" DockPanel.Dock="Bottom" Text="(Chưa chọn khách hàng)" FontStyle="Italic" Margin="0,5,0,0"/>
-                <DataGrid x:Name="dgCustomers" Margin="0,10,0,0" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single"
-                          LoadingRow="DgCustomers_LoadingRow" SelectionChanged="DgCustomers_SelectionChanged" SelectedValuePath="ID">
+
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,5,0,0">
+                    <TextBlock x:Name="tbSelectedCustomer" 
+                               Text="(Chưa chọn khách hàng)" 
+                               FontStyle="Italic" 
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <DataGrid x:Name="dgCustomers" 
+                          Margin="0,10,0,0" 
+                          AutoGenerateColumns="False" 
+                          IsReadOnly="True" 
+                          SelectionMode="Single"
+                          LoadingRow="DgCustomers_LoadingRow" 
+                          SelectionChanged="DgCustomers_SelectionChanged" 
+                          SelectedValuePath="ID"
+                          GridLinesVisibility="Horizontal"
+                          HeadersVisibility="Column"
+                          AlternatingRowBackground="#F5F5F5">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="STT" Binding="{Binding STT}" Width="40"/>
                         <DataGridTextColumn Header="Tên khách hàng" Binding="{Binding Name}" Width="*"/>
@@ -41,25 +105,74 @@
                 </DataGrid>
             </DockPanel>
 
-            <!-- Cột phải: Thêm khách hàng mới và thanh toán -->
+            <!-- Cột phải: Thêm khách hàng mới & Thanh toán -->
             <StackPanel Grid.Column="1" Margin="10,0,0,0">
-                <GroupBox Header="Thêm khách hàng mới" FontWeight="Bold">
+                <GroupBox Header="Thông tin khách hàng" FontWeight="Bold" Margin="0,0,0,10">
                     <StackPanel Margin="5">
                         <TextBlock Text="Tên khách hàng (*):"/>
-                        <TextBox x:Name="txtNewCustomerName" Margin="0,2,0,5"/>
+                        <TextBox x:Name="txtNewCustomerName" 
+                                 Margin="0,2,0,5"
+                                 Tag="Nhập họ và tên đầy đủ..." Style="{StaticResource TextBoxWithPlaceholder}"/>
+
                         <TextBlock Text="Số điện thoại:"/>
-                        <TextBox x:Name="txtNewCustomerPhone" Margin="0,2,0,5"/>
+                        <TextBox x:Name="txtNewCustomerPhone" 
+                                 Margin="0,2,0,5"
+                                 Tag="Nhập số điện thoại..." Style="{StaticResource TextBoxWithPlaceholder}"/>
+
                         <TextBlock Text="Địa chỉ:"/>
-                        <TextBox x:Name="txtNewCustomerAddress" Margin="0,2,0,5"/>
-                        <Button x:Name="btnAddNewCustomer" Content="Thêm &amp; Chọn" Click="BtnAddNewCustomer_Click"/>
+                        <TextBox x:Name="txtNewCustomerAddress" 
+                                 Margin="0,2,0,5"
+                                 Tag="Nhập địa chỉ khách hàng..." Style="{StaticResource TextBoxWithPlaceholder}"/>
+
+                        <WrapPanel HorizontalAlignment="Center" Margin="0,15,0,5">
+                            <Button x:Name="btnAddNewCustomer"
+                                    Content="Thêm mới"
+                                    Click="BtnAddNewCustomer_Click"
+                                    Margin="2" Padding="10,5"/>
+                            <Button x:Name="btnEditCustomer"
+                                    Content="Lưu sửa"
+                                    Click="BtnEditCustomer_Click"
+                                    Margin="2" Padding="10,5"
+                                    IsEnabled="False"/>
+                            <Button x:Name="btnDeleteCustomer"
+                                    Content="Xóa"
+                                    Click="BtnDeleteCustomer_Click"
+                                    Margin="2" Padding="10,5"
+                                    Background="#DC3545" Foreground="White"
+                                    IsEnabled="False"/>
+                            <Button x:Name="btnResetNewCustomer"
+                                    Content="Làm mới"
+                                    Click="BtnResetNewCustomer_Click"
+                                    Margin="2" Padding="10,5"/>
+                        </WrapPanel>
                     </StackPanel>
                 </GroupBox>
 
-                <Separator Margin="0,20,0,20"/>
+                <Separator Margin="0,10,0,10"/>
 
-                <Button x:Name="btnPay" Content="Thanh Toán" Height="40" FontSize="16" FontWeight="Bold" Background="#4CAF50" Foreground="White" IsEnabled="False" Click="BtnPay_Click"/>
-                <Button x:Name="btnPayAsGuest" Content="Thanh toán (Khách vãng lai)" Margin="0,10,0,0" Click="BtnPay_Click"/>
-                <Button x:Name="btnBack" Content="Quay lại" Margin="0,10,0,0" Click="BtnBack_Click"/>
+                <Button x:Name="btnPay" 
+                        Content="Thanh Toán" 
+                        Height="45" 
+                        FontSize="16" 
+                        FontWeight="Bold" 
+                        Background="#4CAF50" 
+                        Foreground="White" 
+                        IsEnabled="False" 
+                        Click="BtnPay_Click"/>
+
+                <Button x:Name="btnPayAsGuest" 
+                        Content="Thanh toán (Khách vãng lai)" 
+                        Margin="0,10,0,0" 
+                        Height="40" 
+                        Background="#0275D8" 
+                        Foreground="White"
+                        Click="BtnPay_Click"/>
+
+                <Button x:Name="btnBack" 
+                        Content="Quay lại" 
+                        Margin="0,10,0,0" 
+                        Height="35" 
+                        Click="BtnBack_Click"/>
             </StackPanel>
         </Grid>
     </Grid>

@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿﻿﻿﻿using System;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
@@ -90,7 +90,7 @@ namespace namm
             if (dgMenuItems.SelectedItem is DataRowView row)
             {
                 // Tạm ngắt sự kiện để tránh tạo mã mới khi đang chọn
-                txtName.TextChanged -= TxtName_TextChanged;
+                txtName.LostFocus -= TxtName_LostFocus;
 
                 txtName.Text = row["Name"] as string ?? string.Empty;
                 txtDrinkCode.Text = row["DrinkCode"] as string ?? string.Empty;
@@ -98,7 +98,7 @@ namespace namm
                 chkIsActive.IsChecked = Convert.ToBoolean(row["IsActive"]);
 
                 // Bật lại sự kiện
-                txtName.TextChanged += TxtName_TextChanged;
+                txtName.LostFocus += TxtName_LostFocus;
             }
             else
             {
@@ -211,12 +211,12 @@ namespace namm
             }
         }
 
-        private void TxtName_TextChanged(object sender, TextChangedEventArgs e)
+        private void TxtName_LostFocus(object sender, RoutedEventArgs e)
         {
             // Chỉ tạo mã khi người dùng đang thêm mới (chưa chọn item nào từ grid)
             if (dgMenuItems.SelectedItem == null)
             {
-                txtDrinkCode.Text = GenerateMenuCode(txtName.Text);
+                txtDrinkCode.Text = GenerateMenuCode(txtName.Text); // Logic tạo mã vẫn giữ nguyên
             }
         }
 
