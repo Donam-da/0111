@@ -147,5 +147,12 @@ namespace namm
             MainContent.Children.Clear();
             MainContent.Children.Add(new InvoiceHistoryView());
         }
+
+        private void LoyalCustomers_Click(object sender, RoutedEventArgs e)
+        {
+            // Hiển thị giao diện thống kê khách hàng thân thiết
+            MainContent.Children.Clear();
+            MainContent.Children.Add(new LoyalCustomerView());
+        }
     }
 }
