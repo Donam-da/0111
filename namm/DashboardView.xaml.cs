@@ -218,12 +218,13 @@ namespace namm
                             {
                                 currentBillItems.Add(new BillItem { DrinkId = drinkId, DrinkName = drinkName, DrinkType = drinkType, Quantity = quantity, Price = price });
                             }
+                            // Cập nhật kho cho món vừa được thêm/cập nhật
+                            await UpdateStockForDrinkAsync(drinkId, drinkType, quantity);
                         }
-                        // Lưu hóa đơn vào cơ sở dữ liệu
+                        // Sau khi xử lý tất cả các món, lưu toàn bộ hóa đơn vào DB
                         await SaveBillToDbAsync(currentTableId, currentBillItems);
 
                         UpdateTotalAmount();
-                        // Sau khi thêm món, đồng bộ lại trạng thái bàn
                         SyncTableStatusBasedOnBill();
                     }
                 }
@@ -252,6 +253,10 @@ namespace namm
         {
             if ((sender as Button)?.CommandParameter is BillItem itemToRemove && dgBill.ItemsSource is ObservableCollection<BillItem> currentBillItems)
             {
+                // Trước khi xóa, hoàn trả lại số lượng vào kho
+                // Chạy tác vụ này ở chế độ nền
+                _ = UpdateStockForDrinkAsync(itemToRemove.DrinkId, itemToRemove.DrinkType, -itemToRemove.Quantity);
+
                 currentBillItems.Remove(itemToRemove);
                 UpdateTotalAmount();
 
@@ -320,6 +325,50 @@ namespace namm
             {
                 // Ghi lại lỗi hoặc hiển thị một thông báo không làm phiền người dùng
                 MessageBox.Show($"Không thể cập nhật trạng thái bàn vào cơ sở dữ liệu: {ex.Message}", "Lỗi nền", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private async Task UpdateStockForDrinkAsync(int drinkId, string drinkType, int quantityChange)
+        {
+            // quantityChange > 0: Trừ kho (thêm món)
+            // quantityChange < 0: Hoàn kho (xóa món)
+            if (quantityChange == 0) return;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                await connection.OpenAsync();
+                if (drinkType == "Nguyên bản")
+                {
+                    var cmd = new SqlCommand("UPDATE Drink SET StockQuantity = StockQuantity - @QuantityChange WHERE ID = @DrinkID", connection);
+                    cmd.Parameters.AddWithValue("@DrinkID", drinkId);
+                    cmd.Parameters.AddWithValue("@QuantityChange", quantityChange);
+                    await cmd.ExecuteNonQueryAsync();
+                }
+                else if (drinkType == "Pha chế")
+                {
+                    // Lấy công thức của đồ uống
+                    var recipeCmd = new SqlCommand("SELECT MaterialID, Quantity FROM Recipe WHERE DrinkID = @DrinkID", connection);
+                    recipeCmd.Parameters.AddWithValue("@DrinkID", drinkId);
+
+                    var materialsToUpdate = new List<(int MaterialID, decimal RecipeQuantity)>();
+                    using (var reader = await recipeCmd.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            materialsToUpdate.Add((reader.GetInt32(0), reader.GetDecimal(1)));
+                        }
+                    }
+
+                    // Cập nhật số lượng cho từng nguyên liệu
+                    foreach (var material in materialsToUpdate)
+                    {
+                        var updateMaterialCmd = new SqlCommand("UPDATE Material SET Quantity = Quantity - @QuantityChange WHERE ID = @MaterialID", connection);
+                        decimal totalMaterialChange = (decimal)material.RecipeQuantity * quantityChange;
+                        updateMaterialCmd.Parameters.AddWithValue("@MaterialID", material.MaterialID);
+                        updateMaterialCmd.Parameters.AddWithValue("@QuantityChange", totalMaterialChange);
+                        await updateMaterialCmd.ExecuteNonQueryAsync();
+                    }
+                }
             }
         }
 
