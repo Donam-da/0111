@@ -291,7 +291,8 @@ namespace namm
             }
             else if (sender == btnPayAsGuest)
             {
-                // customerId vẫn là null cho khách vãng lai
+                // Tạo mã khách hàng đặc biệt cho khách vãng lai dựa trên thời gian
+                customerCode = DateTime.Now.ToString("HHmmssddMMyy");
             }
             else
             {

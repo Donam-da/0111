@@ -28,10 +28,10 @@
 
         <!-- Phần thông tin chi tiết: Bàn, Khách hàng, Ngày -->
         <Border Grid.Row="1" BorderBrush="LightGray" BorderThickness="0,1,0,1" Margin="0,15" Padding="0,10">
-            <Grid>
+            <Grid HorizontalAlignment="Center">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -41,69 +41,52 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="Số HĐ:" FontWeight="SemiBold" Margin="0,0,10,2"/>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Số HĐ:" FontWeight="SemiBold" Margin="0,0,10,2" TextAlignment="Left"/>
                 <TextBlock Grid.Row="0" Grid.Column="1" x:Name="tbInvoiceId" Text="HD00123"/>
-
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="Bàn:" FontWeight="SemiBold" Margin="0,0,10,2"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Bàn:" FontWeight="SemiBold" Margin="0,0,10,2" TextAlignment="Left"/>
                 <TextBlock Grid.Row="1" Grid.Column="1" x:Name="tbTableName" Text="Bàn 01"/>
-
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="Khách hàng:" FontWeight="SemiBold" Margin="0,0,10,2"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Khách hàng:" FontWeight="SemiBold" Margin="0,0,10,2" TextAlignment="Left"/>
                 <TextBlock Grid.Row="2" Grid.Column="1" x:Name="tbCustomerName" Text="Đỗ Hoài Nam"/>
-
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="Mã KH:" FontWeight="SemiBold" Margin="0,0,10,2"/>
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Mã KH:" FontWeight="SemiBold" Margin="0,0,10,2" TextAlignment="Left"/>
                 <TextBlock Grid.Row="3" Grid.Column="1" x:Name="tbCustomerCode" Text="N/A"/>
-
-                <TextBlock Grid.Row="4" Grid.Column="0" Text="Ngày:" FontWeight="SemiBold" Margin="0,0,10,2"/>
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="Ngày:" FontWeight="SemiBold" Margin="0,0,10,2" TextAlignment="Left"/>
                 <TextBlock Grid.Row="4" Grid.Column="1" x:Name="tbDateTime" Text="20/10/2023 10:30 AM"/>
             </Grid>
         </Border>
 
         <!-- Danh sách các món ăn -->
-        <ListView Grid.Row="2" x:Name="lvBillItems" BorderThickness="0" HorizontalContentAlignment="Stretch">
-            <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="Focusable" Value="False"/>
+        <DataGrid Grid.Row="2" x:Name="dgBillItems" BorderThickness="0" HorizontalAlignment="Center"
+                  AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
+                  HeadersVisibility="Column" GridLinesVisibility="None" Background="Transparent">
+            <DataGrid.Resources>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
                 </Style>
-            </ListView.ItemContainerStyle>
-            <ListView.View>
-                <GridView>
-                    <GridView.ColumnHeaderContainerStyle>
-                        <Style TargetType="{x:Type GridViewColumnHeader}">
-                            <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Style x:Key="CenterCell" TargetType="TextBlock">
+                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                </Style>
+            </DataGrid.Resources>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Tên món" Binding="{Binding DrinkName}" Width="160">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="TextAlignment" Value="Center"/>
+                            <Setter Property="TextWrapping" Value="Wrap"/>
                         </Style>
-                    </GridView.ColumnHeaderContainerStyle>
-
-                    <GridViewColumn Header="Tên món" Width="160">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding DrinkName}" TextWrapping="Wrap" TextAlignment="Center"/>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Header="SL" Width="40">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Quantity}" HorizontalAlignment="Center"/>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Header="Đơn giá" Width="80">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Price, StringFormat={}{0:N0}}" HorizontalAlignment="Center"/>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Header="Thành tiền" Width="90">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding TotalPrice, StringFormat={}{0:N0}}" HorizontalAlignment="Center" FontWeight="SemiBold"/>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                </GridView>
-            </ListView.View>
-        </ListView>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="SL" Binding="{Binding Quantity}" Width="40" ElementStyle="{StaticResource CenterCell}"/>
+                <DataGridTextColumn Header="Đơn giá" Binding="{Binding Price, StringFormat={}{0:N0}}" Width="80" ElementStyle="{StaticResource CenterCell}"/>
+                <DataGridTextColumn Header="Thành tiền" Binding="{Binding TotalPrice, StringFormat={}{0:N0}}" Width="90" ElementStyle="{StaticResource CenterCell}">
+                    <DataGridTextColumn.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </Style>
+                    </DataGridTextColumn.CellStyle>
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+        </DataGrid>
 
         <!-- Phần tổng tiền -->
         <StackPanel Grid.Row="3" Margin="0,10,0,0">

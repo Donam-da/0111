@@ -20,7 +20,7 @@ namespace namm
             tbTotalAmount.Text = $"{totalAmount:N0} VNĐ";
 
             // Hiển thị danh sách món
-            lvBillItems.ItemsSource = billItems;
+            dgBillItems.ItemsSource = billItems;
         }
 
         private void BtnConfirm_Click(object sender, RoutedEventArgs e)
