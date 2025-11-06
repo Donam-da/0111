@@ -95,7 +95,17 @@ namespace namm
             using (var connection = new SqlConnection(connectionString))
             {
                 const string query = @"
-                    SELECT d.Name AS DrinkName, bi.Quantity, bi.Price, (bi.Quantity * bi.Price) AS TotalPrice
+                    SELECT 
+                        d.Name + N' (' + 
+                            CASE bi.DrinkType 
+                                WHEN N'Pha chế' THEN N'PC' 
+                                WHEN N'Nguyên bản' THEN N'NB' 
+                                ELSE bi.DrinkType 
+                            END 
+                        + N')' AS DrinkName, 
+                        bi.Quantity, 
+                        bi.Price, 
+                        (bi.Quantity * bi.Price) AS TotalPrice
                     FROM BillInfo bi
                     JOIN Drink d ON bi.DrinkID = d.ID
                     WHERE bi.BillID = @BillID";

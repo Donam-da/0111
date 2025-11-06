@@ -65,29 +65,22 @@
                             <Style TargetType="DataGridColumnHeader">
                                 <Setter Property="HorizontalContentAlignment" Value="Center"/>
                             </Style>
-                            <Style TargetType="DataGridCell">
-                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            <!-- Style để căn giữa nội dung trong các ô -->
+                            <Style x:Key="CenterCellStyle" TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center" />
                             </Style>
                         </DataGrid.Resources>
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Tên món" Binding="{Binding DrinkName}" Width="*">
+                            <DataGridTextColumn Header="Tên đồ uống" Binding="{Binding DrinkName}" Width="*" ElementStyle="{StaticResource CenterCellStyle}"/>
+                            <DataGridTextColumn Header="SL" Binding="{Binding Quantity}" Width="40" ElementStyle="{StaticResource CenterCellStyle}"/>
+                            <DataGridTextColumn Header="Đơn giá" Binding="{Binding Price, StringFormat={}{0:N0}}" Width="80" ElementStyle="{StaticResource CenterCellStyle}"/>
+                            <DataGridTextColumn Header="Thành tiền" Binding="{Binding TotalPrice, StringFormat={}{0:N0}}" Width="90">
                                 <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="TextAlignment" Value="Left"/>
-                                        <Setter Property="Padding" Value="5,0"/>
+                                    <!-- Kết hợp cả căn giữa và làm đậm chữ -->
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource CenterCellStyle}">
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-                            <DataGridTextColumn Header="SL" Binding="{Binding Quantity}" Width="40"/>
-                            <DataGridTextColumn Header="Đơn giá" Binding="{Binding Price, StringFormat={}{0:N0}}" Width="80"/>
-                            <DataGridTextColumn Header="Thành tiền" Binding="{Binding TotalPrice, StringFormat={}{0:N0}}" Width="90">
-                                <DataGridTextColumn.CellStyle>
-                                    <Style TargetType="DataGridCell">
-                                        <Setter Property="FontWeight" Value="SemiBold"/>
-                                        <Setter Property="HorizontalContentAlignment" Value="Right"/>
-                                        <Setter Property="Padding" Value="0,0,5,0"/>
-                                    </Style>
-                                </DataGridTextColumn.CellStyle>
                             </DataGridTextColumn>
                         </DataGrid.Columns>
                     </DataGrid>
