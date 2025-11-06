@@ -279,12 +279,14 @@ namespace namm
         private async void BtnPay_Click(object sender, RoutedEventArgs e)
         {
             int? customerId = null;
+            string customerCode = "N/A";
             string customerName = "Khách vãng lai";
 
             // Xác định ID khách hàng dựa trên nút nào được nhấn
             if (sender == btnPay && _selectedCustomer != null)
             {
                 customerId = (int)_selectedCustomer["ID"];
+                customerCode = _selectedCustomer["CustomerCode"].ToString();
                 customerName = _selectedCustomer["Name"].ToString();
             }
             else if (sender == btnPayAsGuest)
@@ -297,12 +299,35 @@ namespace namm
                 return;
             }
 
-            if (MessageBox.Show($"Xác nhận thanh toán cho '{customerName}'?\nTổng tiền: {_totalAmount:N0} VNĐ", "Xác nhận thanh toán", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            // Lấy ID hóa đơn chưa thanh toán của bàn
+            int billId = await GetUnpaidBillIdForTableAsync(_tableId);
+            if (billId == -1)
             {
+                MessageBox.Show("Không tìm thấy hóa đơn chưa thanh toán cho bàn này.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            await ProcessPaymentAsync(customerId);
+            // Tạo và hiển thị cửa sổ hóa đơn
+            var invoiceWindow = new InvoiceWindow(_tableId, _tableName, customerName, customerCode, _totalAmount, _currentBill, billId);
+            invoiceWindow.Owner = Window.GetWindow(this);
+
+            // Chỉ xử lý thanh toán khi người dùng nhấn "Xác nhận" trên hóa đơn
+            if (invoiceWindow.ShowDialog() == true)
+            {
+                await ProcessPaymentAsync(customerId);
+            }
+        }
+
+        private async Task<int> GetUnpaidBillIdForTableAsync(int tableId)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                var command = new SqlCommand("SELECT ID FROM Bill WHERE TableID = @TableID AND Status = 0", connection);
+                command.Parameters.AddWithValue("@TableID", tableId);
+                await connection.OpenAsync();
+                var result = await command.ExecuteScalarAsync();
+                return result != null ? (int)result : -1;
+            }
         }
 
         private async Task ProcessPaymentAsync(int? customerId)
