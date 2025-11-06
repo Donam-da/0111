@@ -49,3 +49,5 @@ D:\QuanLyCafe\namm\obj\Debug\InvoiceWindow.g.cs
 D:\QuanLyCafe\namm\obj\Debug\InvoiceWindow.baml
 D:\QuanLyCafe\namm\obj\Debug\InvoiceHistoryView.g.cs
 D:\QuanLyCafe\namm\obj\Debug\InvoiceHistoryView.baml
+D:\QuanLyCafe\namm\obj\Debug\InvoicePreviewControl.g.cs
+D:\QuanLyCafe\namm\obj\Debug\InvoicePreviewControl.baml

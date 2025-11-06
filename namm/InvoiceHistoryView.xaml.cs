@@ -47,6 +47,7 @@ namespace namm
                 const string query = @"
                     SELECT 
                         b.ID, 
+                        ISNULL(c.CustomerCode, b.GuestCustomerCode) as CustomerCode,
                         b.DateCheckOut, 
                         ISNULL(c.Name, 'Khách vãng lai') AS CustomerName, 
                         tf.Name AS TableName, 
@@ -68,7 +69,7 @@ namespace namm
 
                 dgInvoices.ItemsSource = invoiceDataTable.DefaultView;
                 CalculateTotalRevenue();
-                ClearDetailView();
+                ClearSelection();
             }
         }
 
@@ -77,20 +78,18 @@ namespace namm
             if (dgInvoices.SelectedItem is DataRowView selectedInvoice)
             {
                 int billId = (int)selectedInvoice["ID"];
-                await LoadInvoiceDetailsAsync(billId);
+                var detailsView = await LoadInvoiceDetailsAsync(billId);
 
-                // Cập nhật thông tin chi tiết
-                tbDetailInvoiceId.Text = $"Mã HĐ: {billId:D6}";
-                tbDetailCustomer.Text = $"Khách hàng: {selectedInvoice["CustomerName"]}";
-                tbDetailDate.Text = $"Ngày: {((DateTime)selectedInvoice["DateCheckOut"]):dd/MM/yyyy HH:mm}";
+                // Hiển thị hóa đơn xem trước
+                invoicePreview.DisplayInvoice(selectedInvoice, detailsView);
             }
             else
             {
-                ClearDetailView();
+                ClearSelection();
             }
         }
 
-        private async Task LoadInvoiceDetailsAsync(int billId)
+        private async Task<DataView> LoadInvoiceDetailsAsync(int billId)
         {
             using (var connection = new SqlConnection(connectionString))
             {
@@ -116,7 +115,7 @@ namespace namm
                 var detailsTable = new DataTable();
                 await Task.Run(() => adapter.Fill(detailsTable));
 
-                dgInvoiceDetails.ItemsSource = detailsTable.DefaultView;
+                return detailsTable.DefaultView;
             }
         }
 
@@ -130,12 +129,9 @@ namespace namm
             tbTotalRevenue.Text = $"{total:N0} VNĐ";
         }
 
-        private void ClearDetailView()
+        private void ClearSelection()
         {
-            dgInvoiceDetails.ItemsSource = null;
-            tbDetailInvoiceId.Text = "Mã HĐ: ";
-            tbDetailCustomer.Text = "Khách hàng: ";
-            tbDetailDate.Text = "Ngày: ";
+            invoicePreview.Clear();
         }
 
         private void DgInvoices_LoadingRow(object sender, DataGridRowEventArgs e)

@@ -279,28 +279,42 @@ namespace namm
         private async void BtnPay_Click(object sender, RoutedEventArgs e)
         {
             int? customerId = null;
-            string customerCode = "N/A";
-            string customerName = "Khách vãng lai";
-
-            // Xác định ID khách hàng dựa trên nút nào được nhấn
-            if (sender == btnPay && _selectedCustomer != null)
+            if (_selectedCustomer != null)
             {
                 customerId = (int)_selectedCustomer["ID"];
-                customerCode = _selectedCustomer["CustomerCode"].ToString();
-                customerName = _selectedCustomer["Name"].ToString();
-            }
-            else if (sender == btnPayAsGuest)
-            {
-                // Tạo mã khách hàng đặc biệt cho khách vãng lai dựa trên thời gian
-                customerCode = DateTime.Now.ToString("HHmmssddMMyy");
+                string customerName = _selectedCustomer["Name"].ToString();
+                string customerCode = _selectedCustomer["CustomerCode"].ToString();
+
+                // Lấy ID hóa đơn chưa thanh toán của bàn
+                int billId = await GetUnpaidBillIdForTableAsync(_tableId);
+                if (billId == -1)
+                {
+                    MessageBox.Show("Không tìm thấy hóa đơn chưa thanh toán cho bàn này.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                // Tạo và hiển thị cửa sổ hóa đơn
+                var invoiceWindow = new InvoiceWindow(_tableId, _tableName, customerName, customerCode, _totalAmount, _currentBill, billId);
+                invoiceWindow.Owner = Window.GetWindow(this);
+
+                // Chỉ xử lý thanh toán khi người dùng nhấn "Xác nhận" trên hóa đơn
+                if (invoiceWindow.ShowDialog() == true)
+                {
+                    await ProcessPaymentAsync(customerId, null); // Khách hàng có đăng ký, không có mã khách vãng lai
+                }
             }
             else
             {
                 MessageBox.Show("Vui lòng chọn một khách hàng để thanh toán.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
             }
+        }
 
-            // Lấy ID hóa đơn chưa thanh toán của bàn
+        private async void BtnPayAsGuest_Click(object sender, RoutedEventArgs e)
+        {
+            string customerName = "Khách vãng lai";
+            // Tạo mã khách hàng vãng lai duy nhất dựa trên thời gian: GiờPhútGiâyNgàyThángNăm
+            string customerCode = DateTime.Now.ToString("HHmmssddMMyy");
+
             int billId = await GetUnpaidBillIdForTableAsync(_tableId);
             if (billId == -1)
             {
@@ -308,14 +322,13 @@ namespace namm
                 return;
             }
 
-            // Tạo và hiển thị cửa sổ hóa đơn
             var invoiceWindow = new InvoiceWindow(_tableId, _tableName, customerName, customerCode, _totalAmount, _currentBill, billId);
             invoiceWindow.Owner = Window.GetWindow(this);
 
-            // Chỉ xử lý thanh toán khi người dùng nhấn "Xác nhận" trên hóa đơn
             if (invoiceWindow.ShowDialog() == true)
             {
-                await ProcessPaymentAsync(customerId);
+                // Thanh toán với customerId là null và truyền mã khách vãng lai
+                await ProcessPaymentAsync(null, customerCode);
             }
         }
 
@@ -331,22 +344,24 @@ namespace namm
             }
         }
 
-        private async Task ProcessPaymentAsync(int? customerId)
+        private async Task ProcessPaymentAsync(int? customerId, string? guestCustomerCode)
         {
             using (var connection = new SqlConnection(connectionString))
             {
                 await connection.OpenAsync();
                 // Tìm hóa đơn chưa thanh toán của bàn (status = 0) và cập nhật nó
                 const string updateBillQuery = @"
-                    UPDATE Bill 
+                    UPDATE Bill
                     SET Status = 1, -- Đã thanh toán
                         DateCheckOut = GETDATE(),
                         IdCustomer = @CustomerID,
+                        GuestCustomerCode = @GuestCustomerCode,
                         TotalAmount = @TotalAmount
                     WHERE TableID = @TableID AND Status = 0";
 
                 var updateBillCmd = new SqlCommand(updateBillQuery, connection);
                 updateBillCmd.Parameters.AddWithValue("@CustomerID", customerId ?? (object)DBNull.Value);
+                updateBillCmd.Parameters.AddWithValue("@GuestCustomerCode", string.IsNullOrEmpty(guestCustomerCode) ? (object)DBNull.Value : guestCustomerCode);
                 updateBillCmd.Parameters.AddWithValue("@TotalAmount", _totalAmount);
                 updateBillCmd.Parameters.AddWithValue("@TableID", _tableId);
 

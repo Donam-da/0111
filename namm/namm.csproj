@@ -126,6 +126,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="InvoicePreviewControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="LinkButtonStyle.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -203,6 +207,10 @@
     </Compile>
     <Compile Include="InvoiceHistoryView.xaml.cs">
       <DependentUpon>InvoiceHistoryView.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="InvoicePreviewControl.xaml.cs">
+      <DependentUpon>InvoicePreviewControl.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="BillItem.cs">

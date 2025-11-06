@@ -51,40 +51,12 @@
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
 
             <!-- Chi tiết hóa đơn -->
-            <GroupBox Grid.Column="2" Header="Chi tiết hóa đơn" FontWeight="SemiBold">
-                <DockPanel>
-                    <StackPanel DockPanel.Dock="Top" Margin="5">
-                        <TextBlock x:Name="tbDetailInvoiceId" Text="Mã HĐ: "/>
-                        <TextBlock x:Name="tbDetailCustomer" Text="Khách hàng: "/>
-                        <TextBlock x:Name="tbDetailDate" Text="Ngày: "/>
-                    </StackPanel>
-                    
-                    <DataGrid x:Name="dgInvoiceDetails" AutoGenerateColumns="False" IsReadOnly="True"
-                              HeadersVisibility="Column" GridLinesVisibility="Horizontal" Background="Transparent">
-                        <DataGrid.Resources>
-                            <Style TargetType="DataGridColumnHeader">
-                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                            </Style>
-                            <!-- Style để căn giữa nội dung trong các ô -->
-                            <Style x:Key="CenterCellStyle" TargetType="TextBlock">
-                                <Setter Property="HorizontalAlignment" Value="Center" />
-                            </Style>
-                        </DataGrid.Resources>
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Tên đồ uống" Binding="{Binding DrinkName}" Width="*" ElementStyle="{StaticResource CenterCellStyle}"/>
-                            <DataGridTextColumn Header="SL" Binding="{Binding Quantity}" Width="40" ElementStyle="{StaticResource CenterCellStyle}"/>
-                            <DataGridTextColumn Header="Đơn giá" Binding="{Binding Price, StringFormat={}{0:N0}}" Width="80" ElementStyle="{StaticResource CenterCellStyle}"/>
-                            <DataGridTextColumn Header="Thành tiền" Binding="{Binding TotalPrice, StringFormat={}{0:N0}}" Width="90">
-                                <DataGridTextColumn.ElementStyle>
-                                    <!-- Kết hợp cả căn giữa và làm đậm chữ -->
-                                    <Style TargetType="TextBlock" BasedOn="{StaticResource CenterCellStyle}">
-                                        <Setter Property="FontWeight" Value="SemiBold"/>
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </DockPanel>
+            <GroupBox Grid.Column="2" Header="Hóa đơn xem trước" FontWeight="SemiBold">
+                <local:InvoicePreviewControl x:Name="invoicePreview" Visibility="Collapsed">
+                    <local:InvoicePreviewControl.LayoutTransform>
+                        <ScaleTransform ScaleX="0.7" ScaleY="0.7" />
+                    </local:InvoicePreviewControl.LayoutTransform>
+                </local:InvoicePreviewControl>
             </GroupBox>
         </Grid>
     </DockPanel>

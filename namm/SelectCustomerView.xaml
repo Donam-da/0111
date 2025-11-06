@@ -174,7 +174,7 @@
                         Height="40" 
                         Background="#0275D8" 
                         Foreground="White"
-                        Click="BtnPay_Click"/>
+                        Click="BtnPayAsGuest_Click"/>
 
                 <Button x:Name="btnBack" 
                         Content="Quay lại" 
