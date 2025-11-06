@@ -12,7 +12,7 @@
         <Border DockPanel.Dock="Top" Padding="5" Margin="0,0,0,10" BorderBrush="LightGray" BorderThickness="0,0,0,1">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock Text="Từ ngày:" VerticalAlignment="Center" Margin="5"/>
-                <DatePicker x:Name="dpStartDate" Width="120" VerticalContentAlignment="Center"/>
+                <DatePicker x:Name="dpStartDate" Width="120" VerticalContentAlignment="Center" SelectedDateChanged="DpStartDate_SelectedDateChanged"/>
                 <TextBlock Text="Đến ngày:" VerticalAlignment="Center" Margin="15,5,5,5"/>
                 <DatePicker x:Name="dpEndDate" Width="120" VerticalContentAlignment="Center"/>
                 <Button x:Name="btnFilter" Content="Lọc" Width="80" Height="30" Margin="15,0" Click="BtnFilter_Click"/>
@@ -31,12 +31,13 @@
 
             <!-- Danh sách hóa đơn -->
             <DataGrid Grid.Column="0" x:Name="dgInvoices" AutoGenerateColumns="False" IsReadOnly="True"
-                      SelectionMode="Single" SelectionChanged="DgInvoices_SelectionChanged" LoadingRow="DgInvoices_LoadingRow">
+                      SelectionMode="Single" SelectionChanged="DgInvoices_SelectionChanged" LoadingRow="DgInvoices_LoadingRow"
+                      CanUserSortColumns="True">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="STT" Binding="{Binding STT}" Width="40"/>
                     <DataGridTextColumn Header="Mã HĐ" Binding="{Binding ID, StringFormat=D6}" Width="80"/>
-                    <DataGridTextColumn Header="Ngày TT" Binding="{Binding DateCheckOut, StringFormat='dd/MM/yyyy HH:mm'}" Width="140"/>
-                    <DataGridTextColumn Header="Khách hàng" Binding="{Binding CustomerName}" Width="*"/>
+                    <DataGridTextColumn Header="Ngày TT" Binding="{Binding DateCheckOut, StringFormat='dd/MM/yyyy HH:mm'}" Width="140" SortDirection="Descending"/>
+                    <DataGridTextColumn Header="Mã Khách hàng" Binding="{Binding CustomerCode}" Width="*"/>
                     <DataGridTextColumn Header="Bàn" Binding="{Binding TableName}" Width="80"/>
                     <DataGridTextColumn Header="Tổng tiền" Binding="{Binding TotalAmount, StringFormat={}{0:N0} VNĐ}" Width="120">
                         <DataGridTextColumn.ElementStyle>
@@ -51,7 +52,7 @@
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
 
             <!-- Chi tiết hóa đơn -->
-            <GroupBox Grid.Column="2" Header="Hóa đơn xem trước" FontWeight="SemiBold">
+            <GroupBox Grid.Column="2" Header="Hóa đơn trước đó" FontWeight="SemiBold">
                 <local:InvoicePreviewControl x:Name="invoicePreview" Visibility="Collapsed">
                     <local:InvoicePreviewControl.LayoutTransform>
                         <ScaleTransform ScaleX="0.7" ScaleY="0.7" />

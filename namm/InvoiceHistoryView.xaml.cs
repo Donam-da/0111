@@ -73,6 +73,21 @@ namespace namm
             }
         }
 
+        private void DpStartDate_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (dpStartDate.SelectedDate.HasValue)
+            {
+                // Đặt ngày bắt đầu có thể chọn cho DatePicker 'Đến ngày'
+                dpEndDate.DisplayDateStart = dpStartDate.SelectedDate;
+
+                // Nếu ngày kết thúc hiện tại nhỏ hơn ngày bắt đầu mới, cập nhật nó
+                if (dpEndDate.SelectedDate < dpStartDate.SelectedDate)
+                {
+                    dpEndDate.SelectedDate = dpStartDate.SelectedDate;
+                }
+            }
+        }
+
         private async void DgInvoices_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (dgInvoices.SelectedItem is DataRowView selectedInvoice)
