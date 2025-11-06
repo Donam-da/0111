@@ -106,11 +106,11 @@
 
             <DataGrid x:Name="dgBill" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Mã kiểu đồ uống" Binding="{Binding DrinkTypeCode}" Width="*"/>
-                    <DataGridTextColumn Header="SL" Binding="{Binding Quantity}" Width="Auto"/>
-                    <DataGridTextColumn Header="Đơn giá" Binding="{Binding Price, StringFormat={}{0:N0}}" Width="Auto"/>
-                    <DataGridTextColumn Header="Thành tiền" Binding="{Binding TotalPrice, StringFormat={}{0:N0}}" Width="Auto"/>
-                    <DataGridTemplateColumn Width="Auto">
+                    <DataGridTextColumn Header="Mã kiểu đồ uống" Binding="{Binding DrinkTypeCode}" Width="30*" HeaderStyle="{StaticResource CenterAlignedColumn}" ElementStyle="{StaticResource CenterAlignedCell}"/>
+                    <DataGridTextColumn Header="SL" Binding="{Binding Quantity}" Width="10*" HeaderStyle="{StaticResource CenterAlignedColumn}" ElementStyle="{StaticResource CenterAlignedCell}"/>
+                    <DataGridTextColumn Header="Đơn giá" Binding="{Binding Price, StringFormat={}{0:N0}}" Width="20*" HeaderStyle="{StaticResource CenterAlignedColumn}" ElementStyle="{StaticResource CenterAlignedCell}"/>
+                    <DataGridTextColumn Header="Thành tiền" Binding="{Binding TotalPrice, StringFormat={}{0:N0}}" Width="20*" HeaderStyle="{StaticResource CenterAlignedColumn}" ElementStyle="{StaticResource CenterAlignedCell}"/>
+                    <DataGridTemplateColumn Width="Auto" HeaderStyle="{StaticResource CenterAlignedColumn}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Button Content="Xóa" CommandParameter="{Binding}" Click="DeleteBillItem_Click" Style="{StaticResource LinkButton}"/>
