@@ -525,5 +525,29 @@ namespace namm
                 }
             }
         }
+
+        private void BtnPay_Click(object sender, RoutedEventArgs e)
+        {
+            // 1. Kiểm tra đã chọn bàn và có hóa đơn chưa
+            if (dgTables.SelectedItem == null || !(dgBill.ItemsSource is ObservableCollection<BillItem> currentBill) || !currentBill.Any())
+            {
+                MessageBox.Show("Vui lòng chọn bàn có hóa đơn để thanh toán.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // 2. Lấy thông tin cần thiết để truyền đi
+            var selectedTable = (DataRowView)dgTables.SelectedItem;
+            int tableId = (int)selectedTable["ID"];
+            string tableName = selectedTable["Name"].ToString();
+
+            // 3. Chuyển sang màn hình chọn khách hàng
+            var mainAppWindow = Window.GetWindow(this) as MainAppWindow;
+            if (mainAppWindow != null)
+            {
+                // Xóa nội dung cũ và thêm view mới vào
+                mainAppWindow.MainContent.Children.Clear();
+                mainAppWindow.MainContent.Children.Add(new SelectCustomerView(tableId, tableName, currentBill));
+            }
+        }
     }
 }

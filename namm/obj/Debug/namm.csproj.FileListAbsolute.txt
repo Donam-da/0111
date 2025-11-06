@@ -43,3 +43,5 @@ D:\QuanLyCafe\namm\obj\Debug\CategoryView.baml
 D:\QuanLyCafe\namm\obj\Debug\GeneratedInternalTypeHelper.g.cs
 D:\QuanLyCafe\namm\obj\Debug\App.baml
 D:\QuanLyCafe\namm\obj\Debug\LinkButtonStyle.baml
+D:\QuanLyCafe\namm\obj\Debug\SelectCustomerView.baml
+D:\QuanLyCafe\namm\obj\Debug\SelectCustomerView.g.cs
