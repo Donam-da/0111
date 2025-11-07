@@ -227,21 +227,41 @@ namespace namm
         // Đổi tên và sửa lại để trả về Task, vì có thể gọi DB
         private async Task UpdateDateRangeInfo()
         {
-            if (!this.IsLoaded || !dpDate.SelectedDate.HasValue || rbOnDate.IsChecked == true) return;
+            if (!this.IsLoaded || !dpDate.SelectedDate.HasValue || rbOnDate.IsChecked == true)
+            {
+                tbDateRangeInfo.Visibility = Visibility.Collapsed;
+                return;
+            }
 
             DateTime selectedDate = dpDate.SelectedDate.Value.Date;
             tbDateRangeInfo.Visibility = Visibility.Visible;
+            int invoiceCount;
 
-            if (rbInWeek.IsChecked == true)
+            if (rbBeforeDate.IsChecked == true)
+            {
+                invoiceCount = await GetInvoiceCountBeforeDateAsync(selectedDate);
+                tbDateRangeInfo.Text = $"(Sẽ xóa {invoiceCount} hóa đơn)";
+            }
+            else if (rbInWeek.IsChecked == true)
             {
                 DayOfWeek firstDayOfWeek = DayOfWeek.Monday;
                 DateTime startDate = selectedDate.AddDays(-(int)selectedDate.DayOfWeek + (int)firstDayOfWeek);
                 if (selectedDate.DayOfWeek < firstDayOfWeek) startDate = startDate.AddDays(-7);
                 DateTime endDate = startDate.AddDays(6);
-                int invoiceCount = await GetInvoiceCountForDateRangeAsync(startDate, endDate.AddDays(1));
+                invoiceCount = await GetInvoiceCountForDateRangeAsync(startDate, endDate.AddDays(1));
                 tbDateRangeInfo.Text = $"(Từ {startDate:dd/MM/yyyy} đến {endDate:dd/MM/yyyy} - có {invoiceCount} hóa đơn)";
             }
-            else { tbDateRangeInfo.Visibility = Visibility.Collapsed; }
+            else if (rbInMonth.IsChecked == true)
+            {
+                DateTime startDate = new DateTime(selectedDate.Year, selectedDate.Month, 1);
+                DateTime endDate = startDate.AddMonths(1);
+                invoiceCount = await GetInvoiceCountForDateRangeAsync(startDate, endDate);
+                tbDateRangeInfo.Text = $"(Trong tháng {startDate:MM/yyyy} - có {invoiceCount} hóa đơn)";
+            }
+            else 
+            { 
+                tbDateRangeInfo.Visibility = Visibility.Collapsed; 
+            }
         }
 
         private async void CalendarMultiSelect_SelectedDatesChanged(object sender, SelectionChangedEventArgs e)
@@ -285,6 +305,19 @@ namespace namm
         private async Task<int> GetInvoiceCountForSingleDateAsync(DateTime date)
         {
             return await GetInvoiceCountForDateRangeAsync(date.Date, date.Date.AddDays(1));
+        }
+
+        private async Task<int> GetInvoiceCountBeforeDateAsync(DateTime date)
+        {
+            string query = "SELECT COUNT(ID) FROM Bill WHERE Status = 1 AND DateCheckOut < @EndDate";
+            using (var connection = new SqlConnection(connectionString))
+            {
+                var command = new SqlCommand(query, connection);
+                command.Parameters.Add(new SqlParameter("@EndDate", date));
+                await connection.OpenAsync();
+                var result = await command.ExecuteScalarAsync();
+                return (result != null && result != DBNull.Value) ? Convert.ToInt32(result) : 0;
+            }
         }
 
         private async Task<int> GetInvoiceCountForMultipleDatesAsync(IEnumerable<DateTime> dates)
