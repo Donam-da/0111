@@ -93,7 +93,8 @@
                   CanUserSortColumns="True"
                   GridLinesVisibility="Horizontal"
                   AlternatingRowBackground="#F5F5F5"
-                  HorizontalContentAlignment="Center">
+                  HorizontalContentAlignment="Center"
+                  LoadingRow="DgLoyalCustomers_LoadingRow">
             <DataGrid.Resources>
                 <!-- Căn giữa cho tiêu đề cột -->
                 <Style TargetType="DataGridColumnHeader">

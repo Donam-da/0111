@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Data;
@@ -63,10 +63,9 @@ namespace namm
 
                 await Task.Run(() => adapter.Fill(customerTable));
 
-                // Thêm số thứ tự
+                // Gán giá trị cho cột Discount, STT sẽ được xử lý trong sự kiện LoadingRow
                 for (int i = 0; i < customerTable.Rows.Count; i++)
                 {
-                    customerTable.Rows[i]["STT"] = i + 1;
                     customerTable.Rows[i]["Discount"] = customerTable.Rows[i]["TotalDiscountGiven"];
                 }
 
@@ -174,5 +173,14 @@ namespace namm
             }
         }
 
+        private void DgLoyalCustomers_LoadingRow(object sender, DataGridRowEventArgs e)
+        {
+            // Gán lại số thứ tự dựa trên vị trí hiển thị của hàng trong DataGrid.
+            // Điều này đảm bảo STT luôn đúng thứ tự 1, 2, 3,... ngay cả khi sắp xếp.
+            if (e.Row.Item is DataRowView rowView)
+            {
+                rowView.Row["STT"] = e.Row.GetIndex() + 1;
+            }
+        }
     }
 }
