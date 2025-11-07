@@ -35,12 +35,13 @@ namespace namm
             InitializeComponent();
         }
 
-        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        private async void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             // Mặc định chọn ngày hôm nay để tránh người dùng vô tình xóa ngay lập tức
             dpDate.SelectedDate = DateTime.Today;
             // lvSelectedDates.ItemsSource = _selectedDatesDetails; // Không còn dùng
             tbResult.Text = "";
+            await LoadCustomersAsync();
             // UpdateDateRangeInfo(); // Sẽ được gọi trong DeleteMode_Changed
             // Gọi lần đầu để tải dữ liệu cho chế độ mặc định
             DeleteMode_Changed(null, null);
@@ -59,7 +60,7 @@ namespace namm
         private async void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
             // Kiểm tra chung cho các chế độ dùng DatePicker
-            if (rbOnDate.IsChecked != true && !dpDate.SelectedDate.HasValue)
+            if (rbOnDate.IsChecked != true && rbByCustomer.IsChecked != true && !dpDate.SelectedDate.HasValue)
             {
                 MessageBox.Show("Vui lòng chọn một ngày.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
@@ -68,6 +69,12 @@ namespace namm
             if (rbOnDate.IsChecked == true && calendarMultiSelect.SelectedDates.Count == 0)
             {
                 MessageBox.Show("Vui lòng chọn ít nhất một ngày trên lịch.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            // Kiểm tra riêng cho chế độ khách hàng
+            if (rbByCustomer.IsChecked == true && cbCustomers.SelectedItem == null)
+            {
+                MessageBox.Show("Vui lòng chọn một khách hàng.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -109,11 +116,18 @@ namespace namm
                 endDate = startDate.AddDays(7);
                 confirmationMessage = $"Bạn có chắc chắn muốn xóa {selectedInvoiceIds.Count} hóa đơn đã chọn trong tuần từ {startDate:dd/MM/yyyy} đến {endDate.Value.AddDays(-1):dd/MM/yyyy} không?";
             }
-            else // rbInMonth
+            else if (rbInMonth.IsChecked == true)
             {
                 startDate = new DateTime(selectedDate.Year, selectedDate.Month, 1);
                 endDate = startDate.AddMonths(1);
                 confirmationMessage = $"Bạn có chắc chắn muốn xóa {selectedInvoiceIds.Count} hóa đơn đã chọn trong tháng {startDate:MM/yyyy} không?";
+            }
+            else // rbByCustomer
+            {
+                var selectedCustomer = (DataRowView)cbCustomers.SelectedItem;
+                string customerName = selectedCustomer["Name"].ToString();
+                confirmationMessage = $"Bạn có chắc chắn muốn xóa {selectedInvoiceIds.Count} hóa đơn đã chọn của khách hàng '{customerName}' không?";
+                startDate = DateTime.MinValue; // Không dùng
             }
 
             // Hiển thị hộp thoại xác nhận cuối cùng
@@ -174,7 +188,10 @@ namespace namm
                 {
                     btnDelete.IsEnabled = true;
                     // Tải lại danh sách hóa đơn sau khi xóa
-                    if (rbOnDate.IsChecked == true) await UpdateSelectedDatesDetailsAsync();
+                    if (rbOnDate.IsChecked == true) 
+                        await UpdateSelectedDatesDetailsAsync();
+                    else if (rbByCustomer.IsChecked == true) 
+                        await UpdateCustomerInvoiceInfo();
                     else await UpdateDateRangeInfo();
                 }
             }
@@ -187,6 +204,7 @@ namespace namm
             // Ẩn/hiện các control chọn ngày
             dpDate.Visibility = (rbOnDate.IsChecked == true) ? Visibility.Collapsed : Visibility.Visible;
             calendarMultiSelect.Visibility = (rbOnDate.IsChecked == true) ? Visibility.Visible : Visibility.Collapsed;
+            cbCustomers.Visibility = (rbByCustomer.IsChecked == true) ? Visibility.Visible : Visibility.Collapsed;
             
             // Các control cũ không còn dùng
             // borderTotal.Visibility = (rbOnDate.IsChecked == true) ? Visibility.Visible : Visibility.Collapsed;
@@ -210,20 +228,28 @@ namespace namm
             {
                 tbDateSelectionLabel.Text = "Xóa tất cả hóa đơn trong THÁNG chứa ngày:";
             }
+
+            if (rbByCustomer.IsChecked == true)
+            {
+                tbDateSelectionLabel.Text = "Xóa tất cả hóa đơn của khách hàng:";
+                dpDate.Visibility = Visibility.Collapsed;
+                calendarMultiSelect.Visibility = Visibility.Collapsed;
+                await UpdateCustomerInvoiceInfo();
+                return; // Dừng ở đây cho chế độ khách hàng
+            }
             // Tải lại thông tin và danh sách hóa đơn
             await UpdateDateRangeInfo();
         }
 
         private async void DpDate_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
-        {
-            // Khi thay đổi ngày, cũng cần cập nhật thông tin hóa đơn nếu đang ở chế độ tuần/tháng
+        {            // Khi thay đổi ngày, cũng cần cập nhật thông tin hóa đơn nếu đang ở chế độ tuần/tháng
             await UpdateDateRangeInfo();
         }
 
         // Đổi tên và sửa lại để trả về Task, vì có thể gọi DB
         private async Task UpdateDateRangeInfo()
         {
-            if (!this.IsLoaded || !dpDate.SelectedDate.HasValue || rbOnDate.IsChecked == true)
+            if (!this.IsLoaded || !dpDate.SelectedDate.HasValue || rbOnDate.IsChecked == true || rbByCustomer.IsChecked == true)
             {
                 tbDateRangeInfo.Visibility = Visibility.Collapsed;
                 return;
@@ -281,6 +307,38 @@ namespace namm
             // Khi danh sách ngày chọn thay đổi, cập nhật lại bảng chi tiết
             await UpdateSelectedDatesDetailsAsync();
         }
+
+        private async void CbCustomers_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            await UpdateCustomerInvoiceInfo();
+        }
+
+        private async Task UpdateCustomerInvoiceInfo()
+        {
+            if (!this.IsLoaded || cbCustomers.SelectedItem == null)
+            {
+                tbDateRangeInfo.Visibility = Visibility.Collapsed;
+                dgInvoicesToDelete.ItemsSource = null;
+                invoicePreview.Clear();
+                return;
+            }
+
+            // Dọn dẹp trước khi tải mới
+            dgInvoicesToDelete.ItemsSource = null;
+            invoicePreview.Clear();
+
+            var selectedCustomer = (DataRowView)cbCustomers.SelectedItem;
+            int customerId = (int)selectedCustomer["ID"];
+            string customerName = selectedCustomer["Name"].ToString();
+
+            var invoices = await GetInvoicesForCustomerAsync(customerId);
+            int invoiceCount = invoices.Rows.Count;
+
+            dgInvoicesToDelete.ItemsSource = invoices.DefaultView;
+            tbDateRangeInfo.Visibility = Visibility.Visible;
+            tbDateRangeInfo.Text = $"(Khách hàng '{customerName}' có {invoiceCount} hóa đơn)";
+        }
+
 
         private async Task UpdateSelectedDatesDetailsAsync()
         {
@@ -361,6 +419,12 @@ namespace namm
             return await GetInvoicesByConditionAsync(condition, dateParams.ToArray());
         }
 
+        private async Task<DataTable> GetInvoicesForCustomerAsync(int customerId)
+        {
+            return await GetInvoicesByConditionAsync("b.Status = 1 AND b.IdCustomer = @CustomerId",
+                new SqlParameter("@CustomerId", customerId));
+        }
+
         private async Task<DataTable> GetInvoicesByConditionAsync(string condition, params SqlParameter[] parameters)
         {
             var dt = new DataTable();
@@ -396,6 +460,18 @@ namespace namm
                 await Task.Run(() => adapter.Fill(dt));
             }
             return dt;
+        }
+
+        private async Task LoadCustomersAsync()
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                const string query = "SELECT ID, Name FROM Customer ORDER BY Name";
+                var adapter = new SqlDataAdapter(query, connection);
+                var customerTable = new DataTable();
+                await Task.Run(() => adapter.Fill(customerTable));
+                cbCustomers.ItemsSource = customerTable.DefaultView;
+            }
         }
 
         private async Task<DataView> LoadInvoiceDetailsAsync(int billId)
