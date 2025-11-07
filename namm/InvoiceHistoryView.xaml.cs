@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
@@ -18,11 +18,15 @@ namespace namm
             InitializeComponent();
         }
 
-        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        private async void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            // Mặc định lọc theo ngày hôm nay
-            dpStartDate.SelectedDate = DateTime.Today;
+            // Lấy ngày có hóa đơn đầu tiên từ DB
+            DateTime? firstInvoiceDate = await GetFirstInvoiceDateAsync();
+
+            // Nếu không có hóa đơn nào, mặc định là ngày hôm nay. Ngược lại, lấy ngày đầu tiên.
+            dpStartDate.SelectedDate = firstInvoiceDate?.Date ?? DateTime.Today;
             dpEndDate.SelectedDate = DateTime.Today;
+
             BtnFilter_Click(sender, e);
         }
 
@@ -71,6 +75,23 @@ namespace namm
                 CalculateTotalRevenue();
                 ClearSelection();
             }
+        }
+
+        private async Task<DateTime?> GetFirstInvoiceDateAsync()
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                // Lấy ngày thanh toán sớm nhất từ các hóa đơn đã hoàn thành
+                const string query = "SELECT MIN(DateCheckOut) FROM Bill WHERE Status = 1";
+                var command = new SqlCommand(query, connection);
+                await connection.OpenAsync();
+                var result = await command.ExecuteScalarAsync();
+                if (result != null && result != DBNull.Value)
+                {
+                    return (DateTime)result;
+                }
+            }
+            return null; // Trả về null nếu không có hóa đơn nào
         }
 
         private void DpStartDate_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
