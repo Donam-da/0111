@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:namm"
+             xmlns:controls="clr-namespace:namm"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              FontFamily="Segoe UI" Loaded="UserControl_Loaded">
@@ -35,22 +36,16 @@
 
             <!-- Phần nội dung chính chia 2 cột: Trái (Cài đặt), Phải (Hành động) -->
             <Grid Grid.Row="2">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/> <!-- Phần 1: Tùy chọn -->
+                    <RowDefinition Height="*"/>    <!-- Phần 2 & 3: Danh sách và Chi tiết -->
+                </Grid.RowDefinitions>
 
                 <!-- Cột Trái: Khu vực cài đặt -->
-                <GroupBox Grid.Column="0" Header="Tùy chọn xóa" FontWeight="SemiBold" Padding="10" Margin="0,0,20,0">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
+                <GroupBox Grid.Row="0" Header="Tùy chọn xóa" FontWeight="SemiBold" Padding="10" Margin="0,0,0,10">
+                    <StackPanel>
                         <!-- Chọn chế độ xóa -->
-                        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,10,0,15">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,15">
                             <TextBlock Text="Chế độ:" VerticalAlignment="Center" FontWeight="Normal" Margin="0,0,15,0"/>
                             <RadioButton x:Name="rbBeforeDate" Content="Trước ngày" IsChecked="True" GroupName="DeleteMode" Checked="DeleteMode_Changed"/>
                             <RadioButton x:Name="rbOnDate" Content="Theo ngày" GroupName="DeleteMode" Margin="15,0,0,0" Checked="DeleteMode_Changed"/>
@@ -58,68 +53,100 @@
                             <RadioButton x:Name="rbInMonth" Content="Theo tháng" GroupName="DeleteMode" Margin="15,0,0,0" Checked="DeleteMode_Changed"/>
                         </StackPanel>
 
-                        <!-- Phần điều khiển chọn ngày -->
-                        <StackPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Left" Margin="0,10,0,5">
-                            <TextBlock x:Name="tbDateSelectionLabel" Text="Xóa tất cả hóa đơn TRƯỚC ngày:" HorizontalAlignment="Left" FontSize="14" Margin="0,0,0,10"/>
-                            <DatePicker x:Name="dpDate" Width="150" VerticalContentAlignment="Center" FontSize="14" SelectedDateChanged="DpDate_SelectedDateChanged" Visibility="Visible"/>
-                            <Calendar x:Name="calendarMultiSelect" 
-                                      SelectionMode="MultipleRange"
-                                      Visibility="Collapsed"
-                                      SelectedDatesChanged="CalendarMultiSelect_SelectedDatesChanged"
-                                      PreviewMouseLeftButtonDown="CalendarMultiSelect_PreviewMouseLeftButtonDown"/>
-                        </StackPanel>
+                        <!-- Phần điều khiển chọn ngày và thông tin -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                        <!-- Thông tin chi tiết -->
-                        <StackPanel Grid.Row="2" HorizontalAlignment="Left" Margin="0,5,0,0">
-                            <TextBlock x:Name="tbDateRangeInfo" 
+                            <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Left" Margin="0,0,20,0">
+                                <TextBlock x:Name="tbDateSelectionLabel" Text="Xóa tất cả hóa đơn TRƯỚC ngày:" HorizontalAlignment="Left" FontSize="14" Margin="0,0,0,10"/>
+                                <DatePicker x:Name="dpDate" Width="150" VerticalContentAlignment="Center" FontSize="14" SelectedDateChanged="DpDate_SelectedDateChanged" Visibility="Visible"/>
+                                <Calendar x:Name="calendarMultiSelect" 
+                                          SelectionMode="MultipleRange"
+                                          Visibility="Collapsed"
+                                          SelectedDatesChanged="CalendarMultiSelect_SelectedDatesChanged"
+                                          PreviewMouseLeftButtonDown="CalendarMultiSelect_PreviewMouseLeftButtonDown"/>
+                            </StackPanel>
+
+                            <TextBlock Grid.Column="1" x:Name="tbDateRangeInfo" 
                                        FontSize="12" FontStyle="Italic" Foreground="DarkSlateGray"
-                                       Visibility="Collapsed" TextWrapping="Wrap" MaxWidth="500" TextAlignment="Left"/>                           
-                        </StackPanel>
-                    </Grid>
+                                       Visibility="Collapsed" TextWrapping="Wrap" VerticalAlignment="Center"
+                                       MaxWidth="500" TextAlignment="Left"/>
+                        </Grid>
+                    </StackPanel>
                 </GroupBox>
 
-                <!-- Cột Phải: Nút thực thi và kết quả -->
-                <Grid Grid.Column="1" HorizontalAlignment="Right">
-                    <StackPanel VerticalAlignment="Top" Margin="0,30,0,0">
-                        <!-- Bảng chi tiết các ngày đã chọn, cao tối đa khoảng 5 dòng -->
-                        <ListView x:Name="lvSelectedDates" Height="155" Visibility="Collapsed"
-                                  BorderBrush="LightGray" BorderThickness="1">
-                            <ListView.View>
-                                <GridView>
-                                    <GridViewColumn Header="Ngày chọn" DisplayMemberBinding="{Binding Date, StringFormat=dd/MM/yyyy}" Width="100"/>
-                                    <GridViewColumn Header="Số hóa đơn" Width="85">
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding InvoiceCount}" HorizontalAlignment="Center" FontWeight="SemiBold"/>
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                </GridView>
-                            </ListView.View>
-                        </ListView>
+                <!-- Phần 2 & 3: Danh sách và chi tiết hóa đơn -->
+                <Grid Grid.Row="1" x:Name="gridInvoiceDetails">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/> <!-- Danh sách hóa đơn -->
+                        <RowDefinition Height="Auto"/> <!-- Chi tiết hóa đơn -->
+                    </Grid.RowDefinitions>
 
-                        <!-- Dòng tổng kết -->
-                        <Border x:Name="borderTotal" BorderBrush="LightGray" BorderThickness="1,0,1,1" Padding="5" Background="#F9F9F9" Visibility="Collapsed">
-                            <Grid>
-                                <TextBlock Text="Tổng cộng:" FontWeight="Bold"/>
-                                <TextBlock x:Name="tbTotalInvoiceCount" HorizontalAlignment="Right" FontWeight="Bold" Foreground="DarkRed"/>
-                            </Grid>
-                        </Border>
-                    </StackPanel>
+                    <!-- Danh sách hóa đơn sẽ bị xóa -->
+                    <GroupBox Grid.Row="0" Header="Danh sách hóa đơn sẽ bị xóa" FontWeight="SemiBold" Padding="5" Margin="0,0,0,10">
+                        <DataGrid x:Name="dgInvoicesToDelete" AutoGenerateColumns="False" CanUserAddRows="False"
+                                  SelectionMode="Extended" SelectionUnit="FullRow">
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Width="Auto">
+                                    <DataGridTemplateColumn.Header>
+                                        <CheckBox x:Name="headerCheckBox" Click="HeaderCheckBox_Click" IsChecked="True"
+                                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </DataGridTemplateColumn.Header>
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Mã HĐ" Binding="{Binding ID, StringFormat=D6}" Width="Auto"/>
+                                <DataGridTextColumn Header="Khách hàng" Binding="{Binding CustomerName}" Width="*"/>
+                                <DataGridTextColumn Header="Ngày" Binding="{Binding DateCheckOut, StringFormat=dd/MM/yy HH:mm}" Width="Auto"/>
+                                <DataGridTextColumn Header="Tổng tiền" Binding="{Binding TotalAmount, StringFormat=N0}" Width="Auto">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTemplateColumn Header="Hành động" Width="Auto">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="Xem" 
+                                                    Click="PreviewInvoice_Click" 
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource LinkButton}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </GroupBox>
 
-                    <!-- Các nút điều khiển và kết quả được đặt cố định ở dưới cùng -->
-                    <StackPanel VerticalAlignment="Bottom" Margin="0,0,0,20">
-                        <Button x:Name="btnDelete" 
-                                Content="XÓA DỮ LIỆU" 
-                                Width="200" Height="40" 
-                                FontSize="16" FontWeight="Bold" 
-                                Background="#DC3545" Foreground="White"
-                                Click="BtnDelete_Click"/>
-                        <TextBlock x:Name="tbResult" 
-                                   Margin="0,10,0,0" 
-                                   FontSize="14" FontWeight="SemiBold" Foreground="DarkGreen"
-                                   TextWrapping="Wrap" TextAlignment="Right"/>
-                    </StackPanel>
+                    <!-- Chi tiết và nút bấm -->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <GroupBox Grid.Column="0" Header="Xem trước hóa đơn" FontWeight="SemiBold" Padding="5">
+                            <controls:InvoicePreviewControl x:Name="invoicePreview" Visibility="Collapsed"/>
+                        </GroupBox>
+
+                        <StackPanel Grid.Column="1" VerticalAlignment="Bottom" Margin="20,0,0,0">
+                            <Button x:Name="btnDelete" Content="XÓA DỮ LIỆU" Width="200" Height="40" FontSize="16" FontWeight="Bold" Background="#DC3545" Foreground="White" Click="BtnDelete_Click"/>
+                            <TextBlock x:Name="tbResult" Margin="0,10,0,0" FontSize="14" FontWeight="SemiBold" Foreground="DarkGreen" TextWrapping="Wrap" TextAlignment="Right"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Các control cũ, sẽ được ẩn đi -->
+                    <ListView x:Name="lvSelectedDates" Visibility="Collapsed"/>
+                    <Border x:Name="borderTotal" Visibility="Collapsed">
+                        <TextBlock x:Name="tbTotalInvoiceCount"/>
+                    </Border>
                 </Grid>
             </Grid>
         </Grid>
