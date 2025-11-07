@@ -31,8 +31,8 @@ namespace namm
         {
             List<Color> colors = new List<Color>
             {
-                Colors.LightGray, Colors.LightSteelBlue, Colors.PaleTurquoise, Colors.LightGreen,
-                Colors.Khaki, Colors.MistyRose, Colors.Plum
+                Colors.LightCoral, Colors.Khaki, Colors.LightGreen, Colors.PaleTurquoise, 
+                Colors.LightSteelBlue, Colors.Plum, Colors.LightGray, Colors.MistyRose
             };
 
             foreach (var color in colors)
@@ -116,6 +116,61 @@ namespace namm
             return Color.FromArgb(a, r, g, b);
         }
 
+        private void HexColor_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                if (sender is TextBox textBox)
+                {
+                    UpdateColorFromHex(textBox);
+                    // Đánh dấu đã xử lý để ngăn tiếng 'ding' khi nhấn Enter
+                    e.Handled = true;
+                    // Di chuyển focus ra khỏi TextBox để người dùng thấy kết quả ngay
+                    textBox.MoveFocus(new System.Windows.Input.TraversalRequest(System.Windows.Input.FocusNavigationDirection.Next));
+                }
+            }
+        }
+
+        private void HexColor_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                UpdateColorFromHex(textBox);
+            }
+        }
+
+        private void UpdateColorFromHex(TextBox textBox)
+        {
+            try
+            {
+                // Sử dụng ColorConverter để phân tích chuỗi hex
+                var newColor = (Color)ColorConverter.ConvertFromString(textBox.Text);
+
+                if (textBox.Name == "txtAppBackgroundColorHex")
+                {
+                    selectedAppColor = newColor;
+                    UpdateAppColor();
+                }
+                else if (textBox.Name == "txtLoginPanelBackgroundColorHex")
+                {
+                    selectedLoginPanelColor = newColor;
+                    UpdateLoginPanelColor();
+                }
+            }
+            catch (FormatException)
+            {
+                // Nếu định dạng không hợp lệ, hoàn nguyên textbox về màu hợp lệ cuối cùng
+                if (textBox.Name == "txtAppBackgroundColorHex")
+                {
+                    textBox.Text = txtAppBackgroundColorHex.Text;
+                }
+                else if (textBox.Name == "txtLoginPanelBackgroundColorHex")
+                {
+                    textBox.Text = txtLoginPanelBackgroundColorHex.Text;
+                }
+            }
+        }
+
         private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (imgPreview != null)
@@ -164,7 +219,7 @@ namespace namm
                 Properties.Settings.Default.LoginIconOpacity = sliderOpacity.Value;
 
                 Properties.Settings.Default.Save();
-                MessageBox.Show("Settings saved successfully! Please restart the application for changes to take full effect.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Đã lưu cài đặt thành công! Vui lòng khởi động lại ứng dụng để các thay đổi có hiệu lực.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {

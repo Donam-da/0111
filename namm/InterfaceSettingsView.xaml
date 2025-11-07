@@ -37,7 +37,7 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <Rectangle Grid.Column="0" x:Name="rectAppColorPreview" Width="50" Height="25" Stroke="Black" StrokeThickness="1" Margin="0,0,10,0"/>
-                            <TextBox Grid.Column="1" x:Name="txtAppBackgroundColorHex" IsReadOnly="True" Background="#f0f0f0" VerticalContentAlignment="Center"/>
+                            <TextBox Grid.Column="1" x:Name="txtAppBackgroundColorHex" VerticalContentAlignment="Center" LostFocus="HexColor_LostFocus" KeyDown="HexColor_KeyDown"/>
                         </Grid>
                     </StackPanel>
                 </GroupBox>
@@ -60,7 +60,7 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <Rectangle Grid.Column="0" x:Name="rectLoginPanelColorPreview" Width="50" Height="25" Stroke="Black" StrokeThickness="1" Margin="0,0,10,0"/>
-                            <TextBox Grid.Column="1" x:Name="txtLoginPanelBackgroundColorHex" IsReadOnly="True" Background="#f0f0f0" VerticalContentAlignment="Center"/>
+                            <TextBox Grid.Column="1" x:Name="txtLoginPanelBackgroundColorHex" VerticalContentAlignment="Center" LostFocus="HexColor_LostFocus" KeyDown="HexColor_KeyDown"/>
                         </Grid>
                     </StackPanel>
                 </GroupBox>
