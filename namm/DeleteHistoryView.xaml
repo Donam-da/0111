@@ -94,6 +94,14 @@
                     <GroupBox Grid.Row="0" Header="Danh sách hóa đơn sẽ bị xóa" FontWeight="SemiBold" Padding="5" Margin="0,0,0,10">
                         <DataGrid x:Name="dgInvoicesToDelete" AutoGenerateColumns="False" CanUserAddRows="False"
                                   SelectionMode="Extended" SelectionUnit="FullRow">
+                            <DataGrid.Resources>
+                                <Style TargetType="DataGridCell">
+                                    <Setter Property="TextBlock.TextAlignment" Value="Center"/>
+                                </Style>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                </Style>
+                            </DataGrid.Resources>
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Width="Auto">
                                     <DataGridTemplateColumn.Header>
@@ -106,16 +114,10 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn Header="Mã HĐ" Binding="{Binding ID, StringFormat=D6}" Width="Auto"/>
-                                <DataGridTextColumn Header="Khách hàng" Binding="{Binding CustomerName}" Width="*"/>
-                                <DataGridTextColumn Header="Ngày" Binding="{Binding DateCheckOut, StringFormat=dd/MM/yy HH:mm}" Width="Auto"/>
-                                <DataGridTextColumn Header="Tổng tiền" Binding="{Binding TotalAmount, StringFormat=N0}" Width="Auto">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="HorizontalAlignment" Value="Right"/>
-                                        </Style>
-                                    </DataGridTextColumn.ElementStyle>
-                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="Mã HĐ" Binding="{Binding ID, StringFormat=D6}" Width="0.8*"/>
+                                <DataGridTextColumn Header="Khách hàng" Binding="{Binding CustomerName}" Width="2*"/>
+                                <DataGridTextColumn Header="Ngày" Binding="{Binding DateCheckOut, StringFormat=dd/MM/yy HH:mm}" Width="1.2*"/>
+                                <DataGridTextColumn Header="Tổng tiền" Binding="{Binding TotalAmount, StringFormat=N0}" Width="1*"/>
                                 <DataGridTemplateColumn Header="Hành động" Width="Auto">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
