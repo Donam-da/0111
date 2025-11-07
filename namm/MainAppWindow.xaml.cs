@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿using System;
+﻿﻿﻿﻿﻿﻿﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -167,6 +167,13 @@ namespace namm
             // Hiển thị giao diện thống kê lợi nhuận
             MainContent.Children.Clear();
             MainContent.Children.Add(new ProfitStatisticsView());
+        }
+
+        private void DeleteHistory_Click(object sender, RoutedEventArgs e)
+        {
+            // Hiển thị giao diện xóa lịch sử hóa đơn
+            MainContent.Children.Clear();
+            MainContent.Children.Add(new DeleteHistoryView());
         }
     }
 }

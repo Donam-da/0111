@@ -28,7 +28,7 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0" Text="Từ ngày:" VerticalAlignment="Center" Margin="5"/>
-                    <DatePicker Grid.Column="1" x:Name="dpStartDate" Width="120" VerticalContentAlignment="Center"/>
+                    <DatePicker Grid.Column="1" x:Name="dpStartDate" Width="120" VerticalContentAlignment="Center" SelectedDateChanged="DpStartDate_SelectedDateChanged"/>
                     <TextBlock Grid.Column="2" Text="Đến ngày:" VerticalAlignment="Center" Margin="15,5,5,5"/>
                     <DatePicker Grid.Column="3" x:Name="dpEndDate" Width="120" VerticalContentAlignment="Center"/>
                     <Button Grid.Column="4" x:Name="btnFilter" Content="Lọc" Width="80" Height="30" Margin="15,0" Click="BtnFilter_Click"/>
@@ -67,7 +67,7 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0" Text="Tên đồ uống:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                <TextBox Grid.Column="1" x:Name="txtFilterDrinkName" TextChanged="Filters_Changed"/>
+                <ComboBox Grid.Column="1" x:Name="cbFilterDrinkName" SelectionChanged="Filters_Changed" DisplayMemberPath="Name" SelectedValuePath="ID"/>
 
                 <TextBlock Grid.Column="2" Text="Kiểu:" VerticalAlignment="Center" Margin="10,0,5,0"/>
                 <ComboBox Grid.Column="3" x:Name="cbFilterDrinkType" SelectionChanged="Filters_Changed"/>

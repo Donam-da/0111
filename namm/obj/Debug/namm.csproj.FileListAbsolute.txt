@@ -57,3 +57,5 @@ D:\QuanLyCafe\namm\obj\Debug\TopSellingItemsView.g.cs
 D:\QuanLyCafe\namm\obj\Debug\TopSellingItemsView.baml
 D:\QuanLyCafe\namm\obj\Debug\ProfitStatisticsView.g.cs
 D:\QuanLyCafe\namm\obj\Debug\ProfitStatisticsView.baml
+D:\QuanLyCafe\namm\obj\Debug\DeleteHistoryView.g.cs
+D:\QuanLyCafe\namm\obj\Debug\DeleteHistoryView.baml

@@ -21,7 +21,7 @@
                 <Separator/>
                 <MenuItem Header="Đăng xuất" Click="Logout_Click"/>
                 <Separator/>
-                <MenuItem x:Name="miDeleteHistory" Header="Xóa lịch sử hóa đơn"/>
+                <MenuItem x:Name="miDeleteHistory" Header="Xóa lịch sử hóa đơn" Click="DeleteHistory_Click"/>
             </MenuItem>
             <MenuItem Header="_Quản lí" Click="TopLevelMenuItem_Click">
                 <MenuItem Header="Quản lí bàn" Click="ManageTables_Click"/>
