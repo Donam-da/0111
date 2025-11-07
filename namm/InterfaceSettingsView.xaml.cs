@@ -1,48 +1,128 @@
 using Microsoft.Win32;
 using System;
-using System.Configuration;
+using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media.Imaging;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 
 namespace namm
 {
     public partial class InterfaceSettingsView : UserControl
     {
+        private Color selectedAppColor;
+        private Color selectedLoginPanelColor;
+
         public InterfaceSettingsView()
         {
             InitializeComponent();
         }
 
-        private Color _appBackgroundColor = (Color)ColorConverter.ConvertFromString(Properties.Settings.Default.AppBackgroundColor);
-        private Color _loginPanelBackgroundColor = (Color)ColorConverter.ConvertFromString(Properties.Settings.Default.LoginIconBgColor);
-
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            LoadSettings();
+            LoadCurrentSettings();
+            PopulateColorPalette(appColorPalette, AppColor_Click);
+            PopulateColorPalette(loginPanelColorPalette, LoginPanelColor_Click);
         }
 
-        private void LoadSettings()
+        private void PopulateColorPalette(Panel palette, RoutedEventHandler colorClickHandler)
         {
-            // Đọc các cài đặt đã lưu
-            txtImagePath.Text = Properties.Settings.Default.LoginIconPath; // Đường dẫn ảnh vẫn là string
+            List<Color> colors = new List<Color>
+            {
+                Colors.LightGray, Colors.LightSteelBlue, Colors.PaleTurquoise, Colors.LightGreen,
+                Colors.Khaki, Colors.MistyRose, Colors.Plum
+            };
 
-            // Cập nhật các biến Color và hiển thị mã Hex
-            _loginPanelBackgroundColor = (Color)ColorConverter.ConvertFromString(Properties.Settings.Default.LoginIconBgColor);
-            txtLoginPanelBackgroundColorHex.Text = Properties.Settings.Default.LoginIconBgColor;
-            _appBackgroundColor = (Color)ColorConverter.ConvertFromString(Properties.Settings.Default.AppBackgroundColor);
-            txtAppBackgroundColorHex.Text = Properties.Settings.Default.AppBackgroundColor;
-            
-            // Tải các giá trị lề riêng biệt
-            sliderMarginLeft.Value = Properties.Settings.Default.LoginIconMarginLeft;
-            sliderMarginRight.Value = Properties.Settings.Default.LoginIconMarginRight;
-            sliderMarginTop.Value = Properties.Settings.Default.LoginIconMarginTop;
-            sliderMarginBottom.Value = Properties.Settings.Default.LoginIconMarginBottom;
-            sliderOpacity.Value = Properties.Settings.Default.LoginIconOpacity;
+            foreach (var color in colors)
+            {
+                var border = new Border
+                {
+                    Background = new SolidColorBrush(color),
+                    Width = 20,
+                    Height = 20,
+                    Margin = new Thickness(2),
+                    CornerRadius = new CornerRadius(10),
+                    BorderBrush = Brushes.Gray,
+                    BorderThickness = new Thickness(1),
+                    Cursor = System.Windows.Input.Cursors.Hand
+                };
+                border.MouseLeftButtonDown += (s, e) => colorClickHandler(s, e);
+                border.Tag = color;
+                palette.Children.Add(border);
+            }
+        }
 
-            UpdatePreview();
+        private void AppColor_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.Tag is Color color)
+            {
+                selectedAppColor = color;
+                UpdateAppColor();
+            }
+        }
+
+        private void LoginPanelColor_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.Tag is Color color)
+            {
+                selectedLoginPanelColor = color;
+                UpdateLoginPanelColor();
+            }
+        }
+
+        private void AppColorAdjustment_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (IsLoaded)
+            {
+                UpdateAppColor();
+            }
+        }
+
+        private void LoginPanelColorAdjustment_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (IsLoaded)
+            {
+                UpdateLoginPanelColor();
+            }
+        }
+
+        private void UpdateAppColor()
+        {
+            Color adjustedColor = AdjustColor(selectedAppColor, sliderAppLightness.Value, sliderAppAlpha.Value);
+            previewGroupBox.Background = new SolidColorBrush(adjustedColor);
+            rectAppColorPreview.Fill = new SolidColorBrush(adjustedColor);
+            txtAppBackgroundColorHex.Text = adjustedColor.ToString();
+        }
+
+        private void UpdateLoginPanelColor()
+        {
+            Color adjustedColor = AdjustColor(selectedLoginPanelColor, sliderLoginPanelLightness.Value, sliderLoginPanelAlpha.Value);
+            previewIconBorder.Background = new SolidColorBrush(adjustedColor);
+            rectLoginPanelColorPreview.Fill = new SolidColorBrush(adjustedColor);
+            txtLoginPanelBackgroundColorHex.Text = adjustedColor.ToString();
+        }
+
+        private Color AdjustColor(Color baseColor, double lightness, double alpha)
+        {
+            // This is a simplified lightness adjustment.
+            float factor = (float)(1 + lightness);
+            byte r = (byte)Math.Max(0, Math.Min(255, baseColor.R * factor));
+            byte g = (byte)Math.Max(0, Math.Min(255, baseColor.G * factor));
+            byte b = (byte)Math.Max(0, Math.Min(255, baseColor.B * factor));
+            byte a = (byte)Math.Max(0, Math.Min(255, 255 * alpha));
+
+            return Color.FromArgb(a, r, g, b);
+        }
+
+        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (imgPreview != null)
+            {
+                imgPreview.Margin = new Thickness(sliderMarginLeft.Value, sliderMarginTop.Value, sliderMarginRight.Value, sliderMarginBottom.Value);
+                imgPreview.Opacity = sliderOpacity.Value;
+            }
         }
 
         private void BtnSelectImage_Click(object sender, RoutedEventArgs e)
@@ -51,74 +131,17 @@ namespace namm
             {
                 Filter = "Image files (*.png;*.jpeg;*.jpg)|*.png;*.jpeg;*.jpg|All files (*.*)|*.*"
             };
-
             if (openFileDialog.ShowDialog() == true)
             {
                 txtImagePath.Text = openFileDialog.FileName;
-                UpdatePreview();
-            }
-        }
-
-        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (IsLoaded) // Chỉ cập nhật khi view đã được tải xong
-            {
-                UpdatePreview();
-            }
-        }
-
-        private void BtnSelectAppBackgroundColor_Click(object sender, RoutedEventArgs e)
-        {
-            var colorPicker = new ColorPickerDialog(_appBackgroundColor);
-            if (colorPicker.ShowDialog() == true)
-            {
-                _appBackgroundColor = colorPicker.SelectedColor;
-                txtAppBackgroundColorHex.Text = _appBackgroundColor.ToString(); // Cập nhật TextBox hiển thị mã Hex
-                UpdatePreview();
-            }
-        }
-
-        private void BtnSelectLoginPanelBackgroundColor_Click(object sender, RoutedEventArgs e)
-        {
-            var colorPicker = new ColorPickerDialog(_loginPanelBackgroundColor);
-            if (colorPicker.ShowDialog() == true)
-            {
-                _loginPanelBackgroundColor = colorPicker.SelectedColor;
-                txtLoginPanelBackgroundColorHex.Text = _loginPanelBackgroundColor.ToString(); // Cập nhật TextBox hiển thị mã Hex
-                UpdatePreview();
-            }
-        }
-
-        private void UpdatePreview()
-        {
-            try
-            {
-                // Cập nhật màu nền của phần xem trước để minh họa
-                previewGroupBox.Background = new SolidColorBrush(_appBackgroundColor);
-
-                // Cập nhật ảnh
-                imgPreview.Source = new BitmapImage(new Uri(txtImagePath.Text, UriKind.RelativeOrAbsolute));
-
-                // Cập nhật độ mờ
-                imgPreview.Opacity = sliderOpacity.Value;
-
-                // Cập nhật màu nền của panel icon
-                previewIconBorder.Background = new SolidColorBrush(_loginPanelBackgroundColor);
-
-                // Cập nhật lề của icon
-                imgPreview.Margin = UIHelper.GetConstrainedMargin(
-                    sliderMarginLeft.Value,
-                    sliderMarginTop.Value,
-                    sliderMarginRight.Value,
-                    sliderMarginBottom.Value
-                );
-
-            }
-            catch (Exception ex)
-            {
-                // Nếu đường dẫn ảnh không hợp lệ, hiển thị ảnh mặc định
-                imgPreview.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/login_icon.png"));
-                MessageBox.Show($"Không thể tải ảnh: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                try
+                {
+                    imgPreview.Source = new BitmapImage(new Uri(openFileDialog.FileName));
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error loading image: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
@@ -126,39 +149,78 @@ namespace namm
         {
             try
             {
-                // Mở file config để ghi
-                // Lưu các giá trị mới
-                Properties.Settings.Default.LoginIconPath = txtImagePath.Text;
-                Properties.Settings.Default.LoginIconBgColor = txtLoginPanelBackgroundColorHex.Text;
+                // Save App Background Color
                 Properties.Settings.Default.AppBackgroundColor = txtAppBackgroundColorHex.Text;
+
+                // Save Login Panel Color
+                Properties.Settings.Default.LoginIconBgColor = txtLoginPanelBackgroundColorHex.Text;
+
+                // Save Image Path and settings
+                Properties.Settings.Default.LoginIconPath = txtImagePath.Text;
                 Properties.Settings.Default.LoginIconMarginLeft = sliderMarginLeft.Value;
                 Properties.Settings.Default.LoginIconMarginRight = sliderMarginRight.Value;
                 Properties.Settings.Default.LoginIconMarginTop = sliderMarginTop.Value;
                 Properties.Settings.Default.LoginIconMarginBottom = sliderMarginBottom.Value;
                 Properties.Settings.Default.LoginIconOpacity = sliderOpacity.Value;
 
-                // Lưu các cài đặt
                 Properties.Settings.Default.Save();
-
-                MessageBox.Show("Đã lưu cài đặt thành công! Thay đổi sẽ được áp dụng ở lần đăng nhập tiếp theo.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Settings saved successfully! Please restart the application for changes to take full effect.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi khi lưu cài đặt: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error saving settings: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private void BtnReset_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show("Bạn có chắc muốn đặt lại tất cả cài đặt giao diện về mặc định không?", "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            if (MessageBox.Show("Are you sure you want to reset all interface settings to their default values?", "Confirm Reset", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
-                // Đặt lại các cài đặt về giá trị mặc định của chúng
                 Properties.Settings.Default.Reset();
                 Properties.Settings.Default.Save();
+                LoadCurrentSettings();
+                MessageBox.Show("Settings have been reset to default.", "Reset Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
 
-                // Tải lại cài đặt mặc định
-                LoadSettings();
-                MessageBox.Show("Đã đặt lại về mặc định.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+        private void LoadCurrentSettings()
+        {
+            try
+            {
+                // Load colors
+                var appBgColor = (Color)ColorConverter.ConvertFromString(Properties.Settings.Default.AppBackgroundColor);
+                var loginPanelColor = (Color)ColorConverter.ConvertFromString(Properties.Settings.Default.LoginIconBgColor);
+
+                selectedAppColor = appBgColor;
+                selectedLoginPanelColor = loginPanelColor;
+
+                // For simplicity, we don't try to reverse-engineer the slider values from the saved color.
+                // We just apply the final color.
+                UpdateAppColor();
+                UpdateLoginPanelColor();
+
+                // Load image path and settings
+                txtImagePath.Text = Properties.Settings.Default.LoginIconPath;
+                if (!string.IsNullOrEmpty(txtImagePath.Text) && File.Exists(txtImagePath.Text))
+                {
+                    imgPreview.Source = new BitmapImage(new Uri(txtImagePath.Text));
+                }
+
+                sliderMarginLeft.Value = Properties.Settings.Default.LoginIconMarginLeft;
+                sliderMarginTop.Value = Properties.Settings.Default.LoginIconMarginTop;
+                sliderMarginRight.Value = Properties.Settings.Default.LoginIconMarginRight;
+                sliderMarginBottom.Value = Properties.Settings.Default.LoginIconMarginBottom;
+
+                sliderOpacity.Value = Properties.Settings.Default.LoginIconOpacity;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Could not load settings, using defaults. Error: {ex.Message}", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                // In case of error, use hardcoded defaults
+                selectedAppColor = Colors.LightGray;
+                selectedLoginPanelColor = (Color)ColorConverter.ConvertFromString("#D2B48C");
+                UpdateAppColor();
+                UpdateLoginPanelColor();
             }
         }
     }

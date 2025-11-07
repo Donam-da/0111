@@ -21,28 +21,46 @@
 
                 <GroupBox Header="Tùy chỉnh chung" Padding="10" Margin="0,0,0,15">
                     <StackPanel>
-                        <TextBlock Text="Màu nền ứng dụng:" Margin="0,0,0,2"/>
+                        <TextBlock Text="Chọn màu cơ bản:" Margin="0,0,0,5" FontStyle="Italic"/>
+                        <WrapPanel x:Name="appColorPalette"/>
+
+                        <TextBlock Text="Độ sáng:" Margin="0,10,0,2"/>
+                        <Slider x:Name="sliderAppLightness" Minimum="-0.5" Maximum="0.5" Value="0" TickFrequency="0.1" ValueChanged="AppColorAdjustment_Changed"/>
+
+                        <TextBlock Text="Độ mờ (Alpha):" Margin="0,10,0,2"/>
+                        <Slider x:Name="sliderAppAlpha" Minimum="0" Maximum="1" Value="1" TickFrequency="0.1" ValueChanged="AppColorAdjustment_Changed"/>
+
+                        <!-- Xem trước màu và mã Hex -->
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox Grid.Column="0" x:Name="txtAppBackgroundColorHex" IsReadOnly="True" Background="#f0f0f0" Margin="0,0,5,0"/>
-                            <Button Grid.Column="1" Content="Chọn màu..." Click="BtnSelectAppBackgroundColor_Click"/>
+                            <Rectangle Grid.Column="0" x:Name="rectAppColorPreview" Width="50" Height="25" Stroke="Black" StrokeThickness="1" Margin="0,0,10,0"/>
+                            <TextBox Grid.Column="1" x:Name="txtAppBackgroundColorHex" IsReadOnly="True" Background="#f0f0f0" VerticalContentAlignment="Center"/>
                         </Grid>
                     </StackPanel>
                 </GroupBox>
 
                 <GroupBox Header="Tùy chỉnh Panel Trái" Padding="10">
                     <StackPanel>
-                        <TextBlock Text="Màu nền Panel Trái:" Margin="0,0,0,2"/>
+                        <TextBlock Text="Chọn màu cơ bản:" Margin="0,0,0,5" FontStyle="Italic"/>
+                        <WrapPanel x:Name="loginPanelColorPalette"/>
+
+                        <TextBlock Text="Độ sáng:" Margin="0,10,0,2"/>
+                        <Slider x:Name="sliderLoginPanelLightness" Minimum="-0.5" Maximum="0.5" Value="0" TickFrequency="0.1" ValueChanged="LoginPanelColorAdjustment_Changed"/>
+
+                        <TextBlock Text="Độ mờ (Alpha):" Margin="0,10,0,2"/>
+                        <Slider x:Name="sliderLoginPanelAlpha" Minimum="0" Maximum="1" Value="1" TickFrequency="0.1" ValueChanged="LoginPanelColorAdjustment_Changed"/>
+
+                        <!-- Xem trước màu và mã Hex -->
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox Grid.Column="0" x:Name="txtLoginPanelBackgroundColorHex" IsReadOnly="True" Background="#f0f0f0" Margin="0,0,5,0"/>
-                            <Button Grid.Column="1" Content="Chọn màu..." Click="BtnSelectLoginPanelBackgroundColor_Click"/>
+                            <Rectangle Grid.Column="0" x:Name="rectLoginPanelColorPreview" Width="50" Height="25" Stroke="Black" StrokeThickness="1" Margin="0,0,10,0"/>
+                            <TextBox Grid.Column="1" x:Name="txtLoginPanelBackgroundColorHex" IsReadOnly="True" Background="#f0f0f0" VerticalContentAlignment="Center"/>
                         </Grid>
                     </StackPanel>
                 </GroupBox>
@@ -67,13 +85,13 @@
                             </Grid.RowDefinitions>
 
                             <TextBlock Grid.Row="0" Grid.Column="0" Text="Trái:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                            <Slider Grid.Row="0" Grid.Column="1" x:Name="sliderMarginLeft" Minimum="10" Maximum="80" ValueChanged="Slider_ValueChanged"/>
+                            <Slider Grid.Row="0" Grid.Column="1" x:Name="sliderMarginLeft" Minimum="10" Maximum="80" ValueChanged="Slider_ValueChanged" />
                             <TextBlock Grid.Row="1" Grid.Column="0" Text="Phải:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                            <Slider Grid.Row="1" Grid.Column="1" x:Name="sliderMarginRight" Minimum="10" Maximum="80" ValueChanged="Slider_ValueChanged"/>
+                            <Slider Grid.Row="1" Grid.Column="1" x:Name="sliderMarginRight" Minimum="10" Maximum="80" ValueChanged="Slider_ValueChanged" />
                             <TextBlock Grid.Row="2" Grid.Column="0" Text="Trên:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                            <Slider Grid.Row="2" Grid.Column="1" x:Name="sliderMarginTop" Minimum="10" Maximum="80" ValueChanged="Slider_ValueChanged"/>
+                            <Slider Grid.Row="2" Grid.Column="1" x:Name="sliderMarginTop" Minimum="10" Maximum="80" ValueChanged="Slider_ValueChanged" />
                             <TextBlock Grid.Row="3" Grid.Column="0" Text="Dưới:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                            <Slider Grid.Row="3" Grid.Column="1" x:Name="sliderMarginBottom" Minimum="10" Maximum="80" ValueChanged="Slider_ValueChanged"/>
+                            <Slider Grid.Row="3" Grid.Column="1" x:Name="sliderMarginBottom" Minimum="10" Maximum="80" ValueChanged="Slider_ValueChanged" />
                         </Grid>
 
                         <TextBlock Text="Độ mờ (0% - 100%):" Margin="0,15,0,2"/>
