@@ -53,7 +53,7 @@ namespace namm
                         b.ID, 
                         ISNULL(c.CustomerCode, b.GuestCustomerCode) as CustomerCode,
                         b.DateCheckOut, 
-                        ISNULL(c.Name, 'Khách vãng lai') AS CustomerName, 
+                        ISNULL(c.Name, N'Khách vãng lai') AS CustomerName, 
                         tf.Name AS TableName, 
                         b.TotalAmount,
                         b.SubTotal
@@ -72,10 +72,12 @@ namespace namm
 
                 await Task.Run(() => adapter.Fill(invoiceDataTable));
 
-                // Thêm số thứ tự cho cột STT
+                // Thêm số thứ tự và chỉnh sửa tên bàn
                 for (int i = 0; i < invoiceDataTable.Rows.Count; i++)
                 {
                     invoiceDataTable.Rows[i]["STT"] = i + 1;
+                    string tableName = invoiceDataTable.Rows[i]["TableName"].ToString();
+                    invoiceDataTable.Rows[i]["TableName"] = tableName.Replace("Bàn ", "");
                 }
 
                 dgInvoices.ItemsSource = invoiceDataTable.DefaultView;
