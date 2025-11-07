@@ -71,6 +71,12 @@ namespace namm
 
                 await Task.Run(() => adapter.Fill(invoiceDataTable));
 
+                // Thêm số thứ tự cho cột STT
+                for (int i = 0; i < invoiceDataTable.Rows.Count; i++)
+                {
+                    invoiceDataTable.Rows[i]["STT"] = i + 1;
+                }
+
                 dgInvoices.ItemsSource = invoiceDataTable.DefaultView;
                 CalculateTotalRevenue();
                 ClearSelection();
@@ -172,7 +178,7 @@ namespace namm
 
         private void DgInvoices_LoadingRow(object sender, DataGridRowEventArgs e)
         {
-            e.Row.Header = (e.Row.GetIndex() + 1).ToString();
+            // Đã chuyển sang dùng cột STT trong DataGrid, không cần header mặc định nữa.
         }
     }
 }
