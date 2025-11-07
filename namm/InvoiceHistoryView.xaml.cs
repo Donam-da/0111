@@ -55,7 +55,8 @@ namespace namm
                         b.DateCheckOut, 
                         ISNULL(c.Name, 'Khách vãng lai') AS CustomerName, 
                         tf.Name AS TableName, 
-                        b.TotalAmount
+                        b.TotalAmount,
+                        b.SubTotal
                     FROM Bill b
                     LEFT JOIN Customer c ON b.IdCustomer = c.ID
                     JOIN TableFood tf ON b.TableID = tf.ID
