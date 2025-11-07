@@ -102,10 +102,10 @@
                 <DataGridTextColumn Header="Tên đồ uống" Binding="{Binding DrinkName}" Width="2.5*" ElementStyle="{StaticResource CenterCellStyle}"/>
                 <DataGridTextColumn Header="Kiểu" Binding="{Binding DrinkType}" Width="1*" ElementStyle="{StaticResource CenterCellStyle}"/>
                 <DataGridTextColumn Header="SL Bán" Binding="{Binding TotalQuantitySold}" Width="0.8*" ElementStyle="{StaticResource CenterCellStyle}"/>
-                <DataGridTextColumn Header="Giá vốn (đơn vị)" Binding="{Binding UnitCost, StringFormat={}{0:N0}}" Width="1.2*" ElementStyle="{StaticResource RightCellStyle}"/>
-                <DataGridTextColumn Header="Tổng Vốn" Binding="{Binding TotalCost, StringFormat={}{0:N0} VNĐ}" Width="1.2*" ElementStyle="{StaticResource RightCellStyle}"/>
-                <DataGridTextColumn Header="Doanh thu" Binding="{Binding TotalRevenue, StringFormat={}{0:N0} VNĐ}" Width="1.2*" ElementStyle="{StaticResource RightCellStyle}"/>
-                <DataGridTextColumn Header="Lợi nhuận" Binding="{Binding Profit, StringFormat={}{0:N0} VNĐ}" Width="1.2*" SortDirection="Descending" ElementStyle="{StaticResource RightCellStyle}">
+                <DataGridTextColumn Header="Giá vốn (đơn vị)" Binding="{Binding UnitCost, StringFormat={}{0:N0}}" Width="1.2*" ElementStyle="{StaticResource CenterCellStyle}"/>
+                <DataGridTextColumn Header="Tổng Vốn" Binding="{Binding TotalCost, StringFormat={}{0:N0} VNĐ}" Width="1.2*" ElementStyle="{StaticResource CenterCellStyle}"/>
+                <DataGridTextColumn Header="Doanh thu" Binding="{Binding TotalRevenue, StringFormat={}{0:N0} VNĐ}" Width="1.2*" ElementStyle="{StaticResource CenterCellStyle}"/>
+                <DataGridTextColumn Header="Lợi nhuận" Binding="{Binding Profit, StringFormat={}{0:N0} VNĐ}" Width="1.2*" SortDirection="Descending" ElementStyle="{StaticResource CenterCellStyle}">
                     <DataGridTextColumn.CellStyle>
                         <Style TargetType="DataGridCell">
                             <Setter Property="FontWeight" Value="Bold"/>
@@ -113,7 +113,7 @@
                         </Style>
                     </DataGridTextColumn.CellStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Header="Tỷ suất (%)" Binding="{Binding ProfitMargin, StringFormat={}{0:N1}%}" Width="1*" ElementStyle="{StaticResource RightCellStyle}">
+                <DataGridTextColumn Header="Tỷ suất (%)" Binding="{Binding ProfitMargin, StringFormat={}{0:N1}%}" Width="1*" ElementStyle="{StaticResource CenterCellStyle}">
                     <DataGridTextColumn.CellStyle>
                         <Style TargetType="DataGridCell">
                             <Setter Property="FontWeight" Value="Bold"/>
