@@ -99,7 +99,7 @@
                 <Separator/>
                 <Grid Margin="0,10,0,0">
                     <TextBlock Text="Tổng cộng:" FontSize="16" FontWeight="Bold" HorizontalAlignment="Left"/>
-                    <TextBlock x:Name="tbTotalAmount" Text="0" FontSize="16" FontWeight="Bold" HorizontalAlignment="Right"/>
+                    <TextBlock x:Name="tbTotalAmount" Text="0" FontSize="16" FontWeight="Bold" HorizontalAlignment="Right" Padding="0,0,30,0"/>
                 </Grid>
                 <Button x:Name="btnPay" Content="Thanh toán" Height="40" FontSize="16" FontWeight="Bold" Margin="0,10,0,0" Background="#4CAF50" Foreground="White" Click="BtnPay_Click"/>
             </StackPanel>
