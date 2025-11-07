@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -34,9 +34,12 @@ namespace namm
 
             await LoadFilterComboBoxes();
 
-            // Mặc định không chọn ngày nào để hiển thị tất cả dữ liệu
-            dpStartDate.SelectedDate = null;
-            dpEndDate.SelectedDate = null;
+            // Lấy ngày có hóa đơn đầu tiên từ DB
+            DateTime? firstInvoiceDate = await GetFirstInvoiceDateAsync();
+
+            // Nếu không có hóa đơn nào, mặc định là ngày hôm nay. Ngược lại, lấy ngày đầu tiên.
+            dpStartDate.SelectedDate = firstInvoiceDate?.Date ?? DateTime.Today;
+            dpEndDate.SelectedDate = DateTime.Today;
             
             // Gắn lại các event handler sau khi đã thiết lập giá trị ban đầu
             dpStartDate.SelectedDateChanged += DpStartDate_SelectedDateChanged; // Gắn lại event mới

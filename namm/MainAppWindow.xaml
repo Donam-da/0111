@@ -19,10 +19,10 @@
                 <MenuItem x:Name="miManageEmployees" Header="Quản lí nhân viên" Click="ManageEmployees_Click"/>
                 <MenuItem Header="Đổi mật khẩu" Click="ChangePassword_Click"/>
                 <MenuItem Header="Thiết lập giao diện" Click="InterfaceSettings_Click"/>
-                <Separator/>
+                <Separator/> 
+                <MenuItem x:Name="miDeleteHistory" Header="Xóa lịch sử hóa đơn" Click="DeleteHistory_Click"/>
                 <MenuItem Header="Đăng xuất" Click="Logout_Click"/>
                 <Separator/>
-                <MenuItem x:Name="miDeleteHistory" Header="Xóa lịch sử hóa đơn" Click="DeleteHistory_Click"/>
             </MenuItem>
             <MenuItem Header="_Quản lí" Click="TopLevelMenuItem_Click">
                 <MenuItem Header="Quản lí bàn" Click="ManageTables_Click"/>
