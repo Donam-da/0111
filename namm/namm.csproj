@@ -134,6 +134,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="ProfitStatisticsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="TopSellingItemsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -223,6 +227,10 @@
     </Compile>
     <Compile Include="LoyalCustomerView.xaml.cs">
       <DependentUpon>LoyalCustomerView.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ProfitStatisticsView.xaml.cs">
+      <DependentUpon>ProfitStatisticsView.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TopSellingItemsView.xaml.cs">
