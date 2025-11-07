@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿﻿using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
@@ -47,7 +47,7 @@ namespace namm
                 var textBox = new TextBox
                 {
                     Name = "txt" + typeName.Replace(" ", ""),
-                    Text = "0",
+                    Text = "", // Để trống ô nhập liệu
                     Width = 50,
                     VerticalContentAlignment = VerticalAlignment.Center, // Căn giữa theo chiều dọc
                     HorizontalContentAlignment = HorizontalAlignment.Center // Căn giữa theo chiều ngang
@@ -76,6 +76,12 @@ namespace namm
                 string type = pair.Key;
                 TextBox textBox = pair.Value.textBox;
                 int stock = pair.Value.stock;
+
+                // Nếu ô nhập trống, coi như số lượng là 0 và bỏ qua
+                if (string.IsNullOrWhiteSpace(textBox.Text))
+                {
+                    continue;
+                }
 
                 if (int.TryParse(textBox.Text, out int quantity))
                 {
