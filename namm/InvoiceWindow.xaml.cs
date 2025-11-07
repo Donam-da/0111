@@ -7,11 +7,16 @@ namespace namm
 {
     public partial class InvoiceWindow : Window
     {
+        public string? WatermarkIconSource { get; private set; }
+
         public InvoiceWindow(int tableId, string tableName, string customerName, string customerCode, decimal subTotal, decimal discountPercent, decimal finalTotal, ObservableCollection<BillItem> billItems, int billId)
         {
             InitializeComponent();
+            this.DataContext = this; // Cần thiết cho việc binding
 
-            // Điền thông tin vào hóa đơn
+            LoadWatermarkIcon();
+
+            // Điền thông tin vào hóa đơn (giữ nguyên)
             tbInvoiceId.Text = billId.ToString("D6"); // Định dạng số hóa đơn, ví dụ: 000123
             tbTableName.Text = tableName;
             tbCustomerCode.Text = customerCode;
@@ -30,6 +35,21 @@ namespace namm
 
             // Hiển thị danh sách món
             dgBillItems.ItemsSource = billItems;
+        }
+
+        private void LoadWatermarkIcon()
+        {
+            // Đọc đường dẫn ảnh đã được lưu trong phần cài đặt giao diện
+            // Giả sử tên setting là "LoginIconPath"
+            string? iconPath = Properties.Settings.Default.LoginIconPath;
+
+            // Chỉ hiển thị nếu đường dẫn hợp lệ và file tồn tại
+            if (!string.IsNullOrEmpty(iconPath) && System.IO.File.Exists(iconPath))
+            {
+                WatermarkIconSource = iconPath;
+            }
+            // Nếu không có ảnh được thiết lập, WatermarkIconSource sẽ là null
+            // và Image trong XAML sẽ không hiển thị gì cả.
         }
 
         private void BtnConfirm_Click(object sender, RoutedEventArgs e)

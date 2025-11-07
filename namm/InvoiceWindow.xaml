@@ -18,6 +18,16 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
+        <!-- Icon chìm ở nền -->
+        <Image Source="{Binding WatermarkIconSource}" 
+               Opacity="0.15" 
+               HorizontalAlignment="Center" 
+               VerticalAlignment="Center" 
+               Stretch="Uniform" 
+               IsHitTestVisible="False" 
+               Grid.Row="0" Grid.RowSpan="5" 
+               Panel.ZIndex="-1"/>
+
         <!-- Phần Header: Thông tin quán và hóa đơn -->
         <StackPanel Grid.Row="0" HorizontalAlignment="Center" TextBlock.TextAlignment="Center">
             <TextBlock Text="Quán Namm" FontSize="24" FontWeight="Bold" Foreground="#1A5276"/>

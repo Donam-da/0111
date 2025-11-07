@@ -5,52 +5,46 @@ using System.Windows.Controls;
 
 namespace namm
 {
+    /// <summary>
+    /// Interaction logic for InvoicePreviewControl.xaml
+    /// </summary>
     public partial class InvoicePreviewControl : UserControl
     {
+        public string? WatermarkIconSource { get; private set; }
+
         public InvoicePreviewControl()
         {
             InitializeComponent();
+            this.DataContext = this;
+            LoadWatermarkIcon();
         }
 
-        public void DisplayInvoice(DataRowView invoiceData, DataView detailsView)
+        private void LoadWatermarkIcon()
         {
-            if (invoiceData == null || detailsView == null)
-            {
-                Clear();
-                return;
-            }
+            // Đọc đường dẫn ảnh đã được lưu trong phần cài đặt giao diện
+            string? iconPath = Properties.Settings.Default.LoginIconPath;
 
+            // Chỉ hiển thị nếu đường dẫn hợp lệ và file tồn tại
+            if (!string.IsNullOrEmpty(iconPath) && System.IO.File.Exists(iconPath))
+            {
+                WatermarkIconSource = iconPath;
+            }
+        }
+
+        public void DisplayInvoice(DataRowView invoiceData, DataView detailsData)
+        {
             this.Visibility = Visibility.Visible;
 
             tbInvoiceId.Text = ((int)invoiceData["ID"]).ToString("D6");
             tbTableName.Text = invoiceData["TableName"].ToString();
             tbCustomerName.Text = invoiceData["CustomerName"].ToString();
-            tbCustomerCode.Text = invoiceData["CustomerCode"]?.ToString() ?? "N/A"; // Sử dụng ?? để xử lý DBNull
+            tbCustomerCode.Text = invoiceData["CustomerCode"].ToString();
             tbDateTime.Text = ((DateTime)invoiceData["DateCheckOut"]).ToString("dd/MM/yyyy HH:mm");
 
-            // Hiển thị danh sách món
-            dgBillItems.ItemsSource = detailsView;
+            dgBillItems.ItemsSource = detailsData;
 
-            // Xử lý hiển thị giảm giá
-            decimal totalAmount = (decimal)invoiceData["TotalAmount"];
-            // Lấy SubTotal, nếu là null (hóa đơn cũ không có) thì mặc định bằng TotalAmount
-            decimal subTotal = (invoiceData["SubTotal"] != DBNull.Value) ? (decimal)invoiceData["SubTotal"] : totalAmount;
-
-            tbSubTotal.Text = $"{subTotal:N0}";
-            tbTotalAmount.Text = $"{totalAmount:N0} VNĐ";
-
-            if (subTotal > totalAmount && subTotal > 0) // Thêm điều kiện subTotal > 0 để tránh lỗi chia cho 0
-            {
-                decimal discountAmount = subTotal - totalAmount;
-                decimal discountPercent = (discountAmount / subTotal) * 100;
-                tbDiscountAmount.Text = $"-{discountAmount:N0} ({discountPercent:G29}%)"; // G29 để loại bỏ các số 0 không cần thiết
-                gridDiscount.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                // Ẩn phần giảm giá nếu không có
-                gridDiscount.Visibility = Visibility.Collapsed;
-            }
+            tbSubTotal.Text = $"{Convert.ToDecimal(invoiceData["SubTotal"]):N0}";
+            tbTotalAmount.Text = $"{Convert.ToDecimal(invoiceData["TotalAmount"]):N0} VNĐ";
         }
 
         public void Clear()
