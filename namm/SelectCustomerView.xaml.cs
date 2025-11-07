@@ -285,10 +285,23 @@ namespace namm
                 string customerName = _selectedCustomer["Name"].ToString();
                 string customerCode = _selectedCustomer["CustomerCode"].ToString();
 
-                // Lấy thông tin chi tiêu và tính toán giảm giá
+                // Lấy thông tin chi tiêu của khách hàng
                 var customerStats = await GetCustomerStatsAsync(customerId.Value);
-                var discountRules = await GetDiscountRulesAsync();
-                decimal discountPercent = CalculateDiscount(customerStats, discountRules);
+
+                // Tìm mức giảm giá tốt nhất từ các quy tắc đã gán
+                decimal bestAppliedDiscount = await GetBestApplicableDiscountAsync(customerId.Value, customerStats);
+                decimal discountPercent;
+
+                if (bestAppliedDiscount >= 0) // Nếu có quy tắc được gán (kể cả khi không đủ điều kiện -> 0%)
+                {
+                    discountPercent = bestAppliedDiscount;
+                }
+                else
+                {
+                    // Nếu không có quy tắc nào được gán, tính tự động như cũ
+                    var discountRules = await GetDiscountRulesAsync();
+                    discountPercent = CalculateDiscount(customerStats, discountRules);
+                }
                 decimal finalAmount = _totalAmount * (1 - (discountPercent / 100m)); // Sử dụng 100m để đảm bảo phép chia là số thập phân
 
                 // Lấy ID hóa đơn chưa thanh toán của bàn
@@ -389,6 +402,43 @@ namespace namm
             NavigateBackToDashboard();
         }
 
+        private async Task<decimal> GetBestApplicableDiscountAsync(int customerId, (int PurchaseCount, decimal TotalSpent) customerStats)
+        {
+            var appliedRules = new List<DiscountRule>();
+            using (var connection = new SqlConnection(connectionString))
+            {
+                // Lấy TẤT CẢ các quy tắc đã được gán cho khách hàng
+                const string query = @"
+                    SELECT dr.ID, dr.CriteriaType, dr.Threshold, dr.DiscountPercent
+                    FROM CustomerAppliedRule car
+                    JOIN DiscountRule dr ON car.DiscountRuleID = dr.ID
+                    WHERE car.CustomerID = @CustomerId";
+                var command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@CustomerId", customerId);
+                await connection.OpenAsync();
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        appliedRules.Add(new DiscountRule { ID = reader.GetInt32(0), CriteriaType = reader.GetString(1), Threshold = reader.GetDecimal(2), DiscountPercent = reader.GetDecimal(3) });
+                    }
+                }
+            }
+
+            if (!appliedRules.Any())
+            {
+                return -1; // Không có quy tắc nào được gán, trả về -1 để logic bên ngoài biết
+            }
+
+            // Từ các quy tắc đã gán, lọc ra những quy tắc mà khách hàng ĐỦ ĐIỀU KIỆN
+            var eligibleRules = appliedRules.Where(rule =>
+                (rule.CriteriaType == "Số lần mua" && customerStats.PurchaseCount > rule.Threshold) ||
+                (rule.CriteriaType == "Tổng chi tiêu" && customerStats.TotalSpent > rule.Threshold)
+            );
+
+            // Nếu có quy tắc đủ điều kiện, trả về mức giảm giá CAO NHẤT. Nếu không, trả về 0%.
+            return eligibleRules.Any() ? eligibleRules.Max(r => r.DiscountPercent) : 0;
+        }
         private async Task<(int PurchaseCount, decimal TotalSpent)> GetCustomerStatsAsync(int customerId)
         {
             using (var connection = new SqlConnection(connectionString))
