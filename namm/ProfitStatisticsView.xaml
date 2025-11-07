@@ -54,6 +54,30 @@
             </Border>
         </StackPanel>
 
+        <!-- Bộ lọc cột -->
+        <Border DockPanel.Dock="Top" Padding="5" Margin="0,0,0,5">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="Tên đồ uống:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBox Grid.Column="1" x:Name="txtFilterDrinkName" TextChanged="Filters_Changed"/>
+
+                <TextBlock Grid.Column="2" Text="Kiểu:" VerticalAlignment="Center" Margin="10,0,5,0"/>
+                <ComboBox Grid.Column="3" x:Name="cbFilterDrinkType" SelectionChanged="Filters_Changed"/>
+
+                <TextBlock Grid.Column="4" Text="Loại:" VerticalAlignment="Center" Margin="10,0,5,0"/>
+                <ComboBox Grid.Column="5" x:Name="cbFilterCategory" SelectionChanged="Filters_Changed" DisplayMemberPath="Name" SelectedValuePath="ID"/>
+
+            </Grid>
+        </Border>
+
         <!-- Bảng dữ liệu -->
         <DataGrid x:Name="dgProfitStats" 
                   AutoGenerateColumns="False" 
@@ -82,6 +106,14 @@
                 <DataGridTextColumn Header="Tổng Vốn" Binding="{Binding TotalCost, StringFormat={}{0:N0} VNĐ}" Width="1.2*" ElementStyle="{StaticResource RightCellStyle}"/>
                 <DataGridTextColumn Header="Doanh thu" Binding="{Binding TotalRevenue, StringFormat={}{0:N0} VNĐ}" Width="1.2*" ElementStyle="{StaticResource RightCellStyle}"/>
                 <DataGridTextColumn Header="Lợi nhuận" Binding="{Binding Profit, StringFormat={}{0:N0} VNĐ}" Width="1.2*" SortDirection="Descending" ElementStyle="{StaticResource RightCellStyle}">
+                    <DataGridTextColumn.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="Foreground" Value="DarkGreen"/>
+                        </Style>
+                    </DataGridTextColumn.CellStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Tỷ suất (%)" Binding="{Binding ProfitMargin, StringFormat={}{0:N1}%}" Width="1*" ElementStyle="{StaticResource RightCellStyle}">
                     <DataGridTextColumn.CellStyle>
                         <Style TargetType="DataGridCell">
                             <Setter Property="FontWeight" Value="Bold"/>
