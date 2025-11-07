@@ -15,7 +15,7 @@
         </Grid.ColumnDefinitions>
 
         <!-- Cột trái: Biểu tượng -->
-        <Border Grid.Column="0" Background="#1A5276">
+        <Border Grid.Column="0" Background="#D2B48C"> <!-- Màu nâu nhạt (Tan) -->
             <!-- Thay 'Resources/login_icon.png' bằng đường dẫn đến file ảnh của bạn -->
             <Image Source="pack://application:,,,/Resources/login_icon.png" Stretch="Uniform" Margin="30" ToolTip="Quán Namm"/>
         </Border>
