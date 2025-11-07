@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿using System;
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,12 +19,12 @@ namespace namm
     /// </summary>
     public partial class MainAppWindow : Window
     {
-        private AccountDTO loggedInAccount;
+        public AccountDTO LoggedInAccount { get; private set; }
 
         public MainAppWindow(AccountDTO account)
         {
             InitializeComponent();
-            this.loggedInAccount = account;
+            this.LoggedInAccount = account;
             Authorize();
 
             // Hiển thị sơ đồ bàn làm màn hình chính
@@ -34,11 +34,12 @@ namespace namm
         void Authorize()
         {
             // Nếu không phải là admin (Type = 0 là nhân viên)
-            if (loggedInAccount.Type == 0)
+            if (LoggedInAccount.Type == 0)
             {
                 miManageEmployees.Visibility = Visibility.Collapsed;
                 miDeleteHistory.Visibility = Visibility.Collapsed;
                 miProfitStatistics.Visibility = Visibility.Collapsed; // Chỉ ẩn mục Thống kê lợi nhuận
+                miEmployeeRevenue.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -71,7 +72,7 @@ namespace namm
         private void ChangePassword_Click(object sender, RoutedEventArgs e)
         {
             // Hiển thị giao diện đổi mật khẩu, truyền thông tin tài khoản đang đăng nhập
-            var changePasswordView = new ChangePasswordView(loggedInAccount);
+            var changePasswordView = new ChangePasswordView(LoggedInAccount);
 
             // Lắng nghe sự kiện yêu cầu đăng xuất từ ChangePasswordView
             changePasswordView.LogoutRequested += (s, args) => Logout_Click(s!, null!);
@@ -174,6 +175,13 @@ namespace namm
             // Hiển thị giao diện xóa lịch sử hóa đơn
             MainContent.Children.Clear();
             MainContent.Children.Add(new DeleteHistoryView());
+        }
+
+        private void EmployeeRevenue_Click(object sender, RoutedEventArgs e)
+        {
+            // Hiển thị giao diện thống kê doanh thu nhân viên
+            MainContent.Children.Clear();
+            MainContent.Children.Add(new EmployeeRevenueView());
         }
     }
 }

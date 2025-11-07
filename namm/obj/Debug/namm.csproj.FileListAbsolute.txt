@@ -59,3 +59,5 @@ D:\QuanLyCafe\namm\obj\Debug\ProfitStatisticsView.g.cs
 D:\QuanLyCafe\namm\obj\Debug\ProfitStatisticsView.baml
 D:\QuanLyCafe\namm\obj\Debug\DeleteHistoryView.g.cs
 D:\QuanLyCafe\namm\obj\Debug\DeleteHistoryView.baml
+D:\QuanLyCafe\namm\obj\Debug\EmployeeRevenueView.g.cs
+D:\QuanLyCafe\namm\obj\Debug\EmployeeRevenueView.baml

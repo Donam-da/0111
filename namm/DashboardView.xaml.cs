@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿using System;
+﻿﻿﻿﻿﻿﻿﻿﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Configuration;
@@ -546,7 +546,8 @@ namespace namm
             {
                 // Xóa nội dung cũ và thêm view mới vào
                 mainAppWindow.MainContent.Children.Clear();
-                mainAppWindow.MainContent.Children.Add(new SelectCustomerView(tableId, tableName, currentBill));
+                // Lấy thông tin tài khoản đang đăng nhập từ MainAppWindow và truyền vào
+                mainAppWindow.MainContent.Children.Add(new SelectCustomerView(tableId, tableName, currentBill, mainAppWindow.LoggedInAccount));
             }
         }
     }

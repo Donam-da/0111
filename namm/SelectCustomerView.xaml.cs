@@ -22,16 +22,18 @@ namespace namm
         private readonly string _tableName;
         private readonly ObservableCollection<BillItem> _currentBill;
         private readonly decimal _totalAmount;
+        private readonly AccountDTO _loggedInAccount;
 
         private readonly string connectionString = ConfigurationManager.ConnectionStrings["CafeDB"].ConnectionString;
         private DataTable customerDataTable = new DataTable();
         private DataRowView? _selectedCustomer;
 
-        public SelectCustomerView(int tableId, string tableName, ObservableCollection<BillItem> currentBill)
+        public SelectCustomerView(int tableId, string tableName, ObservableCollection<BillItem> currentBill, AccountDTO loggedInAccount)
         {
             InitializeComponent();
 
             _tableId = tableId;
+            _loggedInAccount = loggedInAccount;
             _tableName = tableName;
             _currentBill = currentBill;
             _totalAmount = _currentBill.Sum(item => item.TotalPrice);
@@ -377,6 +379,7 @@ namespace namm
                         DateCheckOut = GETDATE(),
                         IdCustomer = @CustomerID,
                         GuestCustomerCode = @GuestCustomerCode,
+                        AccountUserName = @AccountUserName,
                         -- Lưu cả tổng tiền gốc và tổng tiền sau giảm giá
                         SubTotal = @SubTotal,
                         TotalAmount = @FinalAmount
@@ -385,6 +388,7 @@ namespace namm
                 var updateBillCmd = new SqlCommand(updateBillQuery, connection);
                 updateBillCmd.Parameters.AddWithValue("@CustomerID", customerId ?? (object)DBNull.Value);
                 updateBillCmd.Parameters.AddWithValue("@GuestCustomerCode", string.IsNullOrEmpty(guestCustomerCode) ? (object)DBNull.Value : guestCustomerCode);
+                updateBillCmd.Parameters.AddWithValue("@AccountUserName", _loggedInAccount.UserName);
                 updateBillCmd.Parameters.AddWithValue("@FinalAmount", finalAmount);
                 updateBillCmd.Parameters.AddWithValue("@SubTotal", _totalAmount); // _totalAmount là tổng tiền gốc
                 updateBillCmd.Parameters.AddWithValue("@TableID", _tableId);

@@ -33,7 +33,7 @@
                 <MenuItem Header="Quản lí đơn vị tính" Click="ManageUnits_Click"/>
             </MenuItem>
             <MenuItem x:Name="miStatistics" Header="_Thống kê" Click="TopLevelMenuItem_Click">
-                <MenuItem Header="Doanh thu nhân viên"/>
+                <MenuItem x:Name="miEmployeeRevenue" Header="Doanh thu nhân viên" Click="EmployeeRevenue_Click"/>
                 <MenuItem x:Name="miProfitStatistics" Header="Thống kê lợi nhuận" Click="miProfitStatistics_Click"/>
                 <MenuItem Header="Top hàng bán chạy" Click="TopSelling_Click"/>
                 <MenuItem Header="Khách hàng thân thiết" Click="LoyalCustomers_Click"/>

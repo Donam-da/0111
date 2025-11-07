@@ -146,6 +146,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="EmployeeRevenueView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="LinkButtonStyle.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -243,6 +247,10 @@
     </Compile>
     <Compile Include="DeleteHistoryView.xaml.cs">
       <DependentUpon>DeleteHistoryView.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EmployeeRevenueView.xaml.cs">
+      <DependentUpon>EmployeeRevenueView.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="BillItem.cs">
