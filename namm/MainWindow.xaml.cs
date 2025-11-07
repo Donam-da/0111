@@ -39,28 +39,24 @@ namespace namm
             try
             {
                 // Đọc các cài đặt đã lưu từ App.config
-                string iconPath = ConfigurationManager.AppSettings["LoginIconPath"] ?? "pack://application:,,,/Resources/login_icon.png";
+                string iconPath = Properties.Settings.Default.LoginIconPath;
 
-                string bgColor = ConfigurationManager.AppSettings["LoginIconBgColor"] ?? "#D2B48C";
+                string bgColor = Properties.Settings.Default.LoginIconBgColor;
                 try
                 {
                     iconBorder.Background = (SolidColorBrush)new BrushConverter().ConvertFromString(bgColor);
                 }
                 catch
                 {
-                    // Nếu mã màu lưu bị lỗi, dùng màu mặc định
+                    // Nếu mã màu lưu bị lỗi, dùng màu mặc định hoặc màu đã được định nghĩa trong XAML
                 }
 
-                if (double.TryParse(ConfigurationManager.AppSettings["LoginIconOpacity"], out double opacity))
-                {
-                    imgLoginIcon.Opacity = opacity;
-                }
+                imgLoginIcon.Opacity = Properties.Settings.Default.LoginIconOpacity;
 
-                // Đọc các giá trị lề riêng biệt, nếu không có thì dùng giá trị mặc định là 30
-                double.TryParse(ConfigurationManager.AppSettings["LoginIconMarginLeft"], out double marginLeft);
-                double.TryParse(ConfigurationManager.AppSettings["LoginIconMarginRight"], out double marginRight);
-                double.TryParse(ConfigurationManager.AppSettings["LoginIconMarginTop"], out double marginTop);
-                double.TryParse(ConfigurationManager.AppSettings["LoginIconMarginBottom"], out double marginBottom);
+                double marginLeft = Properties.Settings.Default.LoginIconMarginLeft;
+                double marginRight = Properties.Settings.Default.LoginIconMarginRight;
+                double marginTop = Properties.Settings.Default.LoginIconMarginTop;
+                double marginBottom = Properties.Settings.Default.LoginIconMarginBottom;
 
                 imgLoginIcon.Margin = UIHelper.GetConstrainedMargin(
                     marginLeft > 0 ? marginLeft : 30,

@@ -37,7 +37,7 @@ namespace namm
         {
             try
             {
-                string? bgColor = ConfigurationManager.AppSettings["AppBackgroundColor"];
+                string? bgColor = Properties.Settings.Default.AppBackgroundColor;
                 if (!string.IsNullOrEmpty(bgColor))
                 {
                     var converter = new BrushConverter();

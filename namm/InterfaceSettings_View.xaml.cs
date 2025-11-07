@@ -11,11 +11,6 @@ namespace namm
 {
     public partial class InterfaceSettingsView : UserControl
     {
-        public InterfaceSettingsView()
-        {
-            InitializeComponent();
-        }
-
         private Color _appBackgroundColor = (Color)ColorConverter.ConvertFromString(Properties.Settings.Default.AppBackgroundColor);
         private Color _loginPanelBackgroundColor = (Color)ColorConverter.ConvertFromString(Properties.Settings.Default.LoginIconBgColor);
 

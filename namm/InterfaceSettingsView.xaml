@@ -21,15 +21,29 @@
 
                 <GroupBox Header="Tùy chỉnh chung" Padding="10" Margin="0,0,0,15">
                     <StackPanel>
-                        <TextBlock Text="Màu nền ứng dụng (mã Hex):" Margin="0,0,0,2"/>
-                        <TextBox x:Name="txtAppBackgroundColor" TextChanged="TxtAppBackgroundColor_TextChanged"/>
+                        <TextBlock Text="Màu nền ứng dụng:" Margin="0,0,0,2"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" x:Name="txtAppBackgroundColorHex" IsReadOnly="True" Background="#f0f0f0" Margin="0,0,5,0"/>
+                            <Button Grid.Column="1" Content="Chọn màu..." Click="BtnSelectAppBackgroundColor_Click"/>
+                        </Grid>
                     </StackPanel>
                 </GroupBox>
 
                 <GroupBox Header="Tùy chỉnh Panel Trái" Padding="10">
                     <StackPanel>
-                        <TextBlock Text="Màu nền (mã Hex, ví dụ: #D2B48C):" Margin="0,15,0,2"/>
-                        <TextBox x:Name="txtBackgroundColor" TextChanged="TxtBackgroundColor_TextChanged"/>
+                        <TextBlock Text="Màu nền Panel Trái:" Margin="0,0,0,2"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" x:Name="txtLoginPanelBackgroundColorHex" IsReadOnly="True" Background="#f0f0f0" Margin="0,0,5,0"/>
+                            <Button Grid.Column="1" Content="Chọn màu..." Click="BtnSelectLoginPanelBackgroundColor_Click"/>
+                        </Grid>
                     </StackPanel>
                 </GroupBox>
 

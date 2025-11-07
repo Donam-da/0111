@@ -1,4 +1,4 @@
-﻿﻿<?xml version='1.0' encoding='utf-8'?>
+﻿﻿﻿﻿<?xml version='1.0' encoding='utf-8'?>
 <SettingsFile xmlns="uri:settings" CurrentProfile="(Default)">
   <Profiles>
     <Profile Name="(Default)" />
@@ -12,6 +12,30 @@
     </Setting>
     <Setting Name="RememberMe" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="LoginIconPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Resources/login_icon.png</Value>
+    </Setting>
+    <Setting Name="LoginIconBgColor" Type="System.String" Scope="User">
+      <Value Profile="(Default)">#D2B48C</Value>
+    </Setting>
+    <Setting Name="AppBackgroundColor" Type="System.String" Scope="User">
+      <Value Profile="(Default)">#F5F5F5</Value>
+    </Setting>
+    <Setting Name="LoginIconMarginLeft" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">30</Value>
+    </Setting>
+    <Setting Name="LoginIconMarginRight" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">30</Value>
+    </Setting>
+    <Setting Name="LoginIconMarginTop" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">30</Value>
+    </Setting>
+    <Setting Name="LoginIconMarginBottom" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">30</Value>
+    </Setting>
+    <Setting Name="LoginIconOpacity" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">1</Value>
     </Setting>
   </Settings>
 </SettingsFile>
