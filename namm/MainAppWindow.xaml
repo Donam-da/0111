@@ -41,7 +41,7 @@
                 <MenuItem x:Name="miInvoiceHistory" Header="Lịch sử hóa đơn" Click="InvoiceHistory_Click"/>
             </MenuItem>
         </Menu>
-        <Grid x:Name="MainContent">
+        <Grid x:Name="MainContent" Margin="10">
             <!-- Nội dung chính của ứng dụng sẽ được hiển thị ở đây -->
         </Grid>
     </DockPanel>
