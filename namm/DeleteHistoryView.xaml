@@ -51,8 +51,8 @@
                             <RadioButton x:Name="rbOnDate" Content="Theo ngày" GroupName="DeleteMode" Margin="15,0,0,0" Checked="DeleteMode_Changed"/>
                             <RadioButton x:Name="rbInWeek" Content="Theo tuần" GroupName="DeleteMode" Margin="15,0,0,0" Checked="DeleteMode_Changed"/>
                             <RadioButton x:Name="rbInMonth" Content="Theo tháng" GroupName="DeleteMode" Margin="15,0,0,0" Checked="DeleteMode_Changed"/>
+                            <RadioButton x:Name="rbByCustomer" Content="Theo khách hàng" GroupName="DeleteMode" Margin="15,0,0,0" Checked="DeleteMode_Changed"/>
                         </StackPanel>
-                        <RadioButton x:Name="rbByCustomer" Content="Theo khách hàng" GroupName="DeleteMode" Margin="0,5,0,15" Checked="DeleteMode_Changed"/>
 
                         <!-- Phần điều khiển chọn ngày và thông tin -->
                         <Grid>
