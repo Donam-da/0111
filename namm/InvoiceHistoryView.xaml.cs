@@ -72,10 +72,9 @@ namespace namm
 
                 await Task.Run(() => adapter.Fill(invoiceDataTable));
 
-                // Thêm số thứ tự và chỉnh sửa tên bàn
+                // Chỉnh sửa tên bàn, STT sẽ được xử lý trong sự kiện LoadingRow
                 for (int i = 0; i < invoiceDataTable.Rows.Count; i++)
                 {
-                    invoiceDataTable.Rows[i]["STT"] = i + 1;
                     string tableName = invoiceDataTable.Rows[i]["TableName"].ToString();
                     invoiceDataTable.Rows[i]["TableName"] = tableName.Replace("Bàn ", "");
                 }
@@ -181,7 +180,12 @@ namespace namm
 
         private void DgInvoices_LoadingRow(object sender, DataGridRowEventArgs e)
         {
-            // Đã chuyển sang dùng cột STT trong DataGrid, không cần header mặc định nữa.
+            // Gán lại số thứ tự dựa trên vị trí hiển thị của hàng trong DataGrid.
+            // Điều này đảm bảo STT luôn đúng thứ tự 1, 2, 3,... ngay cả khi sắp xếp.
+            if (e.Row.Item is DataRowView rowView)
+            {
+                rowView.Row["STT"] = e.Row.GetIndex() + 1;
+            }
         }
     }
 }
