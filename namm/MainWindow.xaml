@@ -5,36 +5,37 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:namm"
         mc:Ignorable="d"
-        Title="Đăng nhập - Quản lý Cafe" Height="300" Width="500"
+        Title="Đăng nhập - Quản lý Cafe" Height="400" Width="700"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Text="ĐĂNG NHẬP HỆ THỐNG" FontSize="24" FontWeight="Bold" 
-                   HorizontalAlignment="Center" Margin="0,20,0,20"/>
+        <!-- Cột trái: Biểu tượng -->
+        <Border Grid.Column="0" Background="#1A5276">
+            <!-- Thay 'Resources/login_icon.png' bằng đường dẫn đến file ảnh của bạn -->
+            <Image Source="pack://application:,,,/Resources/login_icon.png" Stretch="Uniform" Margin="30" ToolTip="Quán Namm"/>
+        </Border>
 
-        <StackPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Top">
+        <!-- Cột phải: Form đăng nhập -->
+        <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock Text="ĐĂNG NHẬP HỆ THỐNG" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+
             <StackPanel Orientation="Horizontal" Margin="10">
                 <TextBlock Text="Tên đăng nhập:" Width="120" VerticalAlignment="Center" FontSize="14"/>
                 <TextBox x:Name="txtUsername" Width="200" FontSize="14" Padding="5"/>
             </StackPanel>
-
             <StackPanel Orientation="Horizontal" Margin="10">
                 <TextBlock Text="Mật khẩu:" Width="120" VerticalAlignment="Center" FontSize="14"/>
                 <PasswordBox x:Name="pwbPassword" Width="200" FontSize="14" Padding="5"/>
             </StackPanel>
-
-            <CheckBox x:Name="chkRememberMe" Content="Lưu mật khẩu" HorizontalAlignment="Center" Margin="0,5,0,0"/>
-
+            <CheckBox x:Name="chkRememberMe" Content="Lưu thông tin" HorizontalAlignment="Left" Margin="130,5,0,0"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10,20,10,10">
-                <Button x:Name="btnLogin" Content="Đăng nhập" Width="100" Margin="0,0,10,0" 
-                        Click="BtnLogin_Click" IsDefault="True"/>
-                <Button x:Name="btnExit" Content="Thoát" Width="100" 
-                        Click="BtnExit_Click" IsCancel="True"/>
+                <Button x:Name="btnLogin" Content="Đăng nhập" Width="100" Margin="0,0,10,0" Click="BtnLogin_Click" IsDefault="True"/>
+                <Button x:Name="btnExit" Content="Thoát" Width="100" Click="BtnExit_Click" IsCancel="True"/>
             </StackPanel>
         </StackPanel>
     </Grid>
