@@ -28,11 +28,29 @@
                 </StackPanel>
             </Border>
 
+            <!-- Chọn chế độ xóa -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,30,0,10">
+                <TextBlock Text="Chế độ xóa:" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,15,0"/>
+                <RadioButton x:Name="rbBeforeDate" Content="Trước ngày" IsChecked="True" GroupName="DeleteMode" Checked="DeleteMode_Changed"/>
+                <RadioButton x:Name="rbOnDate" Content="Trong ngày" GroupName="DeleteMode" Margin="15,0,0,0" Checked="DeleteMode_Changed"/>
+                <RadioButton x:Name="rbInWeek" Content="Theo tuần" GroupName="DeleteMode" Margin="15,0,0,0" Checked="DeleteMode_Changed"/>
+                <RadioButton x:Name="rbInMonth" Content="Theo tháng" GroupName="DeleteMode" Margin="15,0,0,0" Checked="DeleteMode_Changed"/>
+            </StackPanel>
+
             <!-- Phần điều khiển -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,30,0,10">
-                <TextBlock Text="Xóa tất cả hóa đơn TRƯỚC ngày:" VerticalAlignment="Center" FontSize="14"/>
-                <DatePicker x:Name="dpDeleteBeforeDate" Width="150" Margin="10,0" VerticalContentAlignment="Center" FontSize="14"/>
+                <TextBlock x:Name="tbDateSelectionLabel" Text="Xóa tất cả hóa đơn TRƯỚC ngày:" VerticalAlignment="Center" FontSize="14"/>
+                <DatePicker x:Name="dpDate" Width="150" Margin="10,0" VerticalContentAlignment="Center" FontSize="14" SelectedDateChanged="DpDate_SelectedDateChanged"/>
             </StackPanel>
+
+            <!-- Thông tin chi tiết khoảng thời gian -->
+            <TextBlock x:Name="tbDateRangeInfo" 
+                       HorizontalAlignment="Center" 
+                       Margin="0,5,0,0" 
+                       FontSize="12" 
+                       FontStyle="Italic" 
+                       Foreground="DarkSlateGray"
+                       Visibility="Collapsed"/>
 
             <!-- Nút thực thi -->
             <Button x:Name="btnDelete" 
