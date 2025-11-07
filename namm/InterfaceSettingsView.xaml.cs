@@ -5,6 +5,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
+using System.Windows.Media;
 
 namespace namm
 {
@@ -24,11 +25,20 @@ namespace namm
         {
             // Đọc các cài đặt đã lưu
             txtImagePath.Text = ConfigurationManager.AppSettings["LoginIconPath"] ?? "Resources/login_icon.png";
+            txtBackgroundColor.Text = ConfigurationManager.AppSettings["LoginIconBgColor"] ?? "#D2B48C";
             
-            if (double.TryParse(ConfigurationManager.AppSettings["LoginIconSize"], out double size))
-                sliderSize.Value = size;
-            else
-                sliderSize.Value = 240; // Kích thước mặc định
+            // Tải các giá trị lề riêng biệt
+            if (double.TryParse(ConfigurationManager.AppSettings["LoginIconMarginLeft"], out double marginLeft)) sliderMarginLeft.Value = marginLeft;
+            else sliderMarginLeft.Value = 30;
+
+            if (double.TryParse(ConfigurationManager.AppSettings["LoginIconMarginRight"], out double marginRight)) sliderMarginRight.Value = marginRight;
+            else sliderMarginRight.Value = 30;
+
+            if (double.TryParse(ConfigurationManager.AppSettings["LoginIconMarginTop"], out double marginTop)) sliderMarginTop.Value = marginTop;
+            else sliderMarginTop.Value = 30;
+
+            if (double.TryParse(ConfigurationManager.AppSettings["LoginIconMarginBottom"], out double marginBottom)) sliderMarginBottom.Value = marginBottom;
+            else sliderMarginBottom.Value = 30;
 
             if (double.TryParse(ConfigurationManager.AppSettings["LoginIconOpacity"], out double opacity))
                 sliderOpacity.Value = opacity;
@@ -60,6 +70,16 @@ namespace namm
             }
         }
 
+        private void TxtBackgroundColor_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // Chỉ cập nhật khi view đã được tải xong để tránh lỗi không cần thiết
+            if (IsLoaded)
+            {
+                UpdatePreview();
+            }
+        }
+
+
         private void UpdatePreview()
         {
             try
@@ -67,14 +87,26 @@ namespace namm
                 // Cập nhật ảnh
                 imgPreview.Source = new BitmapImage(new Uri(txtImagePath.Text, UriKind.RelativeOrAbsolute));
 
-                // Cập nhật kích thước
-                double size = sliderSize.Value;
-                // Kích thước của Border chứa ảnh sẽ là `size`, ảnh bên trong sẽ có margin 30
-                imgPreview.Width = size - 60;
-                imgPreview.Height = size - 60;
-
                 // Cập nhật độ mờ
                 imgPreview.Opacity = sliderOpacity.Value;
+
+                // Cập nhật lề của icon
+                imgPreview.Margin = UIHelper.GetConstrainedMargin(
+                    sliderMarginLeft.Value,
+                    sliderMarginTop.Value,
+                    sliderMarginRight.Value,
+                    sliderMarginBottom.Value
+                );
+
+                // Cập nhật màu nền
+                try
+                {
+                    previewIconBorder.Background = (SolidColorBrush)new BrushConverter().ConvertFromString(txtBackgroundColor.Text);
+                }
+                catch
+                {
+                    // Nếu mã màu không hợp lệ, không làm gì cả, giữ nguyên màu cũ
+                }
             }
             catch (Exception ex)
             {
@@ -95,8 +127,17 @@ namespace namm
                 config.AppSettings.Settings.Remove("LoginIconPath");
                 config.AppSettings.Settings.Add("LoginIconPath", txtImagePath.Text);
 
-                config.AppSettings.Settings.Remove("LoginIconSize");
-                config.AppSettings.Settings.Add("LoginIconSize", sliderSize.Value.ToString());
+                config.AppSettings.Settings.Remove("LoginIconBgColor");
+                config.AppSettings.Settings.Add("LoginIconBgColor", txtBackgroundColor.Text);
+
+                config.AppSettings.Settings.Remove("LoginIconMarginLeft");
+                config.AppSettings.Settings.Add("LoginIconMarginLeft", sliderMarginLeft.Value.ToString());
+                config.AppSettings.Settings.Remove("LoginIconMarginRight");
+                config.AppSettings.Settings.Add("LoginIconMarginRight", sliderMarginRight.Value.ToString());
+                config.AppSettings.Settings.Remove("LoginIconMarginTop");
+                config.AppSettings.Settings.Add("LoginIconMarginTop", sliderMarginTop.Value.ToString());
+                config.AppSettings.Settings.Remove("LoginIconMarginBottom");
+                config.AppSettings.Settings.Add("LoginIconMarginBottom", sliderMarginBottom.Value.ToString());
 
                 config.AppSettings.Settings.Remove("LoginIconOpacity");
                 config.AppSettings.Settings.Add("LoginIconOpacity", sliderOpacity.Value.ToString());
@@ -120,7 +161,11 @@ namespace namm
                 // Xóa các key cài đặt
                 Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
                 config.AppSettings.Settings.Remove("LoginIconPath");
-                config.AppSettings.Settings.Remove("LoginIconSize");
+                config.AppSettings.Settings.Remove("LoginIconBgColor");
+                config.AppSettings.Settings.Remove("LoginIconMarginLeft");
+                config.AppSettings.Settings.Remove("LoginIconMarginRight");
+                config.AppSettings.Settings.Remove("LoginIconMarginTop");
+                config.AppSettings.Settings.Remove("LoginIconMarginBottom");
                 config.AppSettings.Settings.Remove("LoginIconOpacity");
                 config.Save(ConfigurationSaveMode.Modified);
                 ConfigurationManager.RefreshSection("appSettings");

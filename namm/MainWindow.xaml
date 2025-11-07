@@ -10,12 +10,12 @@
         ResizeMode="NoResize">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition x:Name="iconColumn" Width="2*"/>
             <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
 
         <!-- Cột trái: Biểu tượng -->
-        <Border Grid.Column="0" Background="#D2B48C"> <!-- Màu nâu nhạt (Tan) -->
+        <Border x:Name="iconBorder" Grid.Column="0" Background="#D2B48C"> <!-- Màu nâu nhạt (Tan) -->
             <!-- Icon sẽ được thiết lập từ code-behind -->
             <Image x:Name="imgLoginIcon" Stretch="Uniform" Margin="30" ToolTip="Quán Namm"/>
         </Border>

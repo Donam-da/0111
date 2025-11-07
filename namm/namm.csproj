@@ -264,6 +264,9 @@
     <Compile Include="BillItem.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="UIHelper.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="NullToFalseConverter.cs">
       <SubType>Code</SubType>
     </Compile>

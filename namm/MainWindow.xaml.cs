@@ -41,19 +41,33 @@ namespace namm
                 // Đọc các cài đặt đã lưu từ App.config
                 string iconPath = ConfigurationManager.AppSettings["LoginIconPath"] ?? "pack://application:,,,/Resources/login_icon.png";
 
-                if (double.TryParse(ConfigurationManager.AppSettings["LoginIconSize"], out double size))
+                string bgColor = ConfigurationManager.AppSettings["LoginIconBgColor"] ?? "#D2B48C";
+                try
                 {
-                    // Kích thước của Border chứa ảnh là `size`, ảnh bên trong có margin 30
-                    // Do đó, kích thước thực của ảnh là size - 60
-                    double imageDimension = size - 60;
-                    imgLoginIcon.Width = imageDimension > 0 ? imageDimension : 0;
-                    imgLoginIcon.Height = imageDimension > 0 ? imageDimension : 0;
+                    iconBorder.Background = (SolidColorBrush)new BrushConverter().ConvertFromString(bgColor);
+                }
+                catch
+                {
+                    // Nếu mã màu lưu bị lỗi, dùng màu mặc định
                 }
 
                 if (double.TryParse(ConfigurationManager.AppSettings["LoginIconOpacity"], out double opacity))
                 {
                     imgLoginIcon.Opacity = opacity;
                 }
+
+                // Đọc các giá trị lề riêng biệt, nếu không có thì dùng giá trị mặc định là 30
+                double.TryParse(ConfigurationManager.AppSettings["LoginIconMarginLeft"], out double marginLeft);
+                double.TryParse(ConfigurationManager.AppSettings["LoginIconMarginRight"], out double marginRight);
+                double.TryParse(ConfigurationManager.AppSettings["LoginIconMarginTop"], out double marginTop);
+                double.TryParse(ConfigurationManager.AppSettings["LoginIconMarginBottom"], out double marginBottom);
+
+                imgLoginIcon.Margin = UIHelper.GetConstrainedMargin(
+                    marginLeft > 0 ? marginLeft : 30,
+                    marginTop > 0 ? marginTop : 30,
+                    marginRight > 0 ? marginRight : 30,
+                    marginBottom > 0 ? marginBottom : 30
+                );
 
                 // Thiết lập nguồn ảnh
                 imgLoginIcon.Source = new BitmapImage(new Uri(iconPath, UriKind.RelativeOrAbsolute));
