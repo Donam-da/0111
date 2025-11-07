@@ -34,13 +34,13 @@
                       SelectionMode="Single" SelectionChanged="DgInvoices_SelectionChanged" LoadingRow="DgInvoices_LoadingRow"
                       CanUserSortColumns="True">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="STT" Binding="{Binding STT}" Width="40"/>
-                    <DataGridTextColumn Header="Mã HĐ" Binding="{Binding ID, StringFormat=D6}" Width="80"/>
-                    <DataGridTextColumn Header="Ngày TT" Binding="{Binding DateCheckOut, StringFormat='dd/MM/yyyy HH:mm'}" Width="140" SortDirection="Descending"/>
-                    <DataGridTextColumn Header="Tên Khách hàng" Binding="{Binding CustomerName}" Width="*"/>
-                    <DataGridTextColumn Header="Mã Khách hàng" Binding="{Binding CustomerCode}" Width="120"/>
-                    <DataGridTextColumn Header="Bàn" Binding="{Binding TableName}" Width="80"/>
-                    <DataGridTextColumn Header="Tổng tiền" Binding="{Binding TotalAmount, StringFormat={}{0:N0} VNĐ}" Width="120">
+                    <DataGridTextColumn Header="STT" Binding="{Binding STT}" Width="0.6*"/>
+                    <DataGridTextColumn Header="Mã HĐ" Binding="{Binding ID, StringFormat=D6}" Width="0.8*"/>
+                    <DataGridTextColumn Header="Ngày TT" Binding="{Binding DateCheckOut, StringFormat='dd/MM/yyyy HH:mm'}" Width="1.4*" SortDirection="Descending"/>
+                    <DataGridTextColumn Header="Tên Khách hàng" Binding="{Binding CustomerName}" Width="1.8*"/>
+                    <DataGridTextColumn Header="Mã Khách hàng" Binding="{Binding CustomerCode}" Width="1.4*"/>
+                    <DataGridTextColumn Header="Bàn" Binding="{Binding TableName}" Width="0.8*"/>
+                    <DataGridTextColumn Header="Tổng tiền" Binding="{Binding TotalAmount, StringFormat={}{0:N0} VNĐ}" Width="1.2*">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="TextAlignment" Value="Right"/>
