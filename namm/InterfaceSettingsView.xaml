@@ -19,6 +19,13 @@
             <StackPanel Width="360">
                 <TextBlock Text="THIẾT LẬP GIAO DIỆN ĐĂNG NHẬP" FontSize="20" FontWeight="Bold" Margin="0,0,0,20" TextWrapping="Wrap"/>
 
+                <GroupBox Header="Tùy chỉnh chung" Padding="10" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="Màu nền ứng dụng (mã Hex):" Margin="0,0,0,2"/>
+                        <TextBox x:Name="txtAppBackgroundColor" TextChanged="TxtAppBackgroundColor_TextChanged"/>
+                    </StackPanel>
+                </GroupBox>
+
                 <GroupBox Header="Tùy chỉnh Panel Trái" Padding="10">
                     <StackPanel>
                         <TextBlock Text="Màu nền (mã Hex, ví dụ: #D2B48C):" Margin="0,15,0,2"/>
@@ -69,7 +76,7 @@
 
         <!-- Cột phải: Xem trước -->
         <Grid Grid.Column="1">
-            <GroupBox Header="Xem trước" Padding="10">
+            <GroupBox x:Name="previewGroupBox" Header="Xem trước" Padding="10">
                 <!-- Đặt kích thước cố định cho phần xem trước để có tỷ lệ giống màn hình đăng nhập thật -->
                 <Border Background="#F5EFE6" CornerRadius="5" Width="490" Height="252" VerticalAlignment="Center" HorizontalAlignment="Center">
                     <Grid>

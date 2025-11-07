@@ -6,8 +6,8 @@
         xmlns:local="clr-namespace:namm"
         mc:Ignorable="d"
         Title="Chương trình Quản lý Cafe" Height="600" Width="1024"
-        WindowStartupLocation="CenterScreen">
-    <DockPanel>
+        WindowStartupLocation="CenterScreen"> <!-- Xóa Background khỏi Window -->
+    <DockPanel> <!-- Xóa x:Name="rootPanel" -->
         <Menu DockPanel.Dock="Top" FontSize="14">
             <MenuItem Click="Home_Click" ToolTip="Quay về màn hình chính">
                 <MenuItem.Header>

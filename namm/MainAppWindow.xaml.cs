@@ -1,5 +1,6 @@
 ﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,10 +26,28 @@ namespace namm
         {
             InitializeComponent();
             this.LoggedInAccount = account;
+            LoadApplicationTheme();
             Authorize();
 
             // Hiển thị sơ đồ bàn làm màn hình chính
             MainContent.Children.Add(new DashboardView());
+        }
+
+        private void LoadApplicationTheme()
+        {
+            try
+            {
+                string? bgColor = ConfigurationManager.AppSettings["AppBackgroundColor"];
+                if (!string.IsNullOrEmpty(bgColor))
+                {
+                    var converter = new BrushConverter();
+                    this.Background = (Brush?)converter.ConvertFromString(bgColor); // Áp dụng màu nền cho Window
+                }
+            }
+            catch (Exception)
+            {
+                // Nếu có lỗi khi chuyển đổi màu, giữ nguyên màu mặc định
+            }
         }
 
         void Authorize()

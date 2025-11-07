@@ -26,6 +26,7 @@ namespace namm
             // Đọc các cài đặt đã lưu
             txtImagePath.Text = ConfigurationManager.AppSettings["LoginIconPath"] ?? "Resources/login_icon.png";
             txtBackgroundColor.Text = ConfigurationManager.AppSettings["LoginIconBgColor"] ?? "#D2B48C";
+            txtAppBackgroundColor.Text = ConfigurationManager.AppSettings["AppBackgroundColor"] ?? "#F5F5F5";
             
             // Tải các giá trị lề riêng biệt
             if (double.TryParse(ConfigurationManager.AppSettings["LoginIconMarginLeft"], out double marginLeft)) sliderMarginLeft.Value = marginLeft;
@@ -79,6 +80,15 @@ namespace namm
             }
         }
 
+        private void TxtAppBackgroundColor_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // Chỉ cập nhật khi view đã được tải xong để tránh lỗi không cần thiết
+            if (IsLoaded)
+            {
+                UpdatePreview();
+            }
+        }
+
 
         private void UpdatePreview()
         {
@@ -107,6 +117,16 @@ namespace namm
                 {
                     // Nếu mã màu không hợp lệ, không làm gì cả, giữ nguyên màu cũ
                 }
+
+                // Cập nhật màu nền của phần xem trước để minh họa
+                try
+                {
+                    previewGroupBox.Background = (SolidColorBrush)new BrushConverter().ConvertFromString(txtAppBackgroundColor.Text);
+                }
+                catch
+                {
+                    // Nếu mã màu không hợp lệ, không làm gì cả
+                }
             }
             catch (Exception ex)
             {
@@ -129,6 +149,9 @@ namespace namm
 
                 config.AppSettings.Settings.Remove("LoginIconBgColor");
                 config.AppSettings.Settings.Add("LoginIconBgColor", txtBackgroundColor.Text);
+
+                config.AppSettings.Settings.Remove("AppBackgroundColor");
+                config.AppSettings.Settings.Add("AppBackgroundColor", txtAppBackgroundColor.Text);
 
                 config.AppSettings.Settings.Remove("LoginIconMarginLeft");
                 config.AppSettings.Settings.Add("LoginIconMarginLeft", sliderMarginLeft.Value.ToString());
@@ -161,6 +184,7 @@ namespace namm
                 // Xóa các key cài đặt
                 Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
                 config.AppSettings.Settings.Remove("LoginIconPath");
+                config.AppSettings.Settings.Remove("AppBackgroundColor");
                 config.AppSettings.Settings.Remove("LoginIconBgColor");
                 config.AppSettings.Settings.Remove("LoginIconMarginLeft");
                 config.AppSettings.Settings.Remove("LoginIconMarginRight");
