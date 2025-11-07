@@ -34,12 +34,9 @@ namespace namm
 
             await LoadFilterComboBoxes();
 
-            // Lấy ngày có hóa đơn đầu tiên từ DB
-            DateTime? firstInvoiceDate = await GetFirstInvoiceDateAsync();
-
-            // Nếu không có hóa đơn nào, mặc định là ngày hôm nay. Ngược lại, lấy ngày đầu tiên.
-            dpStartDate.SelectedDate = firstInvoiceDate?.Date ?? DateTime.Today;
-            dpEndDate.SelectedDate = DateTime.Today;
+            // Mặc định không chọn ngày nào để hiển thị tất cả dữ liệu
+            dpStartDate.SelectedDate = null;
+            dpEndDate.SelectedDate = null;
             
             // Gắn lại các event handler sau khi đã thiết lập giá trị ban đầu
             dpStartDate.SelectedDateChanged += DpStartDate_SelectedDateChanged; // Gắn lại event mới
@@ -74,7 +71,11 @@ namespace namm
             // Load DrinkName filter
             using (var connection = new SqlConnection(connectionString))
             {
-                const string query = "SELECT 0 AS ID, N'Tất cả' AS Name UNION ALL SELECT DISTINCT ID, Name FROM Drink ORDER BY Name";
+                // Thêm cột SortOrder để đảm bảo 'Tất cả' luôn ở đầu tiên
+                const string query = @"
+                    SELECT 0 AS ID, N'Tất cả' AS Name, 0 AS SortOrder
+                    UNION ALL
+                    SELECT DISTINCT ID, Name, 1 AS SortOrder FROM Drink ORDER BY SortOrder, Name";
                 var adapter = new SqlDataAdapter(query, connection);
                 var drinkTable = new DataTable();
                 await Task.Run(() => adapter.Fill(drinkTable));
@@ -91,7 +92,11 @@ namespace namm
             // Load Category filter
             using (var connection = new SqlConnection(connectionString))
             {
-                const string query = "SELECT 0 AS ID, N'Tất cả' AS Name UNION ALL SELECT ID, Name FROM Category WHERE IsActive = 1 ORDER BY Name";
+                // Thêm cột SortOrder để đảm bảo 'Tất cả' luôn ở đầu tiên
+                const string query = @"
+                    SELECT 0 AS ID, N'Tất cả' AS Name, 0 AS SortOrder 
+                    UNION ALL 
+                    SELECT ID, Name, 1 AS SortOrder FROM Category WHERE IsActive = 1 ORDER BY SortOrder, Name";
                 var adapter = new SqlDataAdapter(query, connection);
                 var categoryTable = new DataTable();
                 await Task.Run(() => adapter.Fill(categoryTable));
@@ -119,16 +124,8 @@ namespace namm
         {
             // Hàm này sẽ thay thế cho BtnFilter_Click cũ
 
-            if (dpStartDate.SelectedDate == null || dpEndDate.SelectedDate == null)
-            {
-                MessageBox.Show("Vui lòng chọn ngày bắt đầu và ngày kết thúc.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            DateTime startDate = dpStartDate.SelectedDate.Value.Date;
-            DateTime endDate = dpEndDate.SelectedDate.Value.Date.AddDays(1).AddTicks(-1); // Lấy đến cuối ngày
-
-            // Lấy giá trị từ các bộ lọc mới
+            DateTime? startDate = dpStartDate.SelectedDate?.Date;
+            DateTime? endDate = dpEndDate.SelectedDate?.Date.AddDays(1).AddTicks(-1); // Lấy đến cuối ngày
             int? drinkIdFilter = (cbFilterDrinkName.SelectedValue != null && (int)cbFilterDrinkName.SelectedValue > 0) ? (int)cbFilterDrinkName.SelectedValue : (int?)null;
             string? drinkTypeFilter = cbFilterDrinkType.SelectedIndex > 0 ? cbFilterDrinkType.SelectedItem.ToString() : null;
             int? categoryFilter = (cbFilterCategory.SelectedValue != null && (int)cbFilterCategory.SelectedValue > 0) ? (int)cbFilterCategory.SelectedValue : (int?)null;
@@ -136,13 +133,9 @@ namespace namm
             await LoadProfitDataAsync(startDate, endDate, drinkIdFilter, drinkTypeFilter, categoryFilter);
         }
 
-        private async Task LoadProfitDataAsync(DateTime startDate, DateTime endDate, int? drinkId, string? drinkType, int? categoryId)
+        private async Task LoadProfitDataAsync(DateTime? startDate, DateTime? endDate, int? drinkId, string? drinkType, int? categoryId)
         {
-            var parameters = new List<SqlParameter>
-            {
-                new SqlParameter("@StartDate", startDate),
-                new SqlParameter("@EndDate", endDate)
-            };
+            var parameters = new List<SqlParameter>();
 
             using (var connection = new SqlConnection(connectionString))
             {
@@ -153,8 +146,7 @@ namespace namm
                             (bi.Quantity * bi.Price) AS ItemRevenue,
                             b.SubTotal, b.TotalAmount
                         FROM BillInfo bi
-                        JOIN Bill b ON bi.BillID = b.ID
-                        WHERE b.Status = 1 AND b.DateCheckOut BETWEEN @StartDate AND @EndDate
+                        JOIN Bill b ON bi.BillID = b.ID WHERE b.Status = 1
                     )
                     SELECT 
                     d.Name AS DrinkName, 
@@ -188,6 +180,18 @@ namespace namm
                     FROM BillItemDetails bid
                     JOIN Drink d ON bid.DrinkID = d.ID
                     WHERE 1=1 ");
+
+                if (startDate.HasValue)
+                {
+                    queryBuilder.Append(" AND bid.BillID IN (SELECT ID FROM Bill WHERE DateCheckOut >= @StartDate)");
+                    parameters.Add(new SqlParameter("@StartDate", startDate.Value));
+                }
+
+                if (endDate.HasValue)
+                {
+                    queryBuilder.Append(" AND bid.BillID IN (SELECT ID FROM Bill WHERE DateCheckOut <= @EndDate)");
+                    parameters.Add(new SqlParameter("@EndDate", endDate.Value));
+                }
 
                 if (drinkId.HasValue)
                 {
