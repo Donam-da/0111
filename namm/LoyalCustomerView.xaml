@@ -33,7 +33,7 @@
                         <ComboBoxItem Content="Số lần mua"/>
                         <ComboBoxItem Content="Tổng chi tiêu"/>
                     </ComboBox>
-                    <TextBlock Text="Ngưỡng >=" VerticalAlignment="Center" Margin="15,0,5,0"/>
+                    <TextBlock Text="Ngưỡng >" VerticalAlignment="Center" Margin="15,0,5,0"/>
                     <TextBox x:Name="txtThreshold" Width="120" VerticalContentAlignment="Center"/>
                     <TextBlock Text="Giảm giá (%):" VerticalAlignment="Center" Margin="15,0,5,0"/>
                     <TextBox x:Name="txtDiscountPercent" Width="80" VerticalContentAlignment="Center"/>
@@ -42,11 +42,37 @@
 
                 <!-- Danh sách các quy tắc đã thêm -->
                 <ListView Grid.Row="1" x:Name="lvDiscountRules" MaxHeight="150" HorizontalAlignment="Left">
+                    <ListView.Resources>
+                        <Style TargetType="GridViewColumnHeader">
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        </Style>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        </Style>
+                    </ListView.Resources>
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="Tiêu chí" DisplayMemberBinding="{Binding CriteriaType}" Width="150"/>
-                            <GridViewColumn Header="Ngưỡng" DisplayMemberBinding="{Binding Threshold, StringFormat={}{0:N0}}" Width="150"/>
-                            <GridViewColumn Header="Giảm giá (%)" DisplayMemberBinding="{Binding DiscountPercent}" Width="100"/>
+                            <GridViewColumn Header="Tiêu chí" Width="150">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding CriteriaType}" HorizontalAlignment="Center"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="Ngưỡng" Width="150">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Threshold, StringFormat={}{0:N0}}" HorizontalAlignment="Center"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="Giảm giá (%)" Width="100">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DiscountPercent, StringFormat={}{0:G29}}" HorizontalAlignment="Center"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
                         </GridView>
                     </ListView.View>
                 </ListView>

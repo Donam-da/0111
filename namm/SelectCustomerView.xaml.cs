@@ -439,18 +439,20 @@ namespace namm
 
         private decimal CalculateDiscount((int PurchaseCount, decimal TotalSpent) stats, List<DiscountRule> rules)
         {
-            decimal maxDiscount = 0;
-            foreach (var rule in rules)
-            {
-                bool ruleApplies = (rule.CriteriaType == "Số lần mua" && stats.PurchaseCount >= rule.Threshold) ||
-                                   (rule.CriteriaType == "Tổng chi tiêu" && stats.TotalSpent >= rule.Threshold);
+            // Lọc ra tất cả các quy tắc có thể áp dụng
+            var applicableRules = rules.Where(rule =>
+                (rule.CriteriaType == "Số lần mua" && stats.PurchaseCount > rule.Threshold) ||
+                (rule.CriteriaType == "Tổng chi tiêu" && stats.TotalSpent > rule.Threshold)
+            );
 
-                if (ruleApplies && rule.DiscountPercent > maxDiscount)
-                {
-                    maxDiscount = rule.DiscountPercent;
-                }
+            // Nếu có bất kỳ quy tắc nào áp dụng được, tìm ra mức giảm giá cao nhất
+            if (applicableRules.Any())
+            {
+                return applicableRules.Max(rule => rule.DiscountPercent);
             }
-            return maxDiscount;
+
+            // Nếu không có quy tắc nào, trả về 0
+            return 0;
         }
 
         private void BtnBack_Click(object sender, RoutedEventArgs e)
