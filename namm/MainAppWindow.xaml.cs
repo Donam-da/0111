@@ -183,5 +183,12 @@ namespace namm
             MainContent.Children.Clear();
             MainContent.Children.Add(new EmployeeRevenueView());
         }
+
+        private void InterfaceSettings_Click(object sender, RoutedEventArgs e)
+        {
+            // Hiển thị giao diện cài đặt
+            MainContent.Children.Clear();
+            MainContent.Children.Add(new InterfaceSettingsView());
+        }
     }
 }

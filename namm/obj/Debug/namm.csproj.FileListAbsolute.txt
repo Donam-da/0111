@@ -61,3 +61,5 @@ D:\QuanLyCafe\namm\obj\Debug\DeleteHistoryView.g.cs
 D:\QuanLyCafe\namm\obj\Debug\DeleteHistoryView.baml
 D:\QuanLyCafe\namm\obj\Debug\EmployeeRevenueView.g.cs
 D:\QuanLyCafe\namm\obj\Debug\EmployeeRevenueView.baml
+D:\QuanLyCafe\namm\obj\Debug\InterfaceSettingsView.g.cs
+D:\QuanLyCafe\namm\obj\Debug\InterfaceSettingsView.baml

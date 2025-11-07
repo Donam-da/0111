@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿﻿﻿﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
@@ -24,22 +24,55 @@ namespace namm
     /// </summary>
     public partial class MainWindow : Window
     {
+        string connectionString = ConfigurationManager.ConnectionStrings["CafeDB"].ConnectionString;
+
         public MainWindow()
         {
             InitializeComponent();
-            this.Loaded += MainWindow_Loaded;
+            LoadCustomInterface();
+            LoadRememberedUser();
+            this.Loaded += (s, e) => txtUsername.Focus(); // Focus vào ô username khi cửa sổ được tải
         }
 
-        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        private void LoadCustomInterface()
         {
-            // Tải lại cài đặt đã lưu
+            try
+            {
+                // Đọc các cài đặt đã lưu từ App.config
+                string iconPath = ConfigurationManager.AppSettings["LoginIconPath"] ?? "pack://application:,,,/Resources/login_icon.png";
+
+                if (double.TryParse(ConfigurationManager.AppSettings["LoginIconSize"], out double size))
+                {
+                    // Kích thước của Border chứa ảnh là `size`, ảnh bên trong có margin 30
+                    // Do đó, kích thước thực của ảnh là size - 60
+                    double imageDimension = size - 60;
+                    imgLoginIcon.Width = imageDimension > 0 ? imageDimension : 0;
+                    imgLoginIcon.Height = imageDimension > 0 ? imageDimension : 0;
+                }
+
+                if (double.TryParse(ConfigurationManager.AppSettings["LoginIconOpacity"], out double opacity))
+                {
+                    imgLoginIcon.Opacity = opacity;
+                }
+
+                // Thiết lập nguồn ảnh
+                imgLoginIcon.Source = new BitmapImage(new Uri(iconPath, UriKind.RelativeOrAbsolute));
+            }
+            catch (Exception)
+            {
+                // Nếu có lỗi (ví dụ: file ảnh bị xóa), sử dụng ảnh mặc định
+                imgLoginIcon.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/login_icon.png"));
+            }
+        }
+
+        private void LoadRememberedUser()
+        {
             if (Settings.Default.RememberMe)
             {
                 txtUsername.Text = Settings.Default.Username;
                 pwbPassword.Password = Settings.Default.Password;
                 chkRememberMe.IsChecked = true;
             }
-            txtUsername.Focus();
         }
 
         private void BtnLogin_Click(object sender, RoutedEventArgs e)
@@ -84,7 +117,6 @@ namespace namm
         private AccountDTO? CheckLogin(string username, string password)
         {
             AccountDTO? account = null;
-            string connectionString = ConfigurationManager.ConnectionStrings["CafeDB"].ConnectionString;
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 string query = "SELECT * FROM Account WHERE UserName=@UserName AND Password=@Password";
