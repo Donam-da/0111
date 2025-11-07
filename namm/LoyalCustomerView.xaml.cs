@@ -282,6 +282,7 @@ namespace namm
             bool anyRuleSelected = lvDiscountRules.SelectedItems.Count > 0;
             btnApplyRuleToSelected.IsEnabled = anyRuleSelected;
             btnApplyRuleToAll.IsEnabled = anyRuleSelected;
+            btnRemoveRule.IsEnabled = anyRuleSelected;
         }
 
         private async Task ApplyRulesToCustomers(List<int> customerIds, List<int> ruleIds)
@@ -406,6 +407,13 @@ namespace namm
 
                 // Tải lại phần hiển thị "Đã áp dụng" cho khách hàng vừa cập nhật
                 await HighlightAppliedRulesForCustomer(_activeCustomerId.Value);
+
+                // Reset trạng thái sau khi cập nhật thành công
+                _activeCustomerId = null;
+                tbEditingCustomer.Text = "(Chưa chọn)";
+                btnUpdateForCustomer.IsEnabled = false;
+                lvDiscountRules.SelectedItems.Clear(); // Bỏ chọn tất cả các ô tích
+
             }
             catch (Exception ex)
             {

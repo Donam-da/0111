@@ -54,13 +54,12 @@
                         <GridView>
                             <GridViewColumn Width="50">
                                 <GridViewColumn.Header>
-                                    <CheckBox Content="Chọn" Click="RuleHeaderCheckBox_Click"/>
+                                    <!-- Checkbox ở header để chọn/bỏ chọn tất cả -->
+                                    <CheckBox Click="RuleHeaderCheckBox_Click" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <!-- Sử dụng CheckBox thay vì RadioButton để cho phép chọn nhiều -->
-                                        <CheckBox IsChecked="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListViewItem}}" 
-                                                  VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        <CheckBox IsChecked="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListViewItem}}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
@@ -107,7 +106,7 @@
                     <Button x:Name="btnUpdateForCustomer" Content="Cập nhật cho KH này" Margin="0,0,10,0" Click="BtnUpdateForCustomer_Click" IsEnabled="False" Background="CornflowerBlue" Foreground="White" ToolTip="Lưu lại các thay đổi về mức giảm giá cho khách hàng đang được sửa."/>
                     <Button x:Name="btnApplyRuleToSelected" Content="Áp dụng mức đã chọn cho KH" Margin="0,0,10,0" Click="BtnApplyRuleToSelected_Click" IsEnabled="False" ToolTip="Gán các mức giảm giá đã chọn cho các khách hàng đã chọn."/>
                     <Button x:Name="btnApplyRuleToAll" Content="Áp dụng mức cho TẤT CẢ KH" Margin="0,0,10,0" Click="BtnApplyRuleToAll_Click" Background="OrangeRed" Foreground="White" IsEnabled="False" ToolTip="Gán các mức giảm giá đã chọn cho TẤT CẢ khách hàng."/>
-                    <Button x:Name="btnRemoveRule" Content="Xóa mức đã chọn" Margin="0,0,10,0" Click="BtnRemoveRule_Click"/>
+                    <Button x:Name="btnRemoveRule" Content="Xóa mức đã chọn" Margin="0,0,10,0" Click="BtnRemoveRule_Click" IsEnabled="False" Background="#DC3545" Foreground="White"/>
                 </StackPanel>
             </Grid>
         </GroupBox>
@@ -149,9 +148,11 @@
                 </DataGrid.Resources>
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Width="Auto">
-                        <DataGridTemplateColumn.Header>
-                            <CheckBox Content="Chọn" Click="HeaderCheckBox_Click"/>
-                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <CheckBox Click="HeaderCheckBox_Click" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.HeaderTemplate>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <CheckBox IsChecked="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType=DataGridRow}}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
